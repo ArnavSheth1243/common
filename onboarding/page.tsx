@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArrowRight,
@@ -39,9 +39,10 @@ import {
   Star,
 } from "@phosphor-icons/react"
 import { useUserProfile } from "@/app/context/user-profile"
-import { PODS } from "@/lib/data"
 import type { PodCategory } from "@/lib/data"
 import Link from "next/link"
+import { useSession } from "@/app/context/session"
+import { createClient } from "@/lib/supabase/client"
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -190,21 +191,66 @@ const TOUR_FEATURES = [
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 8
+const REFERRAL_OPTIONS = [
+  { value: "friend", label: "A friend told me" },
+  { value: "social_media", label: "Social media" },
+  { value: "search", label: "Google / search" },
+  { value: "app_store", label: "App store" },
+  { value: "school", label: "School / university" },
+  { value: "other", label: "Other" },
+]
+
+const TOTAL_STEPS = 9
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { profile, updateProfile } = useUserProfile()
+  const { user } = useSession()
+  const { profile, loading: profileLoading, updateProfile } = useUserProfile()
 
   const [step, setStep] = useState(1)
-  const [name, setName] = useState(profile.displayName === "Arnav S." ? "" : profile.displayName)
-  const [age, setAge] = useState<string>(profile.age ? String(profile.age) : "")
-  const [location, setLocation] = useState(profile.location ?? "")
-  const [goals, setGoals] = useState<string[]>(profile.goals)
-  const [interests, setInterests] = useState<PodCategory[]>(profile.interests)
-  const [commitment, setCommitment] = useState(profile.commitment)
-  const [timePreference, setTimePreference] = useState(profile.timePreference)
+  const [name, setName] = useState("")
+  const [age, setAge] = useState<string>("")
+  const [location, setLocation] = useState("")
+  const [referralSource, setReferralSource] = useState("")
+
+  // Sync form state once profile loads
+  useEffect(() => {
+    if (profile) {
+      setName(prev => prev || (profile.displayName === "User" ? "" : profile.displayName))
+      setAge(prev => prev || (profile.age ? String(profile.age) : ""))
+      setLocation(prev => prev || (profile.location ?? ""))
+    }
+  }, [profile])
+  const [goals, setGoals] = useState<string[]>(profile?.goals ?? [])
+  const [interests, setInterests] = useState<PodCategory[]>(profile?.interests ?? [])
+  const [commitment, setCommitment] = useState(profile?.commitment ?? "daily")
+  const [timePreference, setTimePreference] = useState(profile?.timePreference ?? "morning")
   const [activeTourCard, setActiveTourCard] = useState(0)
+  const [suggestedPods, setSuggestedPods] = useState<any[]>([])
+  const [igHandle, setIgHandle] = useState("")
+
+  // Fetch suggested pods based on interests
+  useEffect(() => {
+    if (!interests.length || !user) return
+    const fetchSuggestedPods = async () => {
+      const supabase = createClient()
+      const { data: pods } = await supabase
+        .from("pods")
+        .select("*")
+        .in("category", interests)
+        .limit(3)
+      if (pods) {
+        setSuggestedPods(pods.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          visibility: p.visibility,
+          memberColors: ["bg-zinc-900"],
+        })))
+      }
+    }
+    fetchSuggestedPods()
+  }, [interests, user])
 
   const toggleGoal = (v: string) =>
     setGoals((prev) => prev.includes(v) ? prev.filter((g) => g !== v) : [...prev, v])
@@ -214,20 +260,23 @@ export default function OnboardingPage() {
 
   const handleNext = () => {
     if (step === 1) updateProfile({ displayName: name.trim() || "Friend" })
-    if (step === 2) updateProfile({ age: age ? parseInt(age) : undefined, location: location.trim() })
+    if (step === 2) updateProfile({ age: age ? parseInt(age) : undefined, location: location.trim(), referralSource })
     if (step === 3) updateProfile({ goals })
     if (step === 4) updateProfile({ interests })
     if (step < TOTAL_STEPS) setStep(step + 1)
   }
 
-  const handleFinish = () => {
-    updateProfile({ interests, commitment, timePreference, goals, onboardingComplete: true })
+  const handleFinish = async () => {
+    await updateProfile({
+      interests,
+      commitment,
+      timePreference,
+      goals,
+      onboardingComplete: true,
+      ...(igHandle ? { instagramHandle: igHandle } : {}),
+    })
     router.push("/dashboard")
   }
-
-  const suggestedPods = PODS.filter((p) =>
-    interests.some((i) => p.category === i)
-  ).slice(0, 3)
 
   const canNext =
     step === 1 ? name.trim().length > 0 :
@@ -235,7 +284,15 @@ export default function OnboardingPage() {
     step === 4 ? interests.length > 0 :
     true
 
-  const stepLabel = ["", "Who are you?", "A bit about you", "Goals", "Interests", "How you show up", "The app", "Pod suggestions", "You're all set"][step] ?? ""
+  const stepLabel = ["", "Who are you?", "A bit about you", "Goals", "Interests", "How you show up", "The app", "Pod suggestions", "Almost done", "You're all set"][step] ?? ""
+
+  if (profileLoading) {
+    return (
+      <div className="min-h-[100dvh] bg-[#ede9df] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-[100dvh] bg-[#ede9df] flex flex-col items-center justify-center px-5 py-10">
@@ -319,6 +376,26 @@ export default function OnboardingPage() {
                   className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-5 py-4 text-base text-zinc-900 placeholder:text-zinc-300 outline-none transition-all"
                 />
                 <p className="text-xs text-zinc-300 mt-1.5 ml-1">Optional — helps with in-person pods.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-600 mb-2">How did you hear about Common?</label>
+                <div className="flex flex-wrap gap-2">
+                  {REFERRAL_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setReferralSource(opt.value)}
+                      className={`px-4 py-2.5 rounded-2xl text-sm font-medium border transition-all duration-150 ${
+                        referralSource === opt.value
+                          ? "bg-zinc-900 border-zinc-900 text-white"
+                          : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-zinc-300 mt-1.5 ml-1">Optional — helps us grow.</p>
               </div>
             </div>
           </div>
@@ -493,7 +570,7 @@ export default function OnboardingPage() {
         )}
 
         {/* ── Step 7 — Pod suggestions ──────────────────────────────────────── */}
-        {step === 7 && (
+        {step === 7 && profile && (
           <div className="animate-fade-up">
             <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-tight mb-2">
               Pods made<br />for you
@@ -542,8 +619,41 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* ── Step 8 — Done ─────────────────────────────────────────────────── */}
+        {/* ── Step 8 — Almost done (instagram) ─────────────────────────────── */}
         {step === 8 && (
+          <div className="animate-fade-up">
+            <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-tight mb-2">
+              One more<br />thing
+            </h1>
+            <p className="text-zinc-400 mb-8 text-[15px]">
+              Connect your Instagram so pod members can find you outside the app. (Optional)
+            </p>
+            <div className="bg-white border border-zinc-100 rounded-3xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-pink-500 to-amber-500 rounded-xl flex items-center justify-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-zinc-900">Instagram</p>
+                  <p className="text-xs text-zinc-400">Your handle will appear on your profile</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-zinc-400">@</span>
+                <input
+                  type="text"
+                  value={referralSource === "__ig__" ? "" : (igHandle || "")}
+                  onChange={(e) => setIgHandle(e.target.value.replace(/^@/, "").trim())}
+                  placeholder="yourhandle"
+                  className="flex-1 bg-zinc-50 border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 9 — Done ─────────────────────────────────────────────────── */}
+        {step === 9 && (
           <div className="animate-fade-up text-center">
             <div className="w-20 h-20 bg-amber-50 border-2 border-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle size={36} weight="fill" className="text-amber-500" />
@@ -601,9 +711,9 @@ export default function OnboardingPage() {
 
             <div className="flex items-center gap-3">
               {/* Skip on optional steps */}
-              {[2, 6, 7].includes(step) && (
+              {[2, 6, 7, 8].includes(step) && (
                 <button
-                  onClick={step === 7 ? () => setStep(8) : handleNext}
+                  onClick={step === 7 ? () => setStep(8) : step === 8 ? () => setStep(9) : handleNext}
                   className="text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
                 >
                   Skip

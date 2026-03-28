@@ -14,7 +14,8 @@ import {
   Trash,
   Tag,
 } from "@phosphor-icons/react"
-import { PODS } from "@/lib/data"
+import { useSession } from "@/app/context/session"
+import { createClient } from "@/lib/supabase/client"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,139 +53,26 @@ const POD_COLORS: Record<string, { bg: string; text: string }> = {
   "6": { bg: "bg-pink-500",    text: "text-white" },
 }
 
-// ─── Pull events from pod data + seed mock calendar events ───────────────────
+// ─── Helper to map Supabase events to CalEvent ──────────────────────────────────
 
-function buildInitialEvents(): CalEvent[] {
-  const today = new Date()
-  const y = today.getFullYear()
-  const m = String(today.getMonth() + 1).padStart(2, "0")
-  const d = String(today.getDate()).padStart(2, "0")
-  const base = `${y}-${m}`
-
-  // Pod events from lib/data
-  const podEvents: CalEvent[] = PODS.flatMap((pod) =>
-    (pod.events ?? []).map((e) => {
-      const c = POD_COLORS[pod.id] ?? { bg: "bg-amber-500", text: "text-white" }
-      return {
-        id: `pod-${pod.id}-${e.id}`,
-        title: e.title,
-        date: e.date,
-        time: e.time,
-        type: "pod" as EventType,
-        podId: pod.id,
-        podName: pod.name,
-        color: c.bg,
-        textColor: c.text,
-        description: e.description,
-        location: e.location,
-      }
-    })
-  )
-
-  // Seed personal + pod events across the calendar
-  const seeds: CalEvent[] = [
-    {
-      id: "seed-1",
-      title: "Morning 5K Group Run",
-      date: `${base}-${String(Number(d) + 5).padStart(2, "0")}`,
-      time: "6:00 AM",
-      type: "pod",
-      podId: "1",
-      podName: "Morning Run Club",
-      color: "bg-rose-500",
-      textColor: "text-white",
-      location: "Riverside Park, Main Entrance",
-      description: "Our weekly long-run day. All paces welcome.",
-    },
-    {
-      id: "seed-2",
-      title: "Writing Sprint",
-      date: `${base}-${String(Number(d) + 3).padStart(2, "0")}`,
-      time: "9:00 AM",
-      endTime: "11:00 AM",
-      type: "personal",
-      color: "bg-violet-600",
-      textColor: "text-white",
-      description: "2-hour focused writing block. No distractions.",
-    },
-    {
-      id: "seed-3",
-      title: "Gym — Leg Day",
-      date: `${y}-${m}-${d}`,
-      time: "7:30 AM",
-      type: "personal",
-      color: "bg-zinc-700",
-      textColor: "text-white",
-      location: "Equinox, Downtown",
-    },
-    {
-      id: "seed-4",
-      title: "Writing Workshop",
-      date: `${base}-${String(Number(d) + 10).padStart(2, "0")}`,
-      time: "6:30 PM",
-      type: "pod",
-      podId: "3",
-      podName: "Daily Writing Practice",
-      color: "bg-violet-500",
-      textColor: "text-white",
-      location: "Public Library, Room 3B",
-      description: "Monthly in-person workshop. Bring a piece to share.",
-    },
-    {
-      id: "seed-5",
-      title: "Yoga Retreat Day",
-      date: `${base}-${String(Number(d) + 18).padStart(2, "0")}`,
-      time: "9:00 AM",
-      endTime: "5:00 PM",
-      type: "personal",
-      color: "bg-teal-500",
-      textColor: "text-white",
-      location: "Mountain Zen Studio, Uptown",
-      description: "Full-day retreat — bring a mat and water.",
-    },
-    {
-      id: "seed-6",
-      title: "Finance Pod Q&A",
-      date: `${base}-${String(Number(d) + 8).padStart(2, "0")}`,
-      time: "8:00 PM",
-      type: "pod",
-      podId: "5",
-      podName: "Personal Finance Bootcamp",
-      color: "bg-sky-500",
-      textColor: "text-white",
-      description: "Live Q&A on investing basics. Zoom link in pod chat.",
-    },
-    {
-      id: "seed-7",
-      title: "Read a chapter",
-      date: `${base}-${String(Number(d) + 1).padStart(2, "0")}`,
-      time: "9:00 PM",
-      type: "reminder",
-      color: "bg-amber-400",
-      textColor: "text-white",
-    },
-    {
-      id: "seed-8",
-      title: "Cooking Challenge Kickoff",
-      date: `${base}-${String(Number(d) + 14).padStart(2, "0")}`,
-      time: "12:00 PM",
-      type: "pod",
-      podId: "4",
-      podName: "Home Cooking Club",
-      color: "bg-emerald-500",
-      textColor: "text-white",
-      location: "Brooklyn Kitchen Studio",
-      description: "Kick off the monthly challenge — this month: homemade pasta.",
-    },
-  ]
-
-  // Filter out any seeds with invalid dates (e.g. day 32)
-  const valid = seeds.filter((e) => {
-    const dt = new Date(e.date)
-    return !isNaN(dt.getTime())
-  })
-
-  return [...podEvents, ...valid]
+function mapSupabaseToCalEvent(row: any): CalEvent {
+  const typeColor = row.type === "reminder"
+    ? { bg: "bg-amber-400", text: "text-white" }
+    : { bg: "bg-zinc-700", text: "text-white" }
+  return {
+    id: row.id,
+    title: row.title,
+    date: row.date,
+    time: row.time ?? undefined,
+    endTime: row.end_time ?? undefined,
+    type: row.type ?? "personal",
+    podId: row.pod_id ?? undefined,
+    podName: row.pod_id ? `Pod ${row.pod_id}` : undefined,
+    color: typeColor.bg,
+    textColor: typeColor.text,
+    description: row.description ?? undefined,
+    location: row.location ?? undefined,
+  }
 }
 
 // ─── Map component ────────────────────────────────────────────────────────────
@@ -280,10 +168,12 @@ function AddEventForm({
   defaultDate,
   onAdd,
   onClose,
+  myPods = [],
 }: {
   defaultDate: string
   onAdd: (e: CalEvent) => void
   onClose: () => void
+  myPods?: any[]
 }) {
   const [title, setTitle]       = useState("")
   const [date, setDate]         = useState(defaultDate)
@@ -292,28 +182,50 @@ function AddEventForm({
   const [podId, setPodId]       = useState("")
   const [location, setLocation] = useState("")
   const [desc, setDesc]         = useState("")
+  const [saving, setSaving]     = useState(false)
+  const { user } = useSession()
 
-  const podOptions = PODS.filter((p) => POD_COLORS[p.id])
+  const podOptions = myPods
 
-  const handleSubmit = () => {
-    if (!title.trim() || !date) return
-    const selectedPod = podOptions.find((p) => p.id === podId)
-    const c = selectedPod ? (POD_COLORS[selectedPod.id] ?? { bg: "bg-amber-500", text: "text-white" }) : { bg: "bg-zinc-700", text: "text-white" }
-    const typeColor = type === "reminder" ? { bg: "bg-amber-400", text: "text-white" } : c
-    onAdd({
-      id: `user-${Date.now()}`,
-      title: title.trim(),
-      date,
-      time: time || undefined,
-      type,
-      podId: selectedPod?.id,
-      podName: selectedPod?.name,
-      color: typeColor.bg,
-      textColor: typeColor.text,
-      location: location.trim() || undefined,
-      description: desc.trim() || undefined,
-    })
-    onClose()
+  const handleSubmit = async () => {
+    if (!title.trim() || !date || !user) return
+    setSaving(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from("calendar_events").insert([{
+        user_id: user.id,
+        title: title.trim(),
+        date,
+        time: time || null,
+        end_time: null,
+        type,
+        pod_id: type === "pod" ? podId : null,
+        location: location.trim() || null,
+        description: desc.trim() || null,
+      }])
+      if (!error) {
+        const selectedPod = podOptions.find((p) => p.id === podId)
+        const typeColor = type === "reminder" ? { bg: "bg-amber-400", text: "text-white" } : { bg: "bg-zinc-700", text: "text-white" }
+        onAdd({
+          id: `user-${Date.now()}`,
+          title: title.trim(),
+          date,
+          time: time || undefined,
+          type,
+          podId: selectedPod?.id,
+          podName: selectedPod?.name,
+          color: typeColor.bg,
+          textColor: typeColor.text,
+          location: location.trim() || undefined,
+          description: desc.trim() || undefined,
+        })
+        onClose()
+      }
+    } catch (error) {
+      console.error("Failed to save event:", error)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -396,51 +308,52 @@ function AddEventForm({
   )
 }
 
-// ─── Calendar localStorage helpers ───────────────────────────────────────────
-
-const CAL_KEY = "common_calendar_state"
-
-interface CalStoredState {
-  userEvents: CalEvent[]
-  deletedIds: string[]
-}
-
-function loadCalState(): CalStoredState {
-  if (typeof window === "undefined") return { userEvents: [], deletedIds: [] }
-  try {
-    const raw = localStorage.getItem(CAL_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch {}
-  return { userEvents: [], deletedIds: [] }
-}
-
-function saveCalState(state: CalStoredState) {
-  try { localStorage.setItem(CAL_KEY, JSON.stringify(state)) } catch {}
-}
-
-function buildEvents(stored: CalStoredState): CalEvent[] {
-  const seeds = buildInitialEvents()
-  const filtered = seeds.filter((e) => !stored.deletedIds.includes(e.id))
-  return [...filtered, ...stored.userEvents.filter((e) => !stored.deletedIds.includes(e.id))]
-}
+// ─── Calendar helpers ─────────────────────────────────────────────────────────
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function CalendarPage() {
+  const { user } = useSession()
   const today       = new Date()
   const todayStr    = today.toISOString().slice(0, 10)
   const startYear   = today.getFullYear()
 
-  const [calStored, setCalStored] = useState<CalStoredState>(loadCalState)
+  const [events, setEvents] = useState<CalEvent[]>([])
+  const [myPods, setMyPods] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [viewYear,   setViewYear]   = useState(startYear)
   const [viewMonth,  setViewMonth]  = useState(today.getMonth())
   const [selected,   setSelected]   = useState(todayStr)
   const [showForm,   setShowForm]   = useState(false)
 
-  const events = useMemo(() => buildEvents(calStored), [calStored])
+  // Fetch events and pods from Supabase
+  useEffect(() => {
+    if (!user) return
+    const fetchData = async () => {
+      const supabase = createClient()
+      // Fetch calendar events
+      const { data: calEvents } = await supabase
+        .from("calendar_events")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("date", { ascending: true })
 
-  // Persist any change to localStorage
-  useEffect(() => { saveCalState(calStored) }, [calStored])
+      // Fetch user's pods
+      const { data: podMemberships } = await supabase
+        .from("pod_members")
+        .select("pod_id, pods(id, name)")
+        .eq("user_id", user.id)
+
+      if (calEvents) {
+        setEvents(calEvents.map(mapSupabaseToCalEvent))
+      }
+      if (podMemberships) {
+        setMyPods(podMemberships.map((m: any) => ({ id: m.pods.id, name: m.pods.name })))
+      }
+      setLoading(false)
+    }
+    fetchData()
+  }, [user])
 
   const YEARS = [startYear, startYear + 1, startYear + 2]
 
@@ -492,15 +405,14 @@ export default function CalendarPage() {
     setShowForm(false)
   }
 
-  const deleteEvent = (id: string) => {
-    setCalStored((prev) => ({
-      userEvents: prev.userEvents.filter((e) => e.id !== id),
-      deletedIds: [...prev.deletedIds, id],
-    }))
+  const deleteEvent = async (id: string) => {
+    const supabase = createClient()
+    await supabase.from("calendar_events").delete().eq("id", id)
+    setEvents((prev) => prev.filter((e) => e.id !== id))
   }
 
   const addEvent = (e: CalEvent) => {
-    setCalStored((prev) => ({ ...prev, userEvents: [...prev.userEvents, e] }))
+    setEvents((prev) => [...prev, e])
   }
 
   // ── Apple Calendar / .ics export ───────────────────────────────────────────
@@ -569,17 +481,17 @@ export default function CalendarPage() {
   return (
     <div className="max-w-6xl mx-auto px-5 lg:px-8 py-8">
       {/* Header */}
-      <div className="mb-8 animate-fade-up flex items-start justify-between gap-4">
+      <div className="mb-6 sm:mb-8 animate-fade-up flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.12em] mb-2">
             {today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
-          <h1 className="text-[42px] font-bold text-zinc-900 tracking-tighter leading-none">Calendar</h1>
-          <p className="text-base text-zinc-500 mt-2">Track events across all your pods</p>
+          <h1 className="text-[28px] sm:text-[36px] lg:text-[42px] font-bold text-zinc-900 tracking-tighter leading-none">Calendar</h1>
+          <p className="text-sm sm:text-base text-zinc-500 mt-2">Track events across all your pods</p>
         </div>
         <button
           onClick={() => exportToAppleCalendar()}
-          className="flex-shrink-0 flex items-center gap-2 bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 text-zinc-700 text-sm font-semibold px-4 py-2.5 rounded-2xl transition-all shadow-softer mt-1"
+          className="flex-shrink-0 flex items-center justify-center gap-2 bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 text-zinc-700 text-sm font-semibold px-4 py-2.5 rounded-2xl transition-all shadow-softer w-full sm:w-auto"
         >
           <CalendarBlank size={15} weight="fill" className="text-zinc-500" />
           Add to iPhone
@@ -588,7 +500,7 @@ export default function CalendarPage() {
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
         {/* ── Left: Calendar ─────────────────────────────────────────────── */}
-        <div className="bg-white border border-zinc-100 rounded-3xl p-6 shadow-card animate-fade-up">
+        <div className="bg-white border border-zinc-100 rounded-3xl p-4 sm:p-6 shadow-card animate-fade-up">
           {/* Year tabs */}
           <div className="flex gap-1 mb-6 bg-zinc-50 rounded-2xl p-1">
             {YEARS.map((y) => (
@@ -636,7 +548,7 @@ export default function CalendarPage() {
           <div className="grid grid-cols-7 gap-0.5">
             {cells.map((day, idx) => {
               if (day === null) {
-                return <div key={`empty-${idx}`} className="h-[72px]" />
+                return <div key={`empty-${idx}`} className="h-[52px] sm:h-[72px]" />
               }
               const ds = dateStr(day)
               const dayEvents = eventsByDate[ds] ?? []
@@ -648,7 +560,7 @@ export default function CalendarPage() {
                 <button
                   key={ds}
                   onClick={() => selectDate(day)}
-                  className={`h-[72px] p-1.5 rounded-xl text-left transition-all duration-150 group flex flex-col
+                  className={`h-[52px] sm:h-[72px] p-1 sm:p-1.5 rounded-xl text-left transition-all duration-150 group flex flex-col
                     ${selected_ ? "bg-zinc-900 shadow-sm" : "hover:bg-zinc-50"}
                     ${isPast && !selected_ ? "opacity-60" : ""}
                   `}
@@ -721,6 +633,7 @@ export default function CalendarPage() {
                 defaultDate={selected}
                 onAdd={addEvent}
                 onClose={() => setShowForm(false)}
+                myPods={myPods}
               />
             )}
 

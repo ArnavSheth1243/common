@@ -1,21 +1,61 @@
 "use client"
 
-import { Suspense, useState, useRef } from "react"
+import { Suspense, useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { ArrowLeft, Camera, Flame, CheckCircle, Globe, Users, Lock } from "@phosphor-icons/react"
-import { MY_PODS, CADENCE_LABELS, CADENCE_VERB } from "@/lib/data"
+import { CADENCE_LABELS, CADENCE_VERB, type Pod } from "@/lib/data"
 import { useUserStats } from "@/app/context/user-stats"
 import { usePodState } from "@/app/context/pod-state"
+import { useSession } from "@/app/context/session"
+import { createClient } from "@/lib/supabase/client"
 
 function CheckinForm() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { recordCheckin, currentStreak } = useUserStats()
-  const { postCheckin, createdPods } = usePodState()
+  const { postCheckin } = usePodState()
+  const { user } = useSession()
   const preselected = searchParams.get("pod")
+  const [allMyPods, setAllMyPods] = useState<Pod[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const allMyPods = [...MY_PODS, ...createdPods]
+  useEffect(() => {
+    if (!user) return
+    const fetchPods = async () => {
+      const supabase = createClient()
+      const { data: memberPods, error } = await supabase
+        .from("pod_members")
+        .select("pod_id, pods(id, name, cadence, member_count, streak, visibility)")
+        .eq("user_id", user.id)
+
+      if (!error && memberPods) {
+        const pods: Pod[] = memberPods
+          .filter((m: any) => m.pods)
+          .map((m: any) => ({
+            id: m.pods.id,
+            name: m.pods.name,
+            cadence: m.pods.cadence as any,
+            members: m.pods.member_count,
+            streak: m.pods.streak,
+            visibility: m.pods.visibility,
+            memberColors: ["bg-zinc-900"],
+            type: "Habit" as const,
+            category: "other" as const,
+            description: "",
+            maxMembers: null,
+            createdAt: "",
+            location: "",
+            podMembers: [],
+            recentCheckins: [],
+            podId: m.pods.id,
+          }))
+        setAllMyPods(pods)
+      }
+      setLoading(false)
+    }
+    fetchPods()
+  }, [user])
 
   const defaultPod = preselected && allMyPods.find((p) => p.id === preselected)
     ? preselected
@@ -25,7 +65,7 @@ function CheckinForm() {
   const [text, setText] = useState("")
   const [visibility, setVisibility] = useState<"public" | "pod" | "private">("pod")
   const [submitted, setSubmitted] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const photoRef = useRef<HTMLInputElement>(null)
 
@@ -43,22 +83,26 @@ function CheckinForm() {
   const cadenceLabel = selectedPodData ? CADENCE_LABELS[selectedPodData.cadence] : ""
   const cadenceVerb = selectedPodData ? CADENCE_VERB[selectedPodData.cadence] : ""
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!text.trim()) return
-    setLoading(true)
-    setTimeout(() => {
-      if (selectedPod && selectedPod !== "solo") recordCheckin(selectedPod)
-      postCheckin({
-        podId: selectedPod ?? "solo",
-        content: text.trim(),
-        visibility,
-        streakCount: currentStreak + 1,
-        ...(photoPreview ? { photo: photoPreview } : {}),
-      })
-      setLoading(false)
+    setSubmitting(true)
+    try {
+      if (selectedPod && selectedPod !== "solo") {
+        await postCheckin({
+          podId: selectedPod,
+          content: text.trim(),
+          visibility,
+          streakCount: currentStreak + 1,
+          ...(photoPreview ? { photo: photoPreview } : {}),
+        })
+      }
       setSubmitted(true)
-    }, 1000)
+    } catch (error) {
+      console.error("Failed to post check-in:", error)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (submitted) {
@@ -117,8 +161,8 @@ function CheckinForm() {
       </Link>
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-1">New check-in</h1>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mb-1">New check-in</h1>
         <p className="text-sm text-zinc-500">
           Share what you did{cadenceVerb ? ` ${cadenceVerb}` : ""}. Keep it honest.
         </p>
@@ -128,7 +172,7 @@ function CheckinForm() {
         {/* Pod selector */}
         <div>
           <label className="block text-sm font-semibold text-zinc-700 mb-3">Which pod?</label>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-2 sm:gap-3 flex-wrap">
             {allMyPods.map((pod) => (
               <button
                 key={pod.id}
@@ -281,10 +325,10 @@ function CheckinForm() {
         <div className="pt-2">
           <button
             type="submit"
-            disabled={!text.trim() || loading}
+            disabled={!text.trim() || submitting}
             className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-2xl transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.4)] active:scale-[0.98]"
           >
-            {loading ? (
+            {submitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>

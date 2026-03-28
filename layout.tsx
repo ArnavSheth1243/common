@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Outfit } from "next/font/google"
+import { SessionProvider } from "@/app/context/session"
 import "./globals.css"
 
 const outfit = Outfit({
@@ -28,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={outfit.variable}>
-      <body className="grain antialiased">{children}</body>
+      <body className="grain antialiased">
+        <SessionProvider>{children}</SessionProvider>
+      </body>
     </html>
   )
 }

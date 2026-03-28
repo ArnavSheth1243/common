@@ -52,6 +52,18 @@ body {
   border-radius: 4px;
 }
 
+/* ─── Responsive helpers ────────────────────────────────────────────────── */
+
+/* Prevent horizontal overflow on any screen */
+html, body { overflow-x: hidden; }
+
+/* Ensure images/media never exceed their container */
+img, video, iframe, svg { max-width: 100%; }
+
+/* Hide scrollbar utility (for horizontal scroll strips) */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
 

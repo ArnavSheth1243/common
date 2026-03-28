@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle, Globe, Lock, MapPin } from "@phosphor-icons/react"
+import { ArrowLeft, CheckCircle, Globe, Lock, MapPin, ImageSquare, UploadSimple, X } from "@phosphor-icons/react"
 import type { PodCadence, PodCategory, PodType } from "@/lib/data"
 import { usePodState } from "@/app/context/pod-state"
 import { useUserProfile } from "@/app/context/user-profile"
@@ -51,11 +51,22 @@ export default function NewPodPage() {
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState<PodCategory>("running")
   const [cadence, setCadence] = useState<PodCadence>("daily")
+  const [customCadence, setCustomCadence] = useState("")
   const [type, setType] = useState<PodType>("Habit")
   const [visibility, setVisibility] = useState<"public" | "private">("public")
   const [location, setLocation] = useState("")
   const [maxMembers, setMaxMembers] = useState<string>("8")
+  const [imageUrl, setImageUrl] = useState<string>("")
   const [submitting, setSubmitting] = useState(false)
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) return // 5MB limit
+    const reader = new FileReader()
+    reader.onload = () => setImageUrl(reader.result as string)
+    reader.readAsDataURL(file)
+  }
 
   const handleCreate = () => {
     if (!name.trim()) return
@@ -63,7 +74,8 @@ export default function NewPodPage() {
 
     const podId = `user_${Date.now()}`
     const color = MEMBER_COLORS[Math.floor(Math.random() * MEMBER_COLORS.length)]
-    const initials = profile.displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+    const displayName = profile?.displayName || "User"
+    const initials = displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
 
     createPod({
       id: podId,
@@ -81,8 +93,9 @@ export default function NewPodPage() {
       memberColors: [color],
       createdAt: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
       createdByYou: true,
+      imageUrl: imageUrl || undefined,
       podMembers: [
-        { name: profile.displayName, initials, color: `${color} text-white`, streak: 0, isYou: true },
+        { name: displayName, initials, color: `${color} text-white`, streak: 0, isYou: true },
       ],
       recentCheckins: [],
     })
@@ -153,6 +166,40 @@ export default function NewPodPage() {
           </div>
         </div>
 
+        {/* Cover image */}
+        <div>
+          <label className="block text-sm font-semibold text-zinc-700 mb-2 flex items-center gap-1.5">
+            <ImageSquare size={14} />
+            Cover image (optional)
+          </label>
+          <p className="text-xs text-zinc-400 mb-3">Upload a cover image for your pod. Max 5MB.</p>
+          {imageUrl ? (
+            <div className="relative rounded-2xl overflow-hidden aspect-[3/1] border border-zinc-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="Pod cover" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setImageUrl("")}
+                className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-sm hover:bg-black/80 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X size={14} weight="bold" className="text-white" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center gap-2 w-full aspect-[3/1] border-2 border-dashed border-zinc-200 hover:border-amber-400 rounded-2xl cursor-pointer transition-all hover:bg-amber-50/30">
+              <UploadSimple size={24} className="text-zinc-400" />
+              <span className="text-sm font-medium text-zinc-400">Click to upload</span>
+              <span className="text-[11px] text-zinc-300">JPG, PNG, or WebP</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
+          )}
+        </div>
+
         {/* Type */}
         <div>
           <label className="block text-sm font-semibold text-zinc-700 mb-3">Pod type</label>
@@ -194,6 +241,15 @@ export default function NewPodPage() {
               </button>
             ))}
           </div>
+          {cadence === "other" && (
+            <input
+              type="text"
+              value={customCadence}
+              onChange={(e) => setCustomCadence(e.target.value)}
+              placeholder="e.g. Every Monday and Thursday"
+              className="w-full mt-3 bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+            />
+          )}
         </div>
 
         {/* Location */}

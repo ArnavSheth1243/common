@@ -21,6 +21,7 @@ function AuthForm() {
   const [error, setError] = useState<string | null>(null)
   const [forgotSent, setForgotSent] = useState(false)
   const [forgotLoading, setForgotLoading] = useState(false)
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
   const supabase = createClient()
 
@@ -31,17 +32,30 @@ function AuthForm() {
 
     try {
       if (tab === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { display_name: name.trim() || email.split("@")[0] } },
+          options: {
+            data: { display_name: name.trim() || email.split("@")[0] },
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+          },
         })
         if (signUpError) throw signUpError
-        router.push("/onboarding")
+        // If email confirmation is required, Supabase returns a user with identities = []
+        // or session = null. Show confirmation message instead of redirecting.
+        if (data.session) {
+          // Auto-confirmed (e.g. email confirmation disabled in Supabase)
+          window.location.href = "/onboarding"
+        } else {
+          // Email confirmation required
+          setConfirmationSent(true)
+          setLoading(false)
+          return
+        }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
         if (signInError) throw signInError
-        router.push("/dashboard")
+        window.location.href = "/dashboard"
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Something went wrong"
@@ -71,6 +85,39 @@ function AuthForm() {
     setForgotLoading(false)
     if (resetError) setError(resetError.message)
     else setForgotSent(true)
+  }
+
+  if (confirmationSent) {
+    return (
+      <div className="w-full max-w-sm text-center">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-600 transition-colors mb-8"
+        >
+          <ArrowLeft size={14} />
+          Back
+        </Link>
+        <div className="bg-white border border-zinc-100 rounded-3xl p-8">
+          <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <ArrowRight size={28} className="text-emerald-500" />
+          </div>
+          <h2 className="text-xl font-bold text-zinc-900 tracking-tight mb-2">Check your email</h2>
+          <p className="text-sm text-zinc-500 mb-4">
+            We sent a confirmation link to <span className="font-semibold text-zinc-700">{email}</span>.
+            Click the link in the email to activate your account.
+          </p>
+          <p className="text-xs text-zinc-400">
+            Didn&apos;t get it? Check your spam folder or{" "}
+            <button
+              onClick={() => { setConfirmationSent(false); setTab("signup") }}
+              className="text-amber-600 font-semibold hover:text-amber-700"
+            >
+              try again
+            </button>.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { notFound, useParams } from "next/navigation"
 import Link from "next/link"
 import {
@@ -36,29 +36,46 @@ import {
   Minus,
   Plus,
 } from "@phosphor-icons/react"
-import { POD_MAP, CADENCE_LABELS } from "@/lib/data"
+import { CADENCE_LABELS, type Checkin, type Comment, type RsvpStatus, type PodApplication } from "@/lib/data"
 import { usePodState } from "@/app/context/pod-state"
+import { useSession } from "@/app/context/session"
+import { createClient } from "@/lib/supabase/client"
 import type { FC } from "react"
-import type { Checkin, Comment, RsvpStatus, PodApplication } from "@/lib/data"
+
+const AVATAR_COLORS = [
+  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-amber-500 text-white",
+  "bg-emerald-500 text-white", "bg-sky-500 text-white", "bg-violet-500 text-white",
+  "bg-indigo-500 text-white", "bg-pink-500 text-white", "bg-teal-500 text-white",
+  "bg-orange-500 text-white", "bg-cyan-500 text-white", "bg-fuchsia-500 text-white",
+]
+function getAvatarColor(name: string): string {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  running:     "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=300&fit=crop&q=75",
-  cycling:     "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=300&fit=crop&q=75",
-  swimming:    "https://images.unsplash.com/photo-1504578879986-b5dca29e4200?w=800&h=300&fit=crop&q=75",
-  yoga:        "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=300&fit=crop&q=75",
-  strength:    "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&h=300&fit=crop&q=75",
-  hiking:      "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=300&fit=crop&q=75",
-  reading:     "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=300&fit=crop&q=75",
-  writing:     "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&h=300&fit=crop&q=75",
-  journaling:  "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=800&h=300&fit=crop&q=75",
-  meditation:  "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=300&fit=crop&q=75",
-  cooking:     "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&h=300&fit=crop&q=75",
-  learning:    "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=300&fit=crop&q=75",
-  music:       "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&h=300&fit=crop&q=75",
-  art:         "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=300&fit=crop&q=75",
-  photography: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=300&fit=crop&q=75",
-  finance:     "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=300&fit=crop&q=75",
-  other:       "https://images.unsplash.com/photo-1495592822108-9e6261896da8?w=800&h=300&fit=crop&q=75",
+  running:      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=300&fit=crop&q=75",
+  cycling:      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=300&fit=crop&q=75",
+  swimming:     "https://images.unsplash.com/photo-1504578879986-b5dca29e4200?w=800&h=300&fit=crop&q=75",
+  yoga:         "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=300&fit=crop&q=75",
+  strength:     "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&h=300&fit=crop&q=75",
+  hiking:       "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=300&fit=crop&q=75",
+  reading:      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=300&fit=crop&q=75",
+  writing:      "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&h=300&fit=crop&q=75",
+  journaling:   "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=800&h=300&fit=crop&q=75",
+  meditation:   "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=300&fit=crop&q=75",
+  cooking:      "https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&h=300&fit=crop&q=75",
+  learning:     "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=300&fit=crop&q=75",
+  music:        "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&h=300&fit=crop&q=75",
+  art:          "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=300&fit=crop&q=75",
+  photography:  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=300&fit=crop&q=75",
+  finance:      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=300&fit=crop&q=75",
+  fitness:      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&h=300&fit=crop&q=75",
+  mindfulness:  "https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?w=800&h=300&fit=crop&q=75",
+  productivity: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=800&h=300&fit=crop&q=75",
+  creativity:   "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=300&fit=crop&q=75",
+  other:        "https://images.unsplash.com/photo-1495592822108-9e6261896da8?w=800&h=300&fit=crop&q=75",
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,6 +96,10 @@ const CATEGORY_ICONS: Record<string, FC<any>> = {
   art: PaintBrush,
   photography: Camera,
   finance: CurrencyDollar,
+  fitness: Barbell,
+  mindfulness: Leaf,
+  productivity: GraduationCap,
+  creativity: PaintBrush,
   other: Tag,
 }
 
@@ -103,7 +124,7 @@ function CheckinItem({
   const commentsOpen = openCommentId === checkin.id
 
   const profileHref = (name: string) =>
-    name === "Arnav S." ? "/profile" : `/profile/${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "")}`
+    `/profile/${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "")}`
 
   const handleSubmitComment = () => {
     const text = commentText.trim()
@@ -198,7 +219,7 @@ function CheckinItem({
           {/* Comment input */}
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-zinc-900 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-              AS
+              {"?"}
             </div>
             <div className="flex-1 flex items-center gap-2 bg-zinc-50 border border-zinc-200 focus-within:border-amber-400 focus-within:bg-white rounded-2xl px-3 py-2 transition-all">
               <input
@@ -226,34 +247,195 @@ function CheckinItem({
 
 export default function PodDetailPage() {
   const params = useParams()
+  const { user } = useSession()
   const podState = usePodState()
 
-  // Check static pods first, then dynamically created ones
-  const staticPod = POD_MAP[params.id as string]
-  const dynamicPod = podState.findPod(params.id as string)
-  const pod = staticPod ?? dynamicPod
-  if (!pod) notFound()
-
+  const [pod, setPod] = useState<any | null>(null)
+  const [loading, setLoading] = useState(true)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [openCommentId, setOpenCommentId] = useState<string | null>(null)
   const [showApplicationForm, setShowApplicationForm] = useState(false)
   const [applicationText, setApplicationText] = useState("")
-  const applicationSent = podState.hasApplied(pod.id)
   const [appToast, setAppToast] = useState<string | null>(null)
-  const [maxMembersOverride, setMaxMembersOverride] = useState<number | null>(pod.maxMembers)
+
+  // Fetch pod from Supabase
+  useEffect(() => {
+    if (!user) return
+    const fetchPod = async () => {
+      const supabase = createClient()
+      const podId = params.id as string
+
+      // Fetch pod data
+      const { data: podData } = await supabase
+        .from("pods")
+        .select("*")
+        .eq("id", podId)
+        .single()
+
+      if (!podData) {
+        notFound()
+      }
+
+      // Fetch pod members
+      const { data: members } = await supabase
+        .from("pod_members")
+        .select("user_id, current_streak, is_admin")
+        .eq("pod_id", podId)
+
+      // Fetch pod checkins
+      const { data: checkins } = await supabase
+        .from("checkins")
+        .select("*, checkin_likes(user_id), checkin_comments(id, user_id, content, created_at)")
+        .eq("pod_id", podId)
+        .order("created_at", { ascending: false })
+        .limit(20)
+
+      // Collect all user IDs for profile lookup
+      const allUserIds = new Set<string>()
+      ;(members || []).forEach((m: any) => allUserIds.add(m.user_id))
+      ;(checkins || []).forEach((c: any) => {
+        allUserIds.add(c.user_id)
+        ;(c.checkin_comments || []).forEach((cm: any) => allUserIds.add(cm.user_id))
+      })
+
+      // Fetch all profiles at once
+      const profileMap: Record<string, string> = {}
+      if (allUserIds.size > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, display_name")
+          .in("id", Array.from(allUserIds))
+        ;(profiles || []).forEach((p: any) => {
+          profileMap[p.id] = p.display_name || "Unknown"
+        })
+      }
+
+      // Fetch pod events
+      const { data: events } = await supabase
+        .from("pod_events")
+        .select("*")
+        .eq("pod_id", podId)
+        .gte("date", new Date().toISOString().split("T")[0])
+        .order("date", { ascending: true })
+
+      // Fetch pending applications (if admin)
+      const isAdmin = members?.some((m: any) => m.user_id === user.id && m.is_admin)
+      let pendingApps: any[] = []
+      if (isAdmin) {
+        const { data: apps } = await supabase
+          .from("pod_applications")
+          .select("*")
+          .eq("pod_id", podId)
+          .eq("status", "pending")
+
+        // Fetch applicant profiles
+        const appUserIds = (apps || []).map((a: any) => a.user_id)
+        if (appUserIds.length > 0) {
+          const { data: appProfiles } = await supabase
+            .from("profiles")
+            .select("id, display_name")
+            .in("id", appUserIds)
+          ;(appProfiles || []).forEach((p: any) => {
+            profileMap[p.id] = p.display_name || "Unknown"
+          })
+        }
+        pendingApps = (apps || []).map((a: any) => ({
+          ...a,
+          profiles: { display_name: profileMap[a.user_id] || "Unknown" },
+        }))
+      }
+
+      setPod({
+        ...podData,
+        podMembers: (members || []).map((m: any) => {
+          const name = profileMap[m.user_id] || "Unknown"
+          return {
+            name,
+            initials: name.split(" ").map((w: string) => w[0]).join(""),
+            color: getAvatarColor(name),
+            streak: m.current_streak,
+            isYou: m.user_id === user.id,
+            userId: m.user_id,
+          }
+        }),
+        recentCheckins: (checkins || []).map((c: any) => {
+          const authorName = profileMap[c.user_id] || "Unknown"
+          const initials = authorName.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+          return {
+            id: c.id,
+            author: { name: authorName, initials, color: getAvatarColor(authorName) },
+            content: c.content,
+            time: new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+            likes: c.checkin_likes?.length || 0,
+            comments: c.checkin_comments?.length || 0,
+            streakCount: c.streak_count,
+            image: c.image_url,
+            commentThread: (c.checkin_comments || []).map((cm: any) => {
+              const cmName = profileMap[cm.user_id] || "Unknown"
+              const cmInitials = cmName.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+              return {
+                id: cm.id,
+                author: { name: cmName, initials: cmInitials, color: getAvatarColor(cmName) },
+                text: cm.content,
+                time: new Date(cm.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+              }
+            }),
+          }
+        }),
+        events: (events || []).map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          dateLabel: new Date(e.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+          date: e.date,
+          time: e.time,
+          endTime: e.end_time,
+          location: e.location,
+          description: e.description,
+        })),
+        pendingApplications: pendingApps.map((a: any) => ({
+          id: a.id,
+          userName: a.profiles?.display_name || "Unknown",
+          message: a.message,
+        })),
+        maxMembers: podData.max_members,
+        memberColors: ["bg-zinc-900"],
+        createdByYou: podData.created_by === user.id,
+      })
+      setLoading(false)
+    }
+    fetchPod()
+  }, [user, params.id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!pod) notFound()
+
+  const applicationSent = podState.hasApplied(pod.id)
+  const maxMembersOverride = pod.maxMembers
 
   const effectivelyMember = podState.isMember(pod.id)
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!applicationText.trim()) return
-    podState.sendApplication(pod.id)
+    try {
+      await podState.sendApplication(pod.id, applicationText.trim())
+      setShowApplicationForm(false)
+      setApplicationText("")
+    } catch (err) {
+      console.error("Failed to send application:", err)
+    }
   }
 
   const Icon = CATEGORY_ICONS[pod.category] ?? GraduationCap
   const cadenceLabel = CADENCE_LABELS[pod.cadence]
 
-  const acceptedCount = (podState.acceptedApps[pod.id] ?? []).length
-  const memberCount = pod.members + acceptedCount
+  const memberCount = pod.member_count ?? pod.podMembers?.length ?? 0
 
   const spotsLabel =
     maxMembersOverride === null
@@ -282,13 +464,13 @@ export default function PodDetailPage() {
 
   // Only show apps that haven't been reviewed yet
   const visibleApps = (pod.pendingApplications ?? []).filter(
-    (a) => !podState.isAppReviewed(pod.id, a.id)
+    (a: any) => !podState.isAppReviewed(a.id)
   )
 
   const handleAppAction = (id: string, action: "accept" | "decline") => {
-    if (action === "accept") podState.acceptApp(pod.id, id)
-    else podState.declineApp(pod.id, id)
-    podState.reviewApp(pod.id, id)
+    if (action === "accept") podState.acceptApp(id)
+    else podState.declineApp(id)
+    podState.reviewApp(id)
     setAppToast(action === "accept" ? "✓ Application accepted" : "Application declined")
     setTimeout(() => setAppToast(null), 3000)
   }
@@ -307,11 +489,11 @@ export default function PodDetailPage() {
       {/* Pod header */}
       <div className="bg-white border border-zinc-100 rounded-3xl overflow-hidden mb-6">
         {/* Category image banner */}
-        {CATEGORY_IMAGES[pod.category] && (
+        {(pod.image_url || CATEGORY_IMAGES[pod.category]) && (
           <div className="h-44 relative overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={CATEGORY_IMAGES[pod.category]}
+              src={pod.image_url || CATEGORY_IMAGES[pod.category]}
               alt=""
               className="w-full h-full object-cover"
             />
@@ -341,7 +523,7 @@ export default function PodDetailPage() {
         )}
 
         <div className="p-6">
-          {!CATEGORY_IMAGES[pod.category] && (
+          {!pod.image_url && !CATEGORY_IMAGES[pod.category] && (
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start gap-4">
                 <div className="w-14 h-14 bg-zinc-50 rounded-3xl flex items-center justify-center flex-shrink-0">
@@ -382,7 +564,7 @@ export default function PodDetailPage() {
             <span>·</span>
             <div className="flex items-center gap-1">
               <CalendarCheck size={13} />
-              <span>Since {pod.createdAt}</span>
+              <span>Since {new Date(pod.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })}</span>
             </div>
           </div>
 
@@ -459,33 +641,35 @@ export default function PodDetailPage() {
         </div>{/* /p-6 */}
       </div>
 
-      {/* Location */}
-      <div className="bg-white border border-zinc-100 rounded-3xl overflow-hidden mb-6">
-        <iframe
-          src={`https://maps.google.com/maps?q=${encodeURIComponent(pod.location)}&output=embed&z=15`}
-          width="100%"
-          height="200"
-          style={{ border: 0, display: "block" }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          title={pod.location}
-        />
-        <div className="px-4 py-3 flex items-center justify-between border-t border-zinc-100">
-          <div className="flex items-center gap-2">
-            <MapPin size={13} className="text-zinc-400 flex-shrink-0" />
-            <span className="text-sm text-zinc-600">{pod.location}</span>
+      {/* Location — only show if pod has a location */}
+      {pod.location && pod.location.trim() !== "" && (
+        <div className="bg-white border border-zinc-100 rounded-3xl overflow-hidden mb-6">
+          <iframe
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(pod.location)}&output=embed&z=15`}
+            width="100%"
+            height="200"
+            style={{ border: 0, display: "block" }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title={pod.location}
+          />
+          <div className="px-4 py-3 flex items-center justify-between border-t border-zinc-100">
+            <div className="flex items-center gap-2">
+              <MapPin size={13} className="text-zinc-400 flex-shrink-0" />
+              <span className="text-sm text-zinc-600">{pod.location}</span>
+            </div>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pod.location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+            >
+              Directions →
+            </a>
           </div>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pod.location)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors"
-          >
-            Directions →
-          </a>
         </div>
-      </div>
+      )}
 
       {/* Upcoming events — shown only to members */}
       {effectivelyMember && pod.events && pod.events.length > 0 && (
@@ -548,32 +732,17 @@ export default function PodDetailPage() {
                     )
                   })()}
 
-                  {/* Others' RSVPs */}
+                  {/* Other members */}
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {otherMembers.map((member) => {
-                      const memberRsvp = event.rsvps[member.name]
-                      if (!memberRsvp) return null
-                      return (
-                        <div key={member.name} className="flex items-center gap-1" title={`${member.name}: ${memberRsvp}`}>
-                          <div
-                            className={`w-6 h-6 rounded-full ${member.color} flex items-center justify-center text-[9px] font-bold ring-2 ${
-                              memberRsvp === "going"
-                                ? "ring-emerald-400"
-                                : memberRsvp === "maybe"
-                                ? "ring-amber-400"
-                                : "ring-zinc-300"
-                            }`}
-                          >
-                            {member.initials}
-                          </div>
+                    {otherMembers.slice(0, 5).map((member: any) => (
+                      <div key={member.name} className="flex items-center gap-1" title={member.name}>
+                        <div
+                          className={`w-6 h-6 rounded-full ${member.color} flex items-center justify-center text-[9px] font-bold ring-2 ring-zinc-100`}
+                        >
+                          {member.initials}
                         </div>
-                      )
-                    })}
-                    <span className="text-[10px] text-zinc-400 ml-1">
-                      {otherMembers.filter((m) => event.rsvps[m.name] === "going").length} going
-                      {otherMembers.filter((m) => event.rsvps[m.name] === "maybe").length > 0 &&
-                        ` · ${otherMembers.filter((m) => event.rsvps[m.name] === "maybe").length} maybe`}
-                    </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )
@@ -663,37 +832,12 @@ export default function PodDetailPage() {
             <div>
               <p className="text-sm font-semibold text-zinc-900">Max members</p>
               <p className="text-xs text-zinc-400 mt-0.5">
-                {maxMembersOverride === null ? "Unlimited — anyone can join" : `${pod.members} joined · ${maxMembersOverride - pod.members} spots left`}
+                {maxMembersOverride === null ? "Unlimited — anyone can join" : `${memberCount} joined · ${maxMembersOverride - memberCount} spots left`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setMaxMembersOverride((prev) => {
-                  if (prev === null) return pod.members + 1
-                  return Math.max(pod.members, prev - 1)
-                })}
-                className="w-8 h-8 rounded-xl bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors"
-              >
-                <Minus size={13} weight="bold" className="text-zinc-600" />
-              </button>
-              <span className="w-10 text-center text-sm font-bold text-zinc-900 tabular-nums">
-                {maxMembersOverride === null ? "∞" : maxMembersOverride}
-              </span>
-              <button
-                onClick={() => setMaxMembersOverride((prev) => prev === null ? null : prev + 1)}
-                className="w-8 h-8 rounded-xl bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center transition-colors"
-              >
-                <Plus size={13} weight="bold" className="text-zinc-600" />
-              </button>
-              {maxMembersOverride !== null && (
-                <button
-                  onClick={() => setMaxMembersOverride(null)}
-                  className="text-xs text-zinc-400 hover:text-zinc-600 ml-1 transition-colors"
-                >
-                  Unlimited
-                </button>
-              )}
-            </div>
+            <span className="text-sm font-bold text-zinc-900 tabular-nums">
+              {maxMembersOverride === null ? "∞" : maxMembersOverride}
+            </span>
           </div>
         </div>
       )}
@@ -711,58 +855,36 @@ export default function PodDetailPage() {
             )}
           </div>
           <div className="space-y-3">
-            {(pod.pendingApplications ?? []).map((app) => {
-              const accepted = podState.isAppAccepted(pod.id, app.id)
-              const declined = podState.isAppDeclined(pod.id, app.id)
-              const isPending = !accepted && !declined
+            {(pod.pendingApplications ?? []).map((app: any) => {
+              const reviewed = podState.isAppReviewed(app.id)
+              if (reviewed) return null
               return (
-                <div key={app.id} className={`border rounded-2xl p-4 transition-all ${
-                  accepted ? "border-emerald-200 bg-emerald-50/50" :
-                  declined ? "border-zinc-100 bg-zinc-50/60 opacity-60" :
-                  "border-zinc-100"
-                }`}>
+                <div key={app.id} className="border border-zinc-100 rounded-2xl p-4">
                   <div className="flex items-start gap-3 mb-2">
-                    <div className={`w-8 h-8 rounded-full ${app.applicantColor} flex items-center justify-center text-xs font-bold flex-shrink-0`}>
-                      {app.applicantInitials}
+                    <div className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      {(app.userName || "?").split(" ").map((w: string) => w[0]).join("").slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-zinc-900">{app.applicantName}</span>
-                        <div className="flex items-center gap-2">
-                          {accepted && <span className="text-[10px] font-bold text-emerald-600">✓ Accepted</span>}
-                          {declined && <span className="text-[10px] font-bold text-zinc-400">Declined</span>}
-                          <span className="text-[10px] text-zinc-400">{app.submittedAt}</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{app.text}</p>
+                      <span className="text-sm font-semibold text-zinc-900">{app.userName}</span>
+                      <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{app.message}</p>
                     </div>
                   </div>
-                  {isPending && (
-                    <div className="flex gap-2 mt-3">
-                      <button
-                        onClick={() => handleAppAction(app.id, "accept")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition-all active:scale-[0.97]"
-                      >
-                        <CheckCircle size={13} weight="fill" />
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleAppAction(app.id, "decline")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 text-xs font-semibold rounded-xl transition-all border border-zinc-200 active:scale-[0.97]"
-                      >
-                        <X size={12} weight="bold" />
-                        Decline
-                      </button>
-                    </div>
-                  )}
-                  {accepted && (
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      onClick={() => handleAppAction(app.id, "accept")}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition-all active:scale-[0.97]"
+                    >
+                      <CheckCircle size={13} weight="fill" />
+                      Accept
+                    </button>
                     <button
                       onClick={() => handleAppAction(app.id, "decline")}
-                      className="mt-2 text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 text-xs font-semibold rounded-xl transition-all border border-zinc-200 active:scale-[0.97]"
                     >
-                      Undo accept
+                      <X size={12} weight="bold" />
+                      Decline
                     </button>
-                  )}
+                  </div>
                 </div>
               )
             })}

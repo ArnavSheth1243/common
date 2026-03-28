@@ -806,24 +806,24 @@ export default function MediaPage() {
     <div className="max-w-3xl mx-auto px-5 lg:px-8 py-8">
       {openChallenge && <ChallengeModal challenge={openChallenge} onClose={() => setOpenChallenge(null)} />}
       {/* Header */}
-      <div className="mb-8 animate-fade-up">
+      <div className="mb-6 sm:mb-8 animate-fade-up">
         <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.12em] mb-2">From Common</p>
-        <h1 className="text-[42px] font-bold text-zinc-900 tracking-tighter leading-none">Media</h1>
-        <p className="text-base text-zinc-500 mt-2">Updates, challenges, and community stories</p>
+        <h1 className="text-[28px] sm:text-[36px] lg:text-[42px] font-bold text-zinc-900 tracking-tighter leading-none">Media</h1>
+        <p className="text-sm sm:text-base text-zinc-500 mt-2">Updates, challenges, and community stories</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-zinc-100 rounded-2xl p-1 mb-6 animate-fade-up" style={{ animationDelay: "40ms" }}>
         <button
           onClick={() => setTab("updates")}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all
+          className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all
             ${tab === "updates" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400 hover:text-zinc-700"}`}
         >
           Updates & Stories
         </button>
         <button
           onClick={() => setTab("challenges")}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2
+          className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 sm:gap-2
             ${tab === "challenges" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400 hover:text-zinc-700"}`}
         >
           Challenges

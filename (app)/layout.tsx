@@ -10,25 +10,32 @@ import {
   Flame,
   CalendarBlank,
   Newspaper,
+  ChartLineUp,
+  ChatCircle,
 } from "@phosphor-icons/react"
 import { UserStatsProvider, useUserStats } from "@/app/context/user-stats"
 import { UserProfileProvider, useUserProfile } from "@/app/context/user-profile"
 import { PodStateProvider } from "@/app/context/pod-state"
+import { MessagesProvider } from "@/app/context/messages"
 import { MedalsProvider } from "@/app/context/medals"
+import { FloatingPaths } from "@/components/ui/background-paths"
 
 const navItems = [
   { href: "/dashboard", label: "Home",     icon: House },
   { href: "/pods",      label: "Pods",     icon: Compass },
   { href: "/checkin",   label: "Check in", icon: PlusCircle },
+  { href: "/tracker",   label: "Tracker",  icon: ChartLineUp },
   { href: "/calendar",  label: "Calendar", icon: CalendarBlank },
   { href: "/media",     label: "Media",    icon: Newspaper },
+  { href: "/messages",  label: "Messages", icon: ChatCircle },
   { href: "/profile",   label: "Profile",  icon: User },
 ]
 
 function SidebarStreakFooter() {
   const { totalCheckins } = useUserStats()
   const { profile } = useUserProfile()
-  const initials = profile.displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+  if (!profile) return null
+  const initials = (profile.displayName || "").split(" ").map((w: string) => w[0]).join("").slice(0, 2)
   return (
     <div className="border-t border-white/8 pt-4 px-1">
       <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-white/8 transition-colors">
@@ -51,7 +58,6 @@ function Sidebar() {
   const pathname = usePathname()
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 bg-zinc-900 z-40 py-8 px-4">
-      {/* Subtle top gradient accent */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
 
       {/* Logo */}
@@ -96,18 +102,18 @@ function BottomNav() {
   const pathname = usePathname()
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/96 backdrop-blur-xl border-t border-white/8">
-      <div className="flex items-center justify-around px-0 py-1.5 pb-[max(6px,env(safe-area-inset-bottom))]">
+      <div className="flex items-center justify-around px-0 py-1 pb-[max(6px,env(safe-area-inset-bottom))]">
         {navItems.map((item) => {
           const active = pathname === item.href
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-0.5 px-1 py-1 transition-all duration-200 relative"
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 transition-all duration-200 relative min-w-[44px]"
             >
-              <div className={`flex items-center justify-center w-8 h-6 rounded-lg transition-all duration-200 ${active ? "bg-[#f5f0e6]" : ""}`}>
+              <div className={`flex items-center justify-center w-8 h-7 rounded-lg transition-all duration-200 ${active ? "bg-[#f5f0e6]" : ""}`}>
                 <item.icon
-                  size={17}
+                  size={18}
                   weight={active ? "fill" : "regular"}
                   className={active ? "text-zinc-900" : "text-zinc-500"}
                 />
@@ -125,10 +131,15 @@ function BottomNav() {
 
 function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[#ede9df]">
+    <div className="min-h-[100dvh] bg-[#ede9df] relative">
+      {/* Background paths — fixed behind everything */}
+      <div className="fixed inset-0 z-0 pointer-events-none lg:pl-64">
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
+      </div>
       <Sidebar />
       <BottomNav />
-      <main className="lg:pl-64 pb-24 lg:pb-0 min-h-[100dvh]">
+      <main className="lg:pl-64 pb-24 lg:pb-0 min-h-[100dvh] relative z-10 overflow-x-hidden">
         {children}
       </main>
     </div>
@@ -140,9 +151,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <UserProfileProvider>
       <UserStatsProvider>
         <PodStateProvider>
-          <MedalsProvider>
-            <AppShell>{children}</AppShell>
-          </MedalsProvider>
+          <MessagesProvider>
+            <MedalsProvider>
+              <AppShell>{children}</AppShell>
+            </MedalsProvider>
+          </MessagesProvider>
         </PodStateProvider>
       </UserStatsProvider>
     </UserProfileProvider>

@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import {
   ArrowLeft,
   Flame,
@@ -11,14 +12,142 @@ import {
   ChatCircle,
   Heart,
   CalendarCheck,
+  EnvelopeSimple,
 } from "@phosphor-icons/react"
-import { MEMBER_MAP, PODS, CADENCE_LABELS } from "@/lib/data"
+import { CADENCE_LABELS } from "@/lib/data"
+import { createClient } from "@/lib/supabase/client"
+import { useMessages } from "@/app/context/messages"
+import { useSession } from "@/app/context/session"
+
+const AVATAR_COLORS = [
+  "bg-zinc-900 text-white",
+  "bg-rose-500 text-white",
+  "bg-amber-500 text-white",
+  "bg-emerald-500 text-white",
+  "bg-sky-500 text-white",
+  "bg-violet-500 text-white",
+  "bg-indigo-500 text-white",
+  "bg-pink-500 text-white",
+  "bg-teal-500 text-white",
+  "bg-orange-500 text-white",
+  "bg-cyan-500 text-white",
+  "bg-fuchsia-500 text-white",
+]
+function getAvatarColor(name: string): string {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
 
 export default function MemberProfilePage() {
   const params = useParams()
   const router = useRouter()
   const slug = params.id as string
-  const member = MEMBER_MAP[slug]
+  const { user } = useSession()
+  const { startConversation } = useMessages()
+
+  const [member, setMember] = useState<any | null>(null)
+  const [sharedPods, setSharedPods] = useState<any[]>([])
+  const [allCheckins, setAllCheckins] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [startingDm, setStartingDm] = useState(false)
+
+  // Fetch member profile by name slug
+  useEffect(() => {
+    const fetchMemberData = async () => {
+      const supabase = createClient()
+
+      // Search for profile by display_name converted to slug
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+
+      const matchedProfile = profiles?.find((p: any) =>
+        p.display_name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "") === slug
+      )
+
+      if (!matchedProfile) {
+        setLoading(false)
+        return
+      }
+
+      const displayName = matchedProfile.display_name || "Unknown"
+      setMember({
+        ...matchedProfile,
+        display_name: displayName,
+        initials: displayName.split(" ").map((w: string) => w[0]).join(""),
+        color: getAvatarColor(displayName),
+        streak: 0, // will be updated after checkins fetch
+      })
+
+      // Fetch user's pods (shared pods)
+      const { data: podMemberships } = await supabase
+        .from("pod_members")
+        .select("pod_id, pods(*)")
+        .eq("user_id", matchedProfile.id)
+
+      const pods = (podMemberships || []).map((pm: any) => pm.pods).filter(Boolean)
+      setSharedPods(pods)
+
+      // Fetch their check-ins
+      const { data: checkins } = await supabase
+        .from("checkins")
+        .select("*, pods(id, name)")
+        .eq("user_id", matchedProfile.id)
+        .neq("visibility", "private")
+        .order("created_at", { ascending: false })
+
+      if (checkins) {
+        setAllCheckins(checkins.map((c: any) => ({
+          id: c.id,
+          content: c.content,
+          time: new Date(c.created_at).toLocaleString(),
+          streakCount: c.streak_count,
+          likes: 0,
+          comments: 0,
+          visibility: c.visibility,
+          podName: c.pods?.name || "Unknown Pod",
+          podId: c.pods?.id || "",
+          podColor: getAvatarColor(c.pods?.name || "Pod"),
+        })))
+
+        // Calculate streak from checkins
+        const dates = new Set(checkins.map((c: any) => c.created_at.split("T")[0]))
+        let streak = 0
+        const today = new Date()
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(today)
+          d.setDate(d.getDate() - i)
+          if (dates.has(d.toISOString().split("T")[0])) {
+            streak++
+          } else if (i > 0) {
+            break
+          }
+        }
+        setMember((prev: any) => prev ? { ...prev, streak } : prev)
+      }
+
+      setLoading(false)
+    }
+    fetchMemberData()
+  }, [slug])
+
+  if (loading) {
+    return (
+      <div className="max-w-xl mx-auto px-5 lg:px-8 py-8">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-600 transition-colors mb-8"
+        >
+          <ArrowLeft size={14} />
+          Back
+        </button>
+        <div className="flex items-center justify-center py-16">
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+        </div>
+      </div>
+    )
+  }
 
   if (!member) {
     return (
@@ -38,25 +167,7 @@ export default function MemberProfilePage() {
     )
   }
 
-  // Find shared pods
-  const sharedPods = PODS.filter((pod) =>
-    pod.podMembers.some(
-      (m) =>
-        !m.isYou &&
-        m.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "") === slug
-    )
-  )
-
-  // Get all their check-ins across shared pods, sorted by newest first
-  const allCheckins = sharedPods
-    .flatMap((pod) =>
-      pod.recentCheckins
-        .filter((c) => c.author.name === member.name && c.visibility !== "private")
-        .map((c) => ({ ...c, podName: pod.name, podId: pod.id, podColor: pod.memberColors[0] }))
-    )
-
-  // For mock: assume profile is public (we could add a state toggle)
-  const isPublic = true // mock — would come from user settings
+  const isPublic = member.is_public ?? true
 
   return (
     <div className="max-w-xl mx-auto px-5 lg:px-8 py-8">
@@ -74,13 +185,13 @@ export default function MemberProfilePage() {
         <div className="flex items-start gap-4 mb-5">
           {/* Avatar */}
           <div
-            className={`w-20 h-20 rounded-full ${member.color} flex items-center justify-center text-2xl font-bold flex-shrink-0`}
+            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full ${member.color} flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0`}
           >
             {member.initials}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <h1 className="text-xl font-bold text-zinc-900 tracking-tight">{member.name}</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">{member.display_name}</h1>
               <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${isPublic ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
                 {isPublic ? <Globe size={9} /> : <Lock size={9} />}
                 {isPublic ? "Public" : "Private"}
@@ -96,6 +207,28 @@ export default function MemberProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Message button */}
+        {user && member.id !== user.id && (
+          <button
+            onClick={async () => {
+              setStartingDm(true)
+              try {
+                const convId = await startConversation(member.id)
+                router.push(`/messages/${convId}`)
+              } catch (err) {
+                console.error("Failed to start conversation:", err)
+              } finally {
+                setStartingDm(false)
+              }
+            }}
+            disabled={startingDm}
+            className="w-full flex items-center justify-center gap-2 bg-zinc-900 text-white text-sm font-semibold rounded-xl py-2.5 mb-4 hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          >
+            <EnvelopeSimple size={15} weight="bold" />
+            {startingDm ? "Opening..." : "Message"}
+          </button>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-px bg-zinc-100 rounded-2xl overflow-hidden">
@@ -132,7 +265,7 @@ export default function MemberProfilePage() {
                     href={`/pods/${pod.id}`}
                     className="flex items-center gap-3 bg-white border border-zinc-100 rounded-2xl p-3.5 hover:border-zinc-200 transition-all"
                   >
-                    <div className={`w-9 h-9 rounded-xl ${pod.memberColors[0]} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                    <div className={`w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
                       {pod.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">

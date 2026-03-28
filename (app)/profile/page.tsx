@@ -20,36 +20,94 @@ import {
   CalendarBlank,
   Article,
 } from "@phosphor-icons/react"
-import { MY_PODS, CADENCE_LABELS } from "@/lib/data"
-import type { RsvpStatus } from "@/lib/data"
+import { CADENCE_LABELS, type Pod, type RsvpStatus } from "@/lib/data"
 import { useUserStats } from "@/app/context/user-stats"
 import { useUserProfile } from "@/app/context/user-profile"
-import { useMedals, RARITY_STYLES } from "@/app/context/medals"
+import { useMedals, RARITY_STYLES, CATEGORY_LABELS, type MedalCategory } from "@/app/context/medals"
+import { useSession } from "@/app/context/session"
+import { createClient } from "@/lib/supabase/client"
 
 type ProfileTab = "overview" | "posts" | "events" | "medals"
 
 export default function ProfilePage() {
   const router = useRouter()
+  const { user } = useSession()
   const { totalCheckins, currentStreak, longestStreak, calendarData, podStreaks } = useUserStats()
   const { profile, updateProfile } = useUserProfile()
-  const { medals, earnedCount, rank, nextRank, progressToNext } = useMedals()
+  const { medals, earnedCount, totalMedals, rank, nextRank, progressToNext } = useMedals()
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview")
-  const [isPublic, setIsPublic] = useState(true)
+  const [myPods, setMyPods] = useState<Pod[]>([])
+  const [myPosts, setMyPosts] = useState<any[]>([])
+  const [allEvents, setAllEvents] = useState<any[]>([])
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+
+  // Fetch user's pods and check-ins
+  useEffect(() => {
+    if (!user) return
+    const fetchData = async () => {
+      const supabase = createClient()
+      const { data: podMemberships } = await supabase
+        .from("pod_members")
+        .select("pod_id, pods(*)")
+        .eq("user_id", user.id)
+
+      if (podMemberships) {
+        const pods: Pod[] = podMemberships.map((m: any) => ({
+          id: m.pods.id,
+          name: m.pods.name,
+          cadence: m.pods.cadence as any,
+          members: m.pods.member_count,
+          streak: m.pods.streak,
+          visibility: m.pods.visibility,
+          memberColors: ["bg-zinc-900"],
+          type: m.pods.type,
+          category: m.pods.category,
+          description: m.pods.description || "",
+          maxMembers: m.pods.max_members,
+          createdAt: new Date(m.pods.created_at).toLocaleDateString(),
+          location: m.pods.location || "",
+          podMembers: [],
+          recentCheckins: [],
+          podId: m.pods.id,
+          createdByYou: m.pods.created_by === user.id,
+        }))
+        setMyPods(pods)
+      }
+
+      const { data: checkins } = await supabase
+        .from("checkins")
+        .select("*, pods(name)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+
+      if (checkins) {
+        setMyPosts(checkins.map((c: any) => ({
+          id: c.id,
+          content: c.content,
+          time: new Date(c.created_at).toLocaleString(),
+          streakCount: c.streak_count,
+          likes: 0,
+          comments: 0,
+          visibility: c.visibility,
+          podName: c.pods?.name || "Unknown Pod",
+        })))
+      }
+    }
+    fetchData()
+  }, [user])
+
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [editName, setEditName] = useState("")
   const [editBio, setEditBio] = useState("")
-  const [bio, setBio] = useState("")
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [instagramHandle, setInstagramHandle] = useState<string | null>(null)
   const [igInput, setIgInput] = useState("")
   const [igEditing, setIgEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Load persisted avatar on mount
-  useEffect(() => {
-    const saved = localStorage.getItem("profileAvatar")
-    if (saved) setAvatarUrl(saved)
-  }, [])
+  // Derived from profile context (persisted in Supabase)
+  const isPublic = profile?.isPublic ?? true
+  const bio = profile?.bio || ""
+  const instagramHandle = profile?.instagramHandle || ""
+  const avatarUrl = profile?.avatarUrl || null
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -57,8 +115,7 @@ export default function ProfilePage() {
       const reader = new FileReader()
       reader.onload = () => {
         const dataUrl = reader.result as string
-        localStorage.setItem("profileAvatar", dataUrl)
-        setAvatarUrl(dataUrl)
+        updateProfile({ avatarUrl: dataUrl })
       }
       reader.readAsDataURL(file)
     }
@@ -67,30 +124,41 @@ export default function ProfilePage() {
   const handleSaveInstagram = () => {
     const handle = igInput.replace(/^@/, "").trim()
     if (handle) {
-      setInstagramHandle(handle)
+      updateProfile({ instagramHandle: handle })
       setIgEditing(false)
       setIgInput("")
     }
   }
 
   const handleRemoveInstagram = () => {
-    setInstagramHandle(null)
+    updateProfile({ instagramHandle: "" })
     setIgEditing(false)
     setIgInput("")
   }
 
-  // Posts: all check-ins by the user across pods
-  const myPosts = MY_PODS.flatMap((p) =>
-    p.recentCheckins.filter((c) => c.author.name === "Arnav S.")
-  )
+  const handleDeletePost = async (postId: string) => {
+    setDeletingPostId(postId)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from("checkins").delete().eq("id", postId)
+      if (!error) {
+        setMyPosts((prev) => prev.filter((p) => p.id !== postId))
+      }
+    } catch (err) {
+      console.error("Failed to delete post:", err)
+    } finally {
+      setDeletingPostId(null)
+    }
+  }
 
-  // Events: all upcoming events across pods
-  const allEvents = MY_PODS.flatMap((p) =>
-    (p.events ?? []).map((e) => ({ ...e, podName: p.name, podId: p.id }))
-  )
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/auth")
+  }
 
   // Managed pods
-  const managedPods = MY_PODS.filter((p) => p.createdByYou)
+  const managedPods = myPods.filter((p) => p.createdByYou)
 
   // RSVP state for events tab
   const [eventRsvps, setEventRsvps] = useState<Record<string, RsvpStatus>>(() => {
@@ -111,14 +179,22 @@ export default function ProfilePage() {
   const todayKey = "2026-03-21"
   const futureKey = "2026-03-22"
 
+  if (!profile) {
+    return (
+      <div className="max-w-2xl mx-auto px-5 lg:px-8 py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-5 lg:px-8 py-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-8 animate-fade-up">
-        <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-none">Profile</h1>
+      <div className="flex items-start justify-between mb-6 sm:mb-8 animate-fade-up">
+        <h1 className="text-[28px] sm:text-[36px] font-bold text-zinc-900 tracking-tighter leading-none">Profile</h1>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setIsPublic(p => !p)}
+            onClick={() => updateProfile({ isPublic: !isPublic })}
             className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all ${
               isPublic
                 ? "bg-emerald-50 border-emerald-100 text-emerald-700"
@@ -129,7 +205,7 @@ export default function ProfilePage() {
             {isPublic ? "Public" : "Private"}
           </button>
           <button
-            onClick={() => { setEditName(profile.displayName); setEditBio(bio); setIsEditingProfile(true) }}
+            onClick={() => { setEditName(profile?.displayName || ""); setEditBio(profile?.bio || ""); setIsEditingProfile(true) }}
             className="text-sm font-medium text-zinc-500 hover:text-zinc-800 transition-colors"
           >
             Edit
@@ -152,7 +228,7 @@ export default function ProfilePage() {
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-white text-xl font-bold">
-                  AS
+                  {(profile?.displayName || "U").split(" ").map((w: string) => w[0]).join("").slice(0, 2)}
                 </div>
               )}
               <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -189,9 +265,8 @@ export default function ProfilePage() {
                 <div className="flex gap-2 pt-1">
                   <button
                     onClick={() => {
-                      const name = editName.trim() || profile.displayName
-                      updateProfile({ displayName: name })
-                      setBio(editBio.trim())
+                      const name = editName.trim() || profile?.displayName || "User"
+                      updateProfile({ displayName: name, bio: editBio.trim() })
                       setIsEditingProfile(false)
                     }}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 text-white text-xs font-semibold rounded-xl"
@@ -208,7 +283,7 @@ export default function ProfilePage() {
               </div>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-zinc-900 tracking-tighter">{profile.displayName}</h2>
+                <h2 className="text-2xl font-bold text-zinc-900 tracking-tighter">{profile?.displayName || "User"}</h2>
                 {bio && <p className="text-sm text-zinc-500 mt-0.5 leading-snug">{bio}</p>}
               </>
             )}
@@ -229,7 +304,7 @@ export default function ProfilePage() {
 
             {/* Instagram */}
             <div className="mt-2">
-              {instagramHandle && !igEditing ? (
+              {instagramHandle && instagramHandle.length > 0 && !igEditing ? (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5 text-sm text-zinc-500">
                     <InstagramLogo size={14} weight="duotone" />
@@ -290,28 +365,43 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats bento */}
-        <div className="grid grid-cols-2 gap-3 mt-2">
+        <div className="grid grid-cols-3 gap-3 mt-2">
           {/* Streak — featured, amber */}
-          <div className="row-span-2 bg-amber-500 rounded-3xl p-5 flex flex-col justify-between min-h-[120px]">
-            <Flame size={20} weight="fill" className="text-white/80" />
+          <div className="bg-amber-500 rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[100px]">
+            <Flame size={18} weight="fill" className="text-white/80" />
             <div>
-              <div className="text-4xl font-bold text-white tracking-tighter tabular-nums leading-none">
+              <div className="text-2xl sm:text-3xl font-bold text-white tracking-tighter tabular-nums leading-none">
                 {currentStreak}
               </div>
-              <div className="text-xs font-semibold text-white/70 uppercase tracking-widest mt-1.5">
-                Day streak
+              <div className="text-[9px] sm:text-[10px] font-semibold text-white/70 uppercase tracking-widest mt-1">
+                Streak
               </div>
             </div>
           </div>
           {/* Total check-ins */}
-          <div className="bg-zinc-900 rounded-3xl px-4 py-4 flex flex-col justify-between">
-            <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Check-ins</div>
-            <div className="text-3xl font-bold text-white tabular-nums tracking-tighter">{totalCheckins}</div>
+          <div className="bg-zinc-900 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between">
+            <div className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Posts</div>
+            <div className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tighter">{totalCheckins}</div>
+          </div>
+          {/* People met */}
+          <div className="bg-white border border-zinc-100 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between shadow-softer">
+            <Users size={16} className="text-zinc-400" />
+            <div>
+              <div className="text-2xl sm:text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{profile?.peopleMet ?? 0}</div>
+              <div className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest">People met</div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          {/* Pods joined */}
+          <div className="bg-white border border-zinc-100 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between shadow-softer">
+            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pods</div>
+            <div className="text-2xl sm:text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{myPods.length}</div>
           </div>
           {/* Best streak */}
-          <div className="bg-white border border-zinc-100 rounded-3xl px-4 py-4 flex flex-col justify-between shadow-softer">
+          <div className="bg-white border border-zinc-100 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between shadow-softer">
             <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Best streak</div>
-            <div className="text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{longestStreak}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{longestStreak}</div>
           </div>
         </div>
 
@@ -338,17 +428,17 @@ export default function ProfilePage() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex bg-zinc-100 rounded-2xl p-1 mb-6">
+      <div className="flex bg-zinc-100 rounded-2xl p-1 mb-6 overflow-x-auto scrollbar-hide">
         {([
           { id: "overview", label: "Overview" },
           { id: "posts", label: "Posts" },
           { id: "events", label: "Events" },
-          { id: "medals", label: `Medals${earnedCount > 0 ? ` · ${earnedCount}` : ""}` },
+          { id: "medals", label: `Medals${earnedCount > 0 ? ` · ${earnedCount}/${totalMedals}` : ""}` },
         ] as { id: ProfileTab; label: string }[]).map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
+            className={`flex-1 min-w-[70px] py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 whitespace-nowrap ${
               activeTab === tab.id
                 ? "bg-white text-zinc-900 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-600"
@@ -405,7 +495,7 @@ export default function ProfilePage() {
                 {!isFuture && podIds.length > 0 && (
                   <div className="flex gap-0.5">
                     {podIds.map((pid, j) => {
-                      const pod = MY_PODS.find(p => p.id === pid)
+                      const pod = myPods.find(p => p.id === pid)
                       return (
                         <div
                           key={j}
@@ -422,7 +512,7 @@ export default function ProfilePage() {
 
         {/* Legend below calendar */}
         <div className="flex items-center gap-4 mt-4 flex-wrap">
-          {MY_PODS.map(pod => (
+          {myPods.map(pod => (
             <div key={pod.id} className="flex items-center gap-1.5">
               <div className={`w-2.5 h-2.5 rounded-full ${pod.memberColors[0]}`} />
               <span className="text-xs text-zinc-400">{pod.name}</span>
@@ -451,7 +541,7 @@ export default function ProfilePage() {
           </Link>
         </div>
         <div className="space-y-3">
-          {MY_PODS.map((pod) => {
+          {myPods.map((pod) => {
             const streak = podStreaks[pod.id] ?? pod.streak
             const Icon = pod.category === "running" ? Sneaker : PencilSimple
             return (
@@ -538,7 +628,7 @@ export default function ProfilePage() {
       {/* Sign out */}
       <div className="mt-10 pt-6 border-t border-zinc-100 text-center">
         <button
-          onClick={() => router.push("/auth")}
+          onClick={handleSignOut}
           className="text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
         >
           Sign out
@@ -552,24 +642,45 @@ export default function ProfilePage() {
         <div>
           {myPosts.length > 0 ? (
             <div className="space-y-4">
-              {myPosts.map((post) => (
-                <div key={post.id} className="bg-white border border-zinc-100 rounded-3xl p-5 hover:border-zinc-200 transition-all">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                      AS
+              {myPosts.map((post) => {
+                const initials = (profile?.displayName || "U").split(" ").map((w: string) => w[0]).join("").slice(0, 2)
+                return (
+                  <div key={post.id} className="bg-white border border-zinc-100 rounded-3xl p-5 hover:border-zinc-200 transition-all">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900">{profile?.displayName || "User"}</p>
+                        <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+                          <span>{post.podName}</span>
+                          <span>·</span>
+                          <span>{post.time}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1 text-xs text-amber-600 font-semibold bg-amber-50 rounded-full px-2 py-0.5">
+                          <Flame size={9} weight="fill" />
+                          <span>{post.streakCount}</span>
+                        </div>
+                        <button
+                          onClick={() => handleDeletePost(post.id)}
+                          disabled={deletingPostId === post.id}
+                          className="text-zinc-300 hover:text-rose-500 transition-colors p-1"
+                          title="Delete post"
+                        >
+                          {deletingPostId === post.id ? (
+                            <div className="w-3 h-3 border border-zinc-300 border-t-rose-500 rounded-full animate-spin" />
+                          ) : (
+                            <X size={14} weight="bold" />
+                          )}
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-zinc-900">Arnav S.</p>
-                      <p className="text-xs text-zinc-400">{post.time}</p>
-                    </div>
-                    <div className="ml-auto flex items-center gap-1 text-xs text-amber-600 font-semibold bg-amber-50 rounded-full px-2 py-0.5">
-                      <Flame size={9} weight="fill" />
-                      <span>{post.streakCount}</span>
-                    </div>
+                    <p className="text-[15px] text-zinc-700 leading-relaxed">{post.content}</p>
                   </div>
-                  <p className="text-[15px] text-zinc-700 leading-relaxed">{post.content}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="bg-white border border-zinc-100 rounded-3xl p-10 text-center">
@@ -651,7 +762,7 @@ export default function ProfilePage() {
             <div className="text-5xl">{rank.emoji}</div>
             <div className="flex-1">
               <div className={`text-lg font-bold tracking-tight ${rank.textColor}`}>{rank.name}</div>
-              <div className={`text-sm ${rank.textColor} opacity-70`}>{earnedCount} medals earned</div>
+              <div className={`text-sm ${rank.textColor} opacity-70`}>{earnedCount} of {totalMedals} medals earned</div>
               {nextRank && (
                 <div className="mt-2">
                   <div className="h-1.5 bg-black/10 rounded-full overflow-hidden">
@@ -665,20 +776,43 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {/* Earned medals showcase */}
+          {medals.filter(m => !m.locked).length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3">Earned</h4>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {medals.filter(m => !m.locked).map((medal) => {
+                  const s = RARITY_STYLES[medal.rarity]
+                  return (
+                    <div
+                      key={medal.id}
+                      className={`flex items-center gap-1.5 ${s.bg} ${s.border} border rounded-full px-3 py-1.5 ${s.glow}`}
+                      title={medal.description}
+                    >
+                      <span className="text-lg">{medal.emoji}</span>
+                      <span className={`text-xs font-bold ${s.text}`}>{medal.title}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Medal categories */}
-          {(["founding", "streak", "challenge", "meetup", "social"] as const).map((cat) => {
+          {(["founding", "streak", "milestone", "challenge", "meetup", "social", "exploration", "consistency"] as MedalCategory[]).map((cat) => {
             const catMedals = medals.filter((m) => m.category === cat)
             if (!catMedals.length) return null
-            const catLabel: Record<string, string> = {
-              founding: "Founding",
-              streak: "Streaks",
-              challenge: "Challenges",
-              meetup: "Meetups",
-              social: "Community",
-            }
+            const catInfo = CATEGORY_LABELS[cat]
+            const earnedInCat = catMedals.filter(m => !m.locked).length
             return (
               <div key={cat} className="mb-6">
-                <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3">{catLabel[cat]}</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <span>{catInfo.emoji}</span>
+                    <span>{catInfo.label}</span>
+                  </h4>
+                  <span className="text-[10px] text-zinc-300 font-medium">{earnedInCat}/{catMedals.length}</span>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   {catMedals.map((medal) => {
                     const s = RARITY_STYLES[medal.rarity]
@@ -691,17 +825,21 @@ export default function ProfilePage() {
                             : "bg-zinc-50 border-zinc-100 opacity-40 grayscale"
                         }`}
                       >
-                        <div className="text-3xl mb-2">{medal.emoji}</div>
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="text-3xl">{medal.emoji}</div>
+                          <div className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                            !medal.locked ? `${s.bg} ${s.text} border ${s.border}` : "bg-zinc-100 text-zinc-300"
+                          }`}>
+                            {s.label}
+                          </div>
+                        </div>
                         <div className={`text-xs font-bold mb-0.5 ${!medal.locked ? s.text : "text-zinc-400"}`}>
                           {medal.title}
                         </div>
                         <div className="text-[11px] text-zinc-400 leading-snug">{medal.description}</div>
-                        <div className={`mt-2 text-[10px] font-semibold uppercase tracking-wider ${!medal.locked ? s.text : "text-zinc-300"}`}>
-                          {s.label}
-                        </div>
                         {!medal.locked && medal.earnedAt && (
-                          <div className="text-[10px] text-zinc-300 mt-0.5">
-                            {new Date(medal.earnedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          <div className="text-[10px] text-zinc-300 mt-1.5">
+                            Earned {new Date(medal.earnedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                           </div>
                         )}
                       </div>

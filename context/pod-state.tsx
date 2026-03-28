@@ -1,7 +1,8 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react"
-import { MY_POD_IDS } from "@/lib/data"
+import { createClient } from "@/lib/supabase/client"
+import { useSession } from "@/app/context/session"
 import type { RsvpStatus, Pod } from "@/lib/data"
 
 export type CreatedPod = Omit<Pod, "podMembers" | "recentCheckins" | "events" | "pendingApplications"> & {
@@ -22,183 +23,354 @@ export interface StoredCheckin {
 
 interface PodStateData {
   joinedPodIds: string[]
-  acceptedApps: Record<string, string[]>   // podId → acceptedAppIds[]
-  declinedApps: Record<string, string[]>   // podId → declinedAppIds[]
-  rsvps: Record<string, Record<string, RsvpStatus>>  // podId → eventId → status
-  checkins: StoredCheckin[]
   createdPods: CreatedPod[]
-  sentApplications: string[]               // podIds user has applied to
-  reviewedApps: Record<string, string[]>   // podId → dismissed appIds (accepted or declined)
+  rsvps: Record<string, Record<string, RsvpStatus>>
+  checkins: StoredCheckin[]
 }
 
 interface PodStateContext extends PodStateData {
+  loading: boolean
   isMember: (podId: string) => boolean
-  joinPod: (podId: string) => void
-  acceptApp: (podId: string, appId: string) => void
-  declineApp: (podId: string, appId: string) => void
-  setRsvp: (podId: string, eventId: string, status: RsvpStatus) => void
-  getRsvp: (podId: string, eventId: string) => RsvpStatus | undefined
-  isAppAccepted: (podId: string, appId: string) => boolean
-  isAppDeclined: (podId: string, appId: string) => boolean
-  postCheckin: (checkin: Omit<StoredCheckin, "id" | "postedAt">) => void
-  createPod: (pod: CreatedPod) => void
+  joinPod: (podId: string) => Promise<void>
+  postCheckin: (checkin: Omit<StoredCheckin, "id" | "postedAt">) => Promise<void>
+  createPod: (pod: Omit<CreatedPod, "createdByYou">) => Promise<void>
   findPod: (podId: string) => CreatedPod | undefined
-  sendApplication: (podId: string) => void
+  sendApplication: (podId: string, message?: string) => Promise<void>
   hasApplied: (podId: string) => boolean
-  reviewApp: (podId: string, appId: string) => void
-  isAppReviewed: (podId: string, appId: string) => boolean
+  setRsvp: (podId: string, eventId: string, status: RsvpStatus) => Promise<void>
+  getRsvp: (podId: string, eventId: string) => RsvpStatus | undefined
+  acceptApp: (appId: string) => Promise<void>
+  declineApp: (appId: string) => Promise<void>
+  reviewApp: (appId: string) => void
+  isAppReviewed: (appId: string) => boolean
 }
 
 const Ctx = createContext<PodStateContext | null>(null)
 
-const STORAGE_KEY = "common_pod_state"
-
-function load(): PodStateData {
-  const empty: PodStateData = { joinedPodIds: [], acceptedApps: {}, declinedApps: {}, rsvps: {}, checkins: [], createdPods: [], sentApplications: [], reviewedApps: {} }
-  if (typeof window === "undefined") return empty
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return { ...empty, ...JSON.parse(raw) }
-  } catch {}
-  return empty
-}
-
-function save(data: PodStateData) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) } catch {}
+const EMPTY_STATE: PodStateData = {
+  joinedPodIds: [],
+  createdPods: [],
+  rsvps: {},
+  checkins: [],
 }
 
 export function PodStateProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<PodStateData>(load)
+  const { user, loading: sessionLoading } = useSession()
+  const [state, setState] = useState<PodStateData>(EMPTY_STATE)
+  const [loading, setLoading] = useState(true)
+  const [reviewedApps, setReviewedApps] = useState<Set<string>>(new Set())
+  const supabase = createClient()
 
-  // Persist any change to localStorage
-  useEffect(() => { save(state) }, [state])
+  // Fetch user's pod memberships and created pods
+  useEffect(() => {
+    if (sessionLoading) return
+
+    if (!user) {
+      setState(EMPTY_STATE)
+      setLoading(false)
+      return
+    }
+
+    const fetchPodData = async () => {
+      try {
+        // Fetch pod memberships
+        const { data: memberships } = await supabase
+          .from("pod_members")
+          .select("pod_id")
+          .eq("user_id", user.id)
+
+        const joinedIds = (memberships || []).map((m: any) => m.pod_id)
+
+        // Fetch created pods
+        const { data: created } = await supabase
+          .from("pods")
+          .select("*")
+          .eq("created_by", user.id)
+
+        // Fetch user's checkins
+        const { data: checkins } = await supabase
+          .from("checkins")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+
+        setState({
+          joinedPodIds: joinedIds,
+          createdPods: (created || []).map((p: any) => ({
+            ...p,
+            createdByYou: true,
+            podMembers: [],
+            recentCheckins: [],
+          })),
+          rsvps: {},
+          checkins: (checkins || []).map((c: any) => ({
+            id: c.id,
+            podId: c.pod_id,
+            content: c.content,
+            visibility: c.visibility,
+            streakCount: c.streak_count,
+            postedAt: c.created_at,
+            photo: c.image_url,
+          })),
+        })
+      } catch (err) {
+        console.error("Failed to fetch pod data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPodData()
+  }, [user, sessionLoading, supabase])
 
   const isMember = useCallback((podId: string) =>
-    MY_POD_IDS.includes(podId) ||
     state.joinedPodIds.includes(podId) ||
     state.createdPods.some((p) => p.id === podId),
     [state.joinedPodIds, state.createdPods]
   )
 
-  const joinPod = useCallback((podId: string) => {
-    setState((prev) => {
-      if (prev.joinedPodIds.includes(podId)) return prev
-      return { ...prev, joinedPodIds: [...prev.joinedPodIds, podId] }
-    })
-  }, [])
+  const joinPod = useCallback(async (podId: string) => {
+    if (!user) throw new Error("No user logged in")
 
-  const acceptApp = useCallback((podId: string, appId: string) => {
-    setState((prev) => ({
-      ...prev,
-      acceptedApps: {
-        ...prev.acceptedApps,
-        [podId]: [...(prev.acceptedApps[podId] ?? []), appId],
-      },
-      // Remove from declined if re-reviewed
-      declinedApps: {
-        ...prev.declinedApps,
-        [podId]: (prev.declinedApps[podId] ?? []).filter((id) => id !== appId),
-      },
-    }))
-  }, [])
+    try {
+      const { error } = await supabase
+        .from("pod_members")
+        .insert([{ pod_id: podId, user_id: user.id }])
 
-  const declineApp = useCallback((podId: string, appId: string) => {
-    setState((prev) => ({
-      ...prev,
-      declinedApps: {
-        ...prev.declinedApps,
-        [podId]: [...(prev.declinedApps[podId] ?? []), appId],
-      },
-      acceptedApps: {
-        ...prev.acceptedApps,
-        [podId]: (prev.acceptedApps[podId] ?? []).filter((id) => id !== appId),
-      },
-    }))
-  }, [])
+      if (error) throw error
 
-  const setRsvp = useCallback((podId: string, eventId: string, status: RsvpStatus) => {
-    setState((prev) => ({
-      ...prev,
-      rsvps: {
-        ...prev.rsvps,
-        [podId]: {
-          ...(prev.rsvps[podId] ?? {}),
-          [eventId]: status,
-        },
-      },
-    }))
-  }, [])
+      setState((prev) => ({
+        ...prev,
+        joinedPodIds: [...new Set([...prev.joinedPodIds, podId])],
+      }))
+    } catch (err) {
+      console.error("Failed to join pod:", err)
+      throw err
+    }
+  }, [user, supabase])
 
-  const getRsvp = useCallback((podId: string, eventId: string): RsvpStatus | undefined => {
-    return state.rsvps[podId]?.[eventId]
-  }, [state.rsvps])
+  const postCheckin = useCallback(async (checkin: Omit<StoredCheckin, "id" | "postedAt">) => {
+    if (!user) throw new Error("No user logged in")
 
-  const isAppAccepted = useCallback((podId: string, appId: string) =>
-    (state.acceptedApps[podId] ?? []).includes(appId), [state.acceptedApps])
+    try {
+      const { data, error } = await supabase
+        .from("checkins")
+        .insert([{
+          pod_id: checkin.podId,
+          user_id: user.id,
+          content: checkin.content,
+          visibility: checkin.visibility,
+          streak_count: checkin.streakCount,
+          image_url: checkin.photo || null,
+        }])
+        .select()
+        .single()
 
-  const isAppDeclined = useCallback((podId: string, appId: string) =>
-    (state.declinedApps[podId] ?? []).includes(appId), [state.declinedApps])
+      if (error) throw error
 
-  const postCheckin = useCallback((checkin: Omit<StoredCheckin, "id" | "postedAt">) => {
-    setState((prev) => ({
-      ...prev,
-      checkins: [
-        { ...checkin, id: `ci_${Date.now()}`, postedAt: new Date().toISOString() },
-        ...prev.checkins,
-      ],
-    }))
-  }, [])
+      const newCheckin: StoredCheckin = {
+        id: data.id,
+        podId: data.pod_id,
+        content: data.content,
+        visibility: data.visibility,
+        streakCount: data.streak_count,
+        postedAt: data.created_at,
+        photo: data.image_url,
+      }
 
-  const createPod = useCallback((pod: CreatedPod) => {
-    setState((prev) => ({
-      ...prev,
-      createdPods: [pod, ...prev.createdPods],
-    }))
-  }, [])
+      setState((prev) => ({
+        ...prev,
+        checkins: [newCheckin, ...prev.checkins],
+      }))
+    } catch (err) {
+      console.error("Failed to post checkin:", err)
+      throw err
+    }
+  }, [user, supabase])
+
+  const createPod = useCallback(async (pod: Omit<CreatedPod, "createdByYou">) => {
+    if (!user) throw new Error("No user logged in")
+
+    try {
+      const { data: created, error: podError } = await supabase
+        .from("pods")
+        .insert([{
+          name: pod.name,
+          description: pod.description,
+          type: pod.type,
+          category: pod.category,
+          cadence: pod.cadence,
+          visibility: pod.visibility,
+          location: pod.location,
+          max_members: pod.maxMembers || null,
+          image_url: (pod as any).imageUrl || null,
+          created_by: user.id,
+        }])
+        .select()
+        .single()
+
+      if (podError) throw podError
+
+      // Add creator as admin member
+      await supabase
+        .from("pod_members")
+        .insert([{
+          pod_id: created.id,
+          user_id: user.id,
+          is_admin: true,
+        }])
+
+      const newPod: CreatedPod = {
+        ...pod,
+        id: created.id,
+        createdByYou: true,
+        podMembers: [],
+        recentCheckins: [],
+      }
+
+      setState((prev) => ({
+        ...prev,
+        createdPods: [newPod, ...prev.createdPods],
+        joinedPodIds: [...new Set([...prev.joinedPodIds, created.id])],
+      }))
+    } catch (err) {
+      console.error("Failed to create pod:", err)
+      throw err
+    }
+  }, [user, supabase])
 
   const findPod = useCallback((podId: string): CreatedPod | undefined => {
     return state.createdPods.find((p) => p.id === podId)
   }, [state.createdPods])
 
-  const sendApplication = useCallback((podId: string) => {
-    setState((prev) => {
-      if (prev.sentApplications.includes(podId)) return prev
-      return { ...prev, sentApplications: [...prev.sentApplications, podId] }
-    })
+  const [appliedPodIds, setAppliedPodIds] = useState<Set<string>>(new Set())
+
+  // Fetch applied pods on mount
+  useEffect(() => {
+    if (!user) return
+    const fetchApplied = async () => {
+      const { data } = await supabase
+        .from("pod_applications")
+        .select("pod_id")
+        .eq("user_id", user.id)
+      if (data) {
+        setAppliedPodIds(new Set(data.map((a: any) => a.pod_id)))
+      }
+    }
+    fetchApplied()
+  }, [user, supabase])
+
+  const sendApplication = useCallback(async (podId: string, message?: string) => {
+    if (!user) throw new Error("No user logged in")
+
+    try {
+      const { error } = await supabase
+        .from("pod_applications")
+        .insert([{ pod_id: podId, user_id: user.id, message: message || null }])
+
+      if (error) throw error
+
+      setAppliedPodIds((prev) => new Set([...Array.from(prev), podId]))
+    } catch (err) {
+      console.error("Failed to send application:", err)
+      throw err
+    }
+  }, [user, supabase])
+
+  const hasApplied = useCallback((podId: string) => {
+    return appliedPodIds.has(podId)
+  }, [appliedPodIds])
+
+  const setRsvp = useCallback(async (podId: string, eventId: string, status: RsvpStatus) => {
+    if (!user) throw new Error("No user logged in")
+
+    try {
+      await supabase
+        .from("event_rsvps")
+        .upsert([{ event_id: eventId, user_id: user.id, status }])
+
+      setState((prev) => ({
+        ...prev,
+        rsvps: {
+          ...prev.rsvps,
+          [podId]: {
+            ...(prev.rsvps[podId] ?? {}),
+            [eventId]: status,
+          },
+        },
+      }))
+    } catch (err) {
+      console.error("Failed to set RSVP:", err)
+      throw err
+    }
+  }, [user, supabase])
+
+  const getRsvp = useCallback((podId: string, eventId: string): RsvpStatus | undefined => {
+    return state.rsvps[podId]?.[eventId]
+  }, [state.rsvps])
+
+  const acceptApp = useCallback(async (appId: string) => {
+    try {
+      // Get the application details first
+      const { data: app } = await supabase
+        .from("pod_applications")
+        .select("pod_id, user_id")
+        .eq("id", appId)
+        .single()
+
+      if (!app) throw new Error("Application not found")
+
+      // Update application status
+      await supabase
+        .from("pod_applications")
+        .update({ status: "accepted" })
+        .eq("id", appId)
+
+      // Add user to pod_members (trigger will update member_count)
+      await supabase
+        .from("pod_members")
+        .insert([{ pod_id: app.pod_id, user_id: app.user_id }])
+    } catch (err) {
+      console.error("Failed to accept application:", err)
+      throw err
+    }
+  }, [supabase])
+
+  const declineApp = useCallback(async (appId: string) => {
+    try {
+      await supabase
+        .from("pod_applications")
+        .update({ status: "declined" })
+        .eq("id", appId)
+    } catch (err) {
+      console.error("Failed to decline application:", err)
+      throw err
+    }
+  }, [supabase])
+
+  const reviewApp = useCallback((appId: string) => {
+    setReviewedApps((prev) => new Set([...prev, appId]))
   }, [])
 
-  const hasApplied = useCallback((podId: string) =>
-    state.sentApplications.includes(podId), [state.sentApplications])
-
-  const reviewApp = useCallback((podId: string, appId: string) => {
-    setState((prev) => ({
-      ...prev,
-      reviewedApps: {
-        ...prev.reviewedApps,
-        [podId]: [...(prev.reviewedApps[podId] ?? []), appId],
-      },
-    }))
-  }, [])
-
-  const isAppReviewed = useCallback((podId: string, appId: string) =>
-    (state.reviewedApps[podId] ?? []).includes(appId), [state.reviewedApps])
+  const isAppReviewed = useCallback((appId: string) => {
+    return reviewedApps.has(appId)
+  }, [reviewedApps])
 
   return (
     <Ctx.Provider value={{
       ...state,
+      loading,
       isMember,
       joinPod,
-      acceptApp,
-      declineApp,
-      setRsvp,
-      getRsvp,
-      isAppAccepted,
-      isAppDeclined,
       postCheckin,
       createPod,
       findPod,
       sendApplication,
       hasApplied,
+      setRsvp,
+      getRsvp,
+      acceptApp,
+      declineApp,
       reviewApp,
       isAppReviewed,
     }}>
