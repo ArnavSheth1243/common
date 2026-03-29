@@ -10,36 +10,36 @@ import { useScreenSize } from "@/components/hooks/use-screen-size"
 // Extend these arrays to 200+ items — they're designed to be CMS-replaceable.
 
 const ACTIVITIES = [
-  "run",
-  "read",
-  "cook",
-  "meditate",
-  "journal",
-  "lift weights",
-  "swim",
-  "study",
-  "draw",
-  "write",
-  "stretch",
-  "walk",
-  "code",
-  "practice guitar",
-  "do yoga",
-  "meal prep",
-  "learn a language",
-  "paint",
-  "rock climb",
-  "cycle",
-  "hike",
-  "practice piano",
-  "cold plunge",
-  "wake up early",
-  "go screen-free",
-  "dance",
-  "do breathwork",
-  "garden",
-  "volunteer",
-  "practice mindfulness",
+  "run with",
+  "read with",
+  "cook with",
+  "meditate with",
+  "journal with",
+  "lift weights with",
+  "swim with",
+  "study with",
+  "draw with",
+  "write with",
+  "stretch with",
+  "walk with",
+  "code with",
+  "practice guitar with",
+  "do yoga with",
+  "meal prep with",
+  "learn a language with",
+  "paint with",
+  "rock climb with",
+  "cycle with",
+  "hike with",
+  "practice piano with",
+  "cold plunge with",
+  "wake up early with",
+  "go screen-free with",
+  "dance with",
+  "do breathwork with",
+  "garden with",
+  "volunteer with",
+  "practice mindfulness with",
 ]
 
 const CADENCES = [
@@ -158,7 +158,7 @@ export default function WelcomePage() {
   }, [])
 
   // Static fallback text for screen readers
-  const srText = "I'm looking for people to run every morning"
+  const srText = "I'm looking for people to run with every morning"
 
   return (
     <div className="min-h-[100dvh] bg-[#ede9df] flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
@@ -189,31 +189,31 @@ export default function WelcomePage() {
           {/* Screen-reader-only static sentence */}
           <p className="sr-only">{srText}</p>
 
-          <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
-            I&apos;m looking for people to{" "}
-
-            {/* Activity rotator */}
-            <span
-              className="inline-block text-left align-bottom"
-              style={activityMeasure.maxWidth ? { minWidth: activityMeasure.maxWidth + 4 } : undefined}
-            >
-              <TextRotator
-                items={ACTIVITIES}
-                intervalMs={2500}
-                className="text-amber-500"
-              />
-            </span>{" "}
-
-            {/* Cadence rotator */}
-            <span
-              className="inline-block text-left align-bottom"
-              style={cadenceMeasure.maxWidth ? { minWidth: cadenceMeasure.maxWidth + 4 } : undefined}
-            >
-              <TextRotator
-                items={CADENCES}
-                intervalMs={3200}
-                className="text-forest-500"
-              />
+          <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-4xl mx-auto">
+            <span className="block">I&apos;m looking for people to</span>
+            <span className="flex items-baseline justify-center gap-[0.3em] whitespace-nowrap">
+              {/* Activity rotator (includes "with") */}
+              <span
+                className="inline-block text-left"
+                style={activityMeasure.maxWidth ? { minWidth: activityMeasure.maxWidth + 4 } : undefined}
+              >
+                <TextRotator
+                  items={ACTIVITIES}
+                  intervalMs={2500}
+                  className="text-amber-500"
+                />
+              </span>
+              {/* Cadence rotator */}
+              <span
+                className="inline-block text-left"
+                style={cadenceMeasure.maxWidth ? { minWidth: cadenceMeasure.maxWidth + 4 } : undefined}
+              >
+                <TextRotator
+                  items={CADENCES}
+                  intervalMs={3200}
+                  className="text-forest-500"
+                />
+              </span>
             </span>
           </h1>
 
