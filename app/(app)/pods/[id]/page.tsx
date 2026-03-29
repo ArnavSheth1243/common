@@ -282,11 +282,12 @@ export default function PodDetailPage() {
         .select("user_id, current_streak, is_admin")
         .eq("pod_id", podId)
 
-      // Fetch pod checkins
+      // Fetch pod checkins (exclude private — those are only for the author)
       const { data: checkins } = await supabase
         .from("checkins")
         .select("*, checkin_likes(user_id), checkin_comments(id, user_id, content, created_at)")
         .eq("pod_id", podId)
+        .in("visibility", ["public", "pod"])
         .order("created_at", { ascending: false })
         .limit(20)
 

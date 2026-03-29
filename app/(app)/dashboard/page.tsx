@@ -478,8 +478,20 @@ export default function DashboardPage() {
           .order("member_count", { ascending: false })
           .limit(10)
 
+        // Filter checkins by visibility:
+        // - public: visible to everyone
+        // - pod: visible only to pod members
+        // - private: visible only to the author
+        const myPodIdSet = new Set((memberships || []).map((m: any) => m.pod_id))
+        const visibleCheckins = (checkins || []).filter((c: any) => {
+          if (c.visibility === "public" || !c.visibility) return true
+          if (c.visibility === "pod") return myPodIdSet.has(c.pod_id) || c.user_id === user.id
+          if (c.visibility === "private") return c.user_id === user.id
+          return true
+        })
+
         // Build feed items
-        const items: FeedItem[] = (checkins || []).map((c: any) => {
+        const items: FeedItem[] = visibleCheckins.map((c: any) => {
           const authorProfile = profileMap[c.user_id] || { name: "Unknown User", location: "" }
           const displayName = authorProfile.name
           const initials = displayName

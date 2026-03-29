@@ -37,6 +37,9 @@ import {
   PersonSimpleRun,
   Brain,
   Star,
+  Bell,
+  BellRinging,
+  ChatCircle,
 } from "@phosphor-icons/react"
 import { useUserProfile } from "@/app/context/user-profile"
 import type { PodCategory } from "@/lib/data"
@@ -200,7 +203,13 @@ const REFERRAL_OPTIONS = [
   { value: "other", label: "Other" },
 ]
 
-const TOTAL_STEPS = 9
+const REMINDER_TIMING_OPTIONS = [
+  { value: "day_before",   label: "Day before" },
+  { value: "morning_of",   label: "Morning of" },
+  { value: "1_hour_before", label: "1 hour before" },
+] as const
+
+const TOTAL_STEPS = 10
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -228,6 +237,10 @@ export default function OnboardingPage() {
   const [activeTourCard, setActiveTourCard] = useState(0)
   const [suggestedPods, setSuggestedPods] = useState<any[]>([])
   const [igHandle, setIgHandle] = useState("")
+  const [notifEnabled, setNotifEnabled] = useState(false)
+  const [notifMessages, setNotifMessages] = useState(true)
+  const [notifPodReminders, setNotifPodReminders] = useState(true)
+  const [reminderTiming, setReminderTiming] = useState("day_before")
 
   // Fetch suggested pods based on interests
   useEffect(() => {
@@ -284,7 +297,7 @@ export default function OnboardingPage() {
     step === 4 ? interests.length > 0 :
     true
 
-  const stepLabel = ["", "Who are you?", "A bit about you", "Goals", "Interests", "How you show up", "The app", "Pod suggestions", "Almost done", "You're all set"][step] ?? ""
+  const stepLabel = ["", "Who are you?", "A bit about you", "Goals", "Interests", "How you show up", "The app", "Pod suggestions", "Almost done", "Notifications", "You're all set"][step] ?? ""
 
   if (profileLoading) {
     return (
@@ -652,8 +665,128 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* ── Step 9 — Done ─────────────────────────────────────────────────── */}
+        {/* ── Step 9 — Notifications ──────────────────────────────────────── */}
         {step === 9 && (
+          <div className="animate-fade-up">
+            <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-tight mb-2">
+              Stay in<br />the loop
+            </h1>
+            <p className="text-zinc-400 mb-8 text-[15px]">
+              Get notified when it matters. You can always change this later.
+            </p>
+
+            {/* Enable notifications CTA */}
+            {!notifEnabled ? (
+              <button
+                onClick={async () => {
+                  if ("Notification" in window) {
+                    const perm = await Notification.requestPermission()
+                    if (perm === "granted") {
+                      setNotifEnabled(true)
+                      localStorage.setItem("notif_enabled", "true")
+                      localStorage.setItem("notif_messages", "true")
+                      localStorage.setItem("notif_pod_reminders", "true")
+                      localStorage.setItem("notif_reminder_timing", "day_before")
+                    }
+                  }
+                }}
+                className="w-full flex items-center gap-4 bg-zinc-900 text-white rounded-3xl p-5 mb-4 transition-all active:scale-[0.98]"
+              >
+                <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <BellRinging size={24} weight="fill" className="text-white" />
+                </div>
+                <div className="text-left flex-1">
+                  <div className="text-sm font-bold">Enable notifications</div>
+                  <div className="text-xs text-zinc-400 mt-0.5">Messages, pod reminders, and more</div>
+                </div>
+                <ArrowRight size={16} className="text-zinc-500" />
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 mb-2">
+                  <CheckCircle size={20} weight="fill" className="text-emerald-500" />
+                  <span className="text-sm font-semibold text-emerald-700">Notifications enabled</span>
+                </div>
+
+                {/* Message notifications */}
+                <div className="bg-white border border-zinc-100 rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+                      <ChatCircle size={18} weight="fill" className="text-blue-500" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-zinc-900">Messages</div>
+                      <div className="text-[11px] text-zinc-400">When someone sends you a DM</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setNotifMessages(!notifMessages)
+                      localStorage.setItem("notif_messages", String(!notifMessages))
+                    }}
+                    className={`w-11 h-6 rounded-full transition-all duration-200 relative ${notifMessages ? "bg-amber-500" : "bg-zinc-200"}`}
+                  >
+                    <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${notifMessages ? "left-[22px]" : "left-0.5"}`} />
+                  </button>
+                </div>
+
+                {/* Pod reminders */}
+                <div className="bg-white border border-zinc-100 rounded-2xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-violet-50 rounded-xl flex items-center justify-center">
+                        <Bell size={18} weight="fill" className="text-violet-500" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-zinc-900">Pod reminders</div>
+                        <div className="text-[11px] text-zinc-400">Before pod events and check-in deadlines</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setNotifPodReminders(!notifPodReminders)
+                        localStorage.setItem("notif_pod_reminders", String(!notifPodReminders))
+                      }}
+                      className={`w-11 h-6 rounded-full transition-all duration-200 relative ${notifPodReminders ? "bg-amber-500" : "bg-zinc-200"}`}
+                    >
+                      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${notifPodReminders ? "left-[22px]" : "left-0.5"}`} />
+                    </button>
+                  </div>
+                  {notifPodReminders && (
+                    <div className="mt-3 pt-3 border-t border-zinc-100">
+                      <p className="text-[11px] font-semibold text-zinc-500 mb-2">When should we remind you?</p>
+                      <div className="flex gap-2">
+                        {REMINDER_TIMING_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            onClick={() => {
+                              setReminderTiming(opt.value)
+                              localStorage.setItem("notif_reminder_timing", opt.value)
+                            }}
+                            className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                              reminderTiming === opt.value
+                                ? "border-zinc-900 bg-zinc-900 text-white"
+                                : "border-zinc-200 bg-zinc-50 text-zinc-500 hover:border-zinc-300"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-zinc-300 mt-4 text-center">
+              You can change notification settings anytime in your profile.
+            </p>
+          </div>
+        )}
+
+        {/* ── Step 10 — Done ────────────────────────────────────────────────── */}
+        {step === 10 && (
           <div className="animate-fade-up text-center">
             <div className="w-20 h-20 bg-amber-50 border-2 border-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle size={36} weight="fill" className="text-amber-500" />
@@ -711,9 +844,9 @@ export default function OnboardingPage() {
 
             <div className="flex items-center gap-3">
               {/* Skip on optional steps */}
-              {[2, 6, 7, 8].includes(step) && (
+              {[2, 6, 7, 8, 9].includes(step) && (
                 <button
-                  onClick={step === 7 ? () => setStep(8) : step === 8 ? () => setStep(9) : handleNext}
+                  onClick={step === 7 ? () => setStep(8) : step === 8 ? () => setStep(9) : step === 9 ? () => setStep(10) : handleNext}
                   className="text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
                 >
                   Skip

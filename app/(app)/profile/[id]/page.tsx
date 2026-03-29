@@ -91,7 +91,17 @@ export default function MemberProfilePage() {
       const pods = (podMemberships || []).map((pm: any) => pm.pods).filter(Boolean)
       setSharedPods(pods)
 
-      // Fetch their check-ins
+      // Fetch viewer's pod memberships for visibility filtering
+      let viewerPodIds = new Set<string>()
+      if (user) {
+        const { data: viewerMemberships } = await supabase
+          .from("pod_members")
+          .select("pod_id")
+          .eq("user_id", user.id)
+        viewerPodIds = new Set((viewerMemberships || []).map((m: any) => m.pod_id))
+      }
+
+      // Fetch their check-ins (exclude private)
       const { data: checkins } = await supabase
         .from("checkins")
         .select("*, pods(id, name)")
@@ -100,7 +110,13 @@ export default function MemberProfilePage() {
         .order("created_at", { ascending: false })
 
       if (checkins) {
-        setAllCheckins(checkins.map((c: any) => ({
+        // Filter pod-only checkins to shared pods only
+        const visibleCheckins = checkins.filter((c: any) => {
+          if (c.visibility === "public" || !c.visibility) return true
+          if (c.visibility === "pod") return viewerPodIds.has(c.pod_id)
+          return false
+        })
+        setAllCheckins(visibleCheckins.map((c: any) => ({
           id: c.id,
           content: c.content,
           time: new Date(c.created_at).toLocaleString(),

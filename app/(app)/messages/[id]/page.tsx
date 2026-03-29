@@ -25,7 +25,7 @@ export default function ConversationPage() {
   const router = useRouter()
   const conversationId = params.id as string
   const { user } = useSession()
-  const { conversations, getMessages, sendMessage } = useMessages()
+  const { conversations, getMessages, sendMessage, markConversationRead } = useMessages()
 
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,6 +51,7 @@ export default function ConversationPage() {
       }
     }
     load()
+    markConversationRead(conversationId)
 
     // Poll for new messages every 5s
     const interval = setInterval(async () => {

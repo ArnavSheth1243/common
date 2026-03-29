@@ -1,19 +1,164 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import Link from "next/link"
 import { ArrowRight } from "@phosphor-icons/react"
 import { PixelTrail } from "@/components/ui/pixel-trail"
 import { useScreenSize } from "@/components/hooks/use-screen-size"
 
+// ─── Data ────────────────────────────────────────────────────────────────────
+// Extend these arrays to 200+ items — they're designed to be CMS-replaceable.
+
+const ACTIVITIES = [
+  "run",
+  "read",
+  "cook",
+  "meditate",
+  "journal",
+  "lift weights",
+  "swim",
+  "study",
+  "draw",
+  "write",
+  "stretch",
+  "walk",
+  "code",
+  "practice guitar",
+  "do yoga",
+  "meal prep",
+  "learn a language",
+  "paint",
+  "rock climb",
+  "cycle",
+  "hike",
+  "practice piano",
+  "cold plunge",
+  "wake up early",
+  "go screen-free",
+  "dance",
+  "do breathwork",
+  "garden",
+  "volunteer",
+  "practice mindfulness",
+]
+
+const CADENCES = [
+  "every morning",
+  "3× a week",
+  "daily",
+  "every evening",
+  "on weekends",
+  "twice a week",
+  "every other day",
+  "once a week",
+  "every weekday",
+  "5 days a week",
+  "before work",
+  "after work",
+  "on Sundays",
+  "once a month",
+  "every Monday",
+  "at sunrise",
+  "4× a week",
+  "every night",
+  "on Saturdays",
+  "twice a month",
+  "every lunchtime",
+  "before bed",
+  "on rest days",
+  "every Friday",
+]
+
+// ─── Rotator ─────────────────────────────────────────────────────────────────
+
+function TextRotator({
+  items,
+  intervalMs,
+  className,
+}: {
+  items: string[]
+  intervalMs: number
+  className?: string
+}) {
+  const [index, setIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const containerRef = useRef<HTMLSpanElement>(null)
+
+  // Detect reduced motion preference
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    setPrefersReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+
+  // Rotate through items
+  useEffect(() => {
+    if (prefersReducedMotion) return
+    const id = setInterval(() => {
+      setIsTransitioning(true)
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % items.length)
+        setIsTransitioning(false)
+      }, 280) // half of the crossfade duration
+    }, intervalMs)
+    return () => clearInterval(id)
+  }, [items.length, intervalMs, prefersReducedMotion])
+
+  return (
+    <span
+      ref={containerRef}
+      className={`inline-block transition-all duration-[560ms] ease-spring ${
+        isTransitioning ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
+      } ${className ?? ""}`}
+      // Screen readers see the full sentence; the rotating text is decorative enhancement
+      aria-hidden="true"
+    >
+      {items[index]}
+    </span>
+  )
+}
+
+// ─── Measure widest item to prevent layout shift ─────────────────────────────
+
+function useMaxWidth(items: string[]) {
+  const measureRef = useRef<HTMLSpanElement>(null)
+  const [maxWidth, setMaxWidth] = useState<number | undefined>(undefined)
+
+  useEffect(() => {
+    if (!measureRef.current) return
+    const el = measureRef.current
+    let max = 0
+    const original = el.textContent
+    for (const item of items) {
+      el.textContent = item
+      max = Math.max(max, el.offsetWidth)
+    }
+    el.textContent = original
+    setMaxWidth(max)
+  }, [items])
+
+  return { measureRef, maxWidth }
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
 export default function WelcomePage() {
   const [visible, setVisible] = useState(false)
   const screenSize = useScreenSize()
+
+  const activityMeasure = useMaxWidth(ACTIVITIES)
+  const cadenceMeasure = useMaxWidth(CADENCES)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 120)
     return () => clearTimeout(t)
   }, [])
+
+  // Static fallback text for screen readers
+  const srText = "I'm looking for people to run every morning"
 
   return (
     <div className="min-h-[100dvh] bg-[#ede9df] flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
@@ -36,14 +181,54 @@ export default function WelcomePage() {
           <span className="text-xl font-bold text-zinc-900 tracking-tight">Common</span>
         </div>
 
-        {/* Headline */}
+        {/* ── New Headline ── */}
         <div
           className="transition-all duration-700 delay-100"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(14px)" }}
         >
-<h1 className="text-[42px] md:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.05] mb-5 max-w-[16ch] mx-auto">
-            Whatever you&apos;re looking for, we&apos;ve got a pod for you.
+          {/* Screen-reader-only static sentence */}
+          <p className="sr-only">{srText}</p>
+
+          <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
+            I&apos;m looking for people to{" "}
+
+            {/* Activity rotator */}
+            <span
+              className="inline-block text-left align-bottom"
+              style={activityMeasure.maxWidth ? { minWidth: activityMeasure.maxWidth + 4 } : undefined}
+            >
+              <TextRotator
+                items={ACTIVITIES}
+                intervalMs={2500}
+                className="text-amber-500"
+              />
+            </span>{" "}
+
+            {/* Cadence rotator */}
+            <span
+              className="inline-block text-left align-bottom"
+              style={cadenceMeasure.maxWidth ? { minWidth: cadenceMeasure.maxWidth + 4 } : undefined}
+            >
+              <TextRotator
+                items={CADENCES}
+                intervalMs={3200}
+                className="text-forest-500"
+              />
+            </span>
           </h1>
+
+          {/* Hidden measurement spans (off-screen, same font styling as h1) */}
+          <span
+            ref={activityMeasure.measureRef}
+            className="absolute -left-[9999px] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight whitespace-nowrap"
+            aria-hidden="true"
+          />
+          <span
+            ref={cadenceMeasure.measureRef}
+            className="absolute -left-[9999px] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight whitespace-nowrap"
+            aria-hidden="true"
+          />
+
           <p className="text-lg text-zinc-500 leading-relaxed max-w-[34ch] mx-auto mb-12">
             Join a pod, pursue your passions together.
           </p>

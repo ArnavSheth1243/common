@@ -27,14 +27,27 @@ export interface Message {
 interface MessagesContextValue {
   conversations: Conversation[]
   loading: boolean
+  unreadCount: number
   sendMessage: (conversationId: string, content: string) => Promise<void>
   getMessages: (conversationId: string) => Promise<Message[]>
   startConversation: (otherUserId: string) => Promise<string>
   findExistingConversation: (otherUserId: string) => string | undefined
   refreshConversations: () => Promise<void>
+  markConversationRead: (conversationId: string) => void
 }
 
 const MessagesContext = createContext<MessagesContextValue | null>(null)
+
+function getReadTimestamps(): Record<string, string> {
+  if (typeof window === "undefined") return {}
+  try { return JSON.parse(localStorage.getItem("msg_read_at") || "{}") } catch { return {} }
+}
+
+function setReadTimestamp(conversationId: string) {
+  const ts = getReadTimestamps()
+  ts[conversationId] = new Date().toISOString()
+  localStorage.setItem("msg_read_at", JSON.stringify(ts))
+}
 
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
   const { user, loading: sessionLoading } = useSession()
@@ -81,17 +94,19 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       // Get latest message per conversation
       const { data: latestMessages } = await supabase
         .from("messages")
-        .select("conversation_id, content, created_at")
+        .select("conversation_id, content, created_at, sender_id")
         .in("conversation_id", convIds)
         .order("created_at", { ascending: false })
 
       // Build a map of latest message per conversation
-      const lastMsgMap: Record<string, { content: string; created_at: string }> = {}
+      const lastMsgMap: Record<string, { content: string; created_at: string; sender_id: string }> = {}
       for (const msg of latestMessages || []) {
         if (!lastMsgMap[msg.conversation_id]) {
           lastMsgMap[msg.conversation_id] = msg
         }
       }
+
+      const readTs = getReadTimestamps()
 
       // Build a map of other user per conversation
       const otherUserMap: Record<string, any> = {}
@@ -113,7 +128,9 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
             },
             lastMessage: lastMsg?.content,
             lastMessageAt: lastMsg?.created_at || c.updated_at,
-            unread: false,
+            unread: lastMsg
+              ? lastMsg.sender_id !== user.id && (!readTs[c.id] || new Date(lastMsg.created_at) > new Date(readTs[c.id]))
+              : false,
           }
         })
 
@@ -167,6 +184,15 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     }))
   }, [supabase])
 
+  const markConversationRead = useCallback((conversationId: string) => {
+    setReadTimestamp(conversationId)
+    setConversations((prev) =>
+      prev.map((c) => c.id === conversationId ? { ...c, unread: false } : c)
+    )
+  }, [])
+
+  const unreadCount = conversations.filter((c) => c.unread).length
+
   const findExistingConversation = useCallback((otherUserId: string): string | undefined => {
     return conversations.find((c) => c.otherUser.id === otherUserId)?.id
   }, [conversations])
@@ -207,11 +233,13 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     <MessagesContext.Provider value={{
       conversations,
       loading,
+      unreadCount,
       sendMessage,
       getMessages,
       startConversation,
       findExistingConversation,
       refreshConversations: fetchConversations,
+      markConversationRead,
     }}>
       {children}
     </MessagesContext.Provider>
