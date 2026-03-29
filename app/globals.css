@@ -85,3 +85,22 @@ img, video, iframe, svg { max-width: 100%; }
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* Hero text crossfade — GPU-accelerated, no React state jank */
+@keyframes heroFadeOut {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes heroFadeIn {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.hero-fade-out {
+  animation: heroFadeOut 0.35s ease-out forwards;
+  will-change: opacity, transform;
+}
+.hero-fade-in {
+  animation: heroFadeIn 0.35s ease-out 0.15s forwards;
+  opacity: 0;
+  will-change: opacity, transform;
+}
