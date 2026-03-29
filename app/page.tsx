@@ -71,21 +71,16 @@ const CADENCES = [
 
 // ─── Rotator ─────────────────────────────────────────────────────────────────
 
-function TextRotator({
-  items,
-  intervalMs,
-  className,
-}: {
-  items: string[]
-  intervalMs: number
-  className?: string
-}) {
+// Shared staggered rotation: activity and cadence alternate on an even beat
+// Total cycle = 3s. Activity swaps at 0s, cadence swaps at 1.5s, repeat.
+const CYCLE_MS = 3000
+const FADE_MS = 400
+
+function useStaggeredRotator(items: string[], delayMs: number) {
   const [index, setIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const containerRef = useRef<HTMLSpanElement>(null)
 
-  // Detect reduced motion preference
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
     setPrefersReducedMotion(mq.matches)
@@ -94,29 +89,52 @@ function TextRotator({
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Rotate through items
   useEffect(() => {
     if (prefersReducedMotion) return
-    const id = setInterval(() => {
+    let intervalId: ReturnType<typeof setInterval>
+
+    const swap = () => {
       setIsTransitioning(true)
       setTimeout(() => {
         setIndex((i) => (i + 1) % items.length)
         setIsTransitioning(false)
-      }, 280) // half of the crossfade duration
-    }, intervalMs)
-    return () => clearInterval(id)
-  }, [items.length, intervalMs, prefersReducedMotion])
+      }, FADE_MS / 2)
+    }
+
+    // Initial delay to stagger, then repeat every CYCLE_MS
+    const timeoutId = setTimeout(() => {
+      swap()
+      intervalId = setInterval(swap, CYCLE_MS)
+    }, delayMs)
+
+    return () => {
+      clearTimeout(timeoutId)
+      clearInterval(intervalId)
+    }
+  }, [items.length, delayMs, prefersReducedMotion])
+
+  return { text: items[index], isTransitioning }
+}
+
+function RotatingText({
+  items,
+  delayMs,
+  className,
+}: {
+  items: string[]
+  delayMs: number
+  className?: string
+}) {
+  const { text, isTransitioning } = useStaggeredRotator(items, delayMs)
 
   return (
     <span
-      ref={containerRef}
-      className={`inline-block transition-all duration-[560ms] ease-spring ${
+      className={`inline-block transition-all duration-[400ms] ease-spring ${
         isTransitioning ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
       } ${className ?? ""}`}
-      // Screen readers see the full sentence; the rotating text is decorative enhancement
       aria-hidden="true"
     >
-      {items[index]}
+      {text}
     </span>
   )
 }
@@ -168,20 +186,20 @@ export default function WelcomePage() {
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-4xl mx-auto">
             <span className="block">I&apos;m looking for people to</span>
             <span className="flex items-baseline whitespace-nowrap">
-              {/* Activity — right-aligned so it hugs the center */}
+              {/* Activity — swaps at t=0, right-aligned to hug center */}
               <span className="flex-1 text-right">
-                <TextRotator
+                <RotatingText
                   items={ACTIVITIES}
-                  intervalMs={2500}
+                  delayMs={0}
                   className="text-amber-500"
                 />
               </span>
               <span className="shrink-0">&nbsp;</span>
-              {/* Cadence — left-aligned so it hugs the center */}
+              {/* Cadence — swaps at t=1.5s, left-aligned to hug center */}
               <span className="flex-1 text-left">
-                <TextRotator
+                <RotatingText
                   items={CADENCES}
-                  intervalMs={3200}
+                  delayMs={CYCLE_MS / 2}
                   className="text-forest-500"
                 />
               </span>
