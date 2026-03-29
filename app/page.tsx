@@ -70,16 +70,16 @@ const CADENCES = [
 ]
 
 // ─── Rotator ─────────────────────────────────────────────────────────────────
+// Single orchestrator: one tick every 2s, alternates activity ↔ cadence.
 
-// Shared staggered rotation: activity and cadence alternate on an even beat
-// Total cycle = 3s. Activity swaps at 0s, cadence swaps at 1.5s, repeat.
-const CYCLE_MS = 3000
-const FADE_MS = 400
+const TICK_MS = 2000
 
-function useStaggeredRotator(items: string[], delayMs: number) {
-  const [index, setIndex] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+function useAlternatingRotator() {
+  const [activityIdx, setActivityIdx] = useState(0)
+  const [cadenceIdx, setCadenceIdx] = useState(0)
+  const [fadingSlot, setFadingSlot] = useState<"none" | "activity" | "cadence">("none")
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const tickRef = useRef(0)
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -91,52 +91,34 @@ function useStaggeredRotator(items: string[], delayMs: number) {
 
   useEffect(() => {
     if (prefersReducedMotion) return
-    let intervalId: ReturnType<typeof setInterval>
 
-    const swap = () => {
-      setIsTransitioning(true)
+    const id = setInterval(() => {
+      const isActivity = tickRef.current % 2 === 0
+      tickRef.current++
+
+      // Fade out
+      setFadingSlot(isActivity ? "activity" : "cadence")
+
+      // Swap text mid-fade, then fade back in
       setTimeout(() => {
-        setIndex((i) => (i + 1) % items.length)
-        setIsTransitioning(false)
-      }, FADE_MS / 2)
-    }
+        if (isActivity) {
+          setActivityIdx((i) => (i + 1) % ACTIVITIES.length)
+        } else {
+          setCadenceIdx((i) => (i + 1) % CADENCES.length)
+        }
+        setFadingSlot("none")
+      }, 200)
+    }, TICK_MS)
 
-    // Initial delay to stagger, then repeat every CYCLE_MS
-    const timeoutId = setTimeout(() => {
-      swap()
-      intervalId = setInterval(swap, CYCLE_MS)
-    }, delayMs)
+    return () => clearInterval(id)
+  }, [prefersReducedMotion])
 
-    return () => {
-      clearTimeout(timeoutId)
-      clearInterval(intervalId)
-    }
-  }, [items.length, delayMs, prefersReducedMotion])
-
-  return { text: items[index], isTransitioning }
-}
-
-function RotatingText({
-  items,
-  delayMs,
-  className,
-}: {
-  items: string[]
-  delayMs: number
-  className?: string
-}) {
-  const { text, isTransitioning } = useStaggeredRotator(items, delayMs)
-
-  return (
-    <span
-      className={`inline-block transition-all duration-[400ms] ease-spring ${
-        isTransitioning ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
-      } ${className ?? ""}`}
-      aria-hidden="true"
-    >
-      {text}
-    </span>
-  )
+  return {
+    activityText: ACTIVITIES[activityIdx],
+    cadenceText: CADENCES[cadenceIdx],
+    activityFading: fadingSlot === "activity",
+    cadenceFading: fadingSlot === "cadence",
+  }
 }
 
 // ─── Page ────────────────────────────────────────────────────────────────────
@@ -144,7 +126,7 @@ function RotatingText({
 export default function WelcomePage() {
   const [visible, setVisible] = useState(false)
   const screenSize = useScreenSize()
-
+  const { activityText, cadenceText, activityFading, cadenceFading } = useAlternatingRotator()
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 120)
@@ -186,22 +168,26 @@ export default function WelcomePage() {
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-4xl mx-auto">
             <span className="block">I&apos;m looking for people to</span>
             <span className="flex items-baseline whitespace-nowrap">
-              {/* Activity — swaps at t=0, right-aligned to hug center */}
               <span className="flex-1 text-right">
-                <RotatingText
-                  items={ACTIVITIES}
-                  delayMs={0}
-                  className="text-amber-500"
-                />
+                <span
+                  className={`inline-block text-amber-500 transition-all duration-[400ms] ease-spring ${
+                    activityFading ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
+                  }`}
+                  aria-hidden="true"
+                >
+                  {activityText}
+                </span>
               </span>
               <span className="shrink-0">&nbsp;</span>
-              {/* Cadence — swaps at t=1.5s, left-aligned to hug center */}
               <span className="flex-1 text-left">
-                <RotatingText
-                  items={CADENCES}
-                  delayMs={CYCLE_MS / 2}
-                  className="text-forest-500"
-                />
+                <span
+                  className={`inline-block text-forest-500 transition-all duration-[400ms] ease-spring ${
+                    cadenceFading ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
+                  }`}
+                  aria-hidden="true"
+                >
+                  {cadenceText}
+                </span>
               </span>
             </span>
           </h1>
