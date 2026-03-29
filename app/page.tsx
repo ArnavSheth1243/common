@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { ArrowRight } from "@phosphor-icons/react"
 import { PixelTrail } from "@/components/ui/pixel-trail"
@@ -68,57 +68,17 @@ const CADENCES = [
   "every Friday",
 ]
 
-// ─── Crossfade slot ──────────────────────────────────────────────────────────
-// Two stacked layers: "current" visible, "next" invisible.
-// On swap: next gets new text → crossfade via CSS animation → promote next to current.
-
-function FadeSlot({ text, className }: { text: string; className?: string }) {
-  const [displayText, setDisplayText] = useState(text)
-  const [animate, setAnimate] = useState(false)
-  const nextTextRef = useRef(text)
-
-  useEffect(() => {
-    if (text === displayText) return
-    nextTextRef.current = text
-    setAnimate(true)
-  }, [text, displayText])
-
-  const handleAnimationEnd = useCallback(() => {
-    setDisplayText(nextTextRef.current)
-    setAnimate(false)
-  }, [])
-
-  return (
-    <span className={`inline-block relative ${className ?? ""}`}>
-      {/* Current text — fades out when animating */}
-      <span
-        className={animate ? "hero-fade-out" : ""}
-        style={{ display: "inline-block" }}
-      >
-        {displayText}
-      </span>
-      {/* Next text — positioned on top, fades in */}
-      {animate && (
-        <span
-          className="hero-fade-in absolute left-0 top-0"
-          style={{ display: "inline-block", whiteSpace: "nowrap" }}
-          onAnimationEnd={handleAnimationEnd}
-        >
-          {nextTextRef.current}
-        </span>
-      )}
-    </span>
-  )
-}
-
 // ─── Orchestrator ────────────────────────────────────────────────────────────
-// Single timer. Every 2s, one slot changes. Activity → Cadence → Activity → …
+// Single timer. Every 2s one slot changes: activity → cadence → activity → …
+// Simple fade: out 300ms → swap text → in 300ms. One layer, no overlays.
 
 const TICK_MS = 2000
+const FADE_OUT_MS = 300
 
 function useAlternatingRotator() {
   const [activityIdx, setActivityIdx] = useState(0)
   const [cadenceIdx, setCadenceIdx] = useState(0)
+  const [fading, setFading] = useState<"none" | "activity" | "cadence">("none")
   const tickRef = useRef(0)
 
   useEffect(() => {
@@ -126,12 +86,21 @@ function useAlternatingRotator() {
     if (mq.matches) return
 
     const id = setInterval(() => {
-      if (tickRef.current % 2 === 0) {
-        setActivityIdx((i) => (i + 1) % ACTIVITIES.length)
-      } else {
-        setCadenceIdx((i) => (i + 1) % CADENCES.length)
-      }
+      const slot = tickRef.current % 2 === 0 ? "activity" : "cadence"
       tickRef.current++
+
+      // Phase 1: fade out
+      setFading(slot)
+
+      // Phase 2: swap text + fade in (after fade-out completes)
+      setTimeout(() => {
+        if (slot === "activity") {
+          setActivityIdx((i) => (i + 1) % ACTIVITIES.length)
+        } else {
+          setCadenceIdx((i) => (i + 1) % CADENCES.length)
+        }
+        setFading("none")
+      }, FADE_OUT_MS)
     }, TICK_MS)
 
     return () => clearInterval(id)
@@ -140,6 +109,8 @@ function useAlternatingRotator() {
   return {
     activityText: ACTIVITIES[activityIdx],
     cadenceText: CADENCES[cadenceIdx],
+    activityFading: fading === "activity",
+    cadenceFading: fading === "cadence",
   }
 }
 
@@ -148,7 +119,7 @@ function useAlternatingRotator() {
 export default function WelcomePage() {
   const [visible, setVisible] = useState(false)
   const screenSize = useScreenSize()
-  const { activityText, cadenceText } = useAlternatingRotator()
+  const { activityText, cadenceText, activityFading, cadenceFading } = useAlternatingRotator()
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 120)
@@ -185,11 +156,27 @@ export default function WelcomePage() {
             <span className="block">I&apos;m looking for people to</span>
             <span className="flex items-baseline whitespace-nowrap">
               <span className="flex-1 text-right">
-                <FadeSlot text={activityText} className="text-amber-500" />
+                <span
+                  className="inline-block text-amber-500"
+                  style={{
+                    opacity: activityFading ? 0 : 1,
+                    transition: `opacity ${FADE_OUT_MS}ms ease`,
+                  }}
+                >
+                  {activityText}
+                </span>
               </span>
               <span className="shrink-0">&nbsp;</span>
               <span className="flex-1 text-left">
-                <FadeSlot text={cadenceText} className="text-forest-500" />
+                <span
+                  className="inline-block text-forest-500"
+                  style={{
+                    opacity: cadenceFading ? 0 : 1,
+                    transition: `opacity ${FADE_OUT_MS}ms ease`,
+                  }}
+                >
+                  {cadenceText}
+                </span>
               </span>
             </span>
           </h1>
