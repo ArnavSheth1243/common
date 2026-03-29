@@ -48,11 +48,12 @@ export async function GET(request: Request) {
             || user.email?.split("@")[0]
             || "User"
 
-          await supabase.from("profiles").insert({
+          // Use upsert to handle race with on_auth_user_created trigger
+          await supabase.from("profiles").upsert({
             id: user.id,
             display_name: displayName,
             onboarding_complete: false,
-          })
+          }, { onConflict: 'id', ignoreDuplicates: true })
 
           return NextResponse.redirect(`${origin}/onboarding`)
         }
