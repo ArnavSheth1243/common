@@ -13,6 +13,8 @@ import {
   Heart,
   CalendarCheck,
   EnvelopeSimple,
+  InstagramLogo,
+  ArrowUpRight,
 } from "@phosphor-icons/react"
 import { CADENCE_LABELS } from "@/lib/data"
 import { createClient } from "@/lib/supabase/client"
@@ -205,6 +207,18 @@ export default function MemberProfilePage() {
               <CalendarCheck size={11} />
               <span>Joined Common 2025</span>
             </div>
+            {member.instagram_handle && (
+              <a
+                href={`https://instagram.com/${member.instagram_handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-pink-600 transition-colors mt-1.5"
+              >
+                <InstagramLogo size={14} weight="duotone" />
+                <span>@{member.instagram_handle}</span>
+                <ArrowUpRight size={11} className="opacity-50" />
+              </a>
+            )}
           </div>
         </div>
 

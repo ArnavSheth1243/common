@@ -404,6 +404,24 @@ export default function DashboardPage() {
   const [myPods, setMyPods] = useState<any[]>([])
   const [trendingPods, setTrendingPods] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Re-fetch feed when page becomes visible (e.g. after posting a check-in)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        setRefreshKey((k) => k + 1)
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+    // Also re-fetch on focus (covers SPA navigation back)
+    const handleFocus = () => setRefreshKey((k) => k + 1)
+    window.addEventListener("focus", handleFocus)
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility)
+      window.removeEventListener("focus", handleFocus)
+    }
+  }, [])
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [openCommentId, setOpenCommentId] = useState<string | null>(null)
   const [composerOpen, setComposerOpen] = useState(false)
@@ -538,7 +556,7 @@ export default function DashboardPage() {
 
     fetchData()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, refreshKey])
 
   const handleQuickPost = async () => {
     if (!composerText.trim() || !composerPod || !user) return
@@ -559,7 +577,7 @@ export default function DashboardPage() {
         setComposerPosted(false)
         setComposerOpen(false)
         setComposerText("")
-        window.location.reload()
+        setRefreshKey((k) => k + 1)
       }, 2500)
     } catch (err) {
       console.error("Failed to post checkin:", err)

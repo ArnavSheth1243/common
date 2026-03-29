@@ -57,11 +57,14 @@ function CheckinForm() {
     fetchPods()
   }, [user])
 
-  const defaultPod = preselected && allMyPods.find((p) => p.id === preselected)
-    ? preselected
-    : allMyPods[0]?.id
+  const [selectedPod, setSelectedPod] = useState<string>(preselected || "")
 
-  const [selectedPod, setSelectedPod] = useState<string>(defaultPod ?? "")
+  // Once pods load, auto-select first pod if nothing selected
+  useEffect(() => {
+    if (!selectedPod && allMyPods.length > 0) {
+      setSelectedPod(preselected && allMyPods.find((p) => p.id === preselected) ? preselected : allMyPods[0].id)
+    }
+  }, [allMyPods, preselected, selectedPod])
   const [text, setText] = useState("")
   const [visibility, setVisibility] = useState<"public" | "pod" | "private">("pod")
   const [submitted, setSubmitted] = useState(false)

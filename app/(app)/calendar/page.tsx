@@ -107,8 +107,21 @@ function LocationMap({ location }: { location: string }) {
 
 // ─── Event card ───────────────────────────────────────────────────────────────
 
-function EventCard({ event, onDelete }: { event: CalEvent; onDelete: (id: string) => void }) {
+function EventCard({
+  event,
+  onDelete,
+  rsvpStatus,
+  onRsvp,
+  rsvpSaving,
+}: {
+  event: CalEvent & { _podEventId?: string }
+  onDelete: (id: string) => void
+  rsvpStatus?: string
+  onRsvp?: (podEventId: string, status: string) => void
+  rsvpSaving?: boolean
+}) {
   const [showMap, setShowMap] = useState(false)
+  const isPodEvent = event.id.startsWith("pod-event-")
   return (
     <div className="bg-white border border-zinc-100 rounded-2xl p-4 shadow-softer">
       <div className="flex items-start gap-3">
@@ -150,13 +163,38 @@ function EventCard({ event, onDelete }: { event: CalEvent; onDelete: (id: string
               {showMap && <LocationMap location={event.location} />}
             </div>
           )}
+          {/* RSVP buttons for pod events */}
+          {isPodEvent && onRsvp && event._podEventId && (
+            <div className="flex items-center gap-1.5 mt-3">
+              {(["going", "maybe", "no"] as const).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => onRsvp(event._podEventId!, status)}
+                  disabled={rsvpSaving}
+                  className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg border transition-all capitalize
+                    ${rsvpStatus === status
+                      ? status === "going"
+                        ? "bg-emerald-500 border-emerald-500 text-white"
+                        : status === "maybe"
+                          ? "bg-amber-500 border-amber-500 text-white"
+                          : "bg-zinc-400 border-zinc-400 text-white"
+                      : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
+                    } disabled:opacity-50`}
+                >
+                  {status === "no" ? "Can't go" : status}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <button
-          onClick={() => onDelete(event.id)}
-          className="text-zinc-300 hover:text-zinc-500 transition-colors flex-shrink-0"
-        >
-          <Trash size={14} />
-        </button>
+        {!isPodEvent && (
+          <button
+            onClick={() => onDelete(event.id)}
+            className="text-zinc-300 hover:text-zinc-500 transition-colors flex-shrink-0"
+          >
+            <Trash size={14} />
+          </button>
+        )}
       </div>
     </div>
   )
@@ -320,18 +358,21 @@ export default function CalendarPage() {
 
   const [events, setEvents] = useState<CalEvent[]>([])
   const [myPods, setMyPods] = useState<any[]>([])
+  const [rsvps, setRsvps] = useState<Record<string, string>>({}) // eventId -> status
   const [loading, setLoading] = useState(true)
   const [viewYear,   setViewYear]   = useState(startYear)
   const [viewMonth,  setViewMonth]  = useState(today.getMonth())
   const [selected,   setSelected]   = useState(todayStr)
   const [showForm,   setShowForm]   = useState(false)
+  const [rsvpSaving, setRsvpSaving] = useState<string | null>(null)
 
-  // Fetch events and pods from Supabase
+  // Fetch events, pod events, and RSVPs from Supabase
   useEffect(() => {
     if (!user) return
     const fetchData = async () => {
       const supabase = createClient()
-      // Fetch calendar events
+
+      // Fetch personal calendar events
       const { data: calEvents } = await supabase
         .from("calendar_events")
         .select("*")
@@ -344,16 +385,84 @@ export default function CalendarPage() {
         .select("pod_id, pods(id, name)")
         .eq("user_id", user.id)
 
-      if (calEvents) {
-        setEvents(calEvents.map(mapSupabaseToCalEvent))
+      const pods = (podMemberships || []).map((m: any) => ({ id: m.pods.id, name: m.pods.name }))
+      const podIds = pods.map((p: any) => p.id)
+      const podNameMap: Record<string, string> = {}
+      pods.forEach((p: any) => { podNameMap[p.id] = p.name })
+
+      // Fetch pod events for all user's pods
+      let podEventsMapped: CalEvent[] = []
+      if (podIds.length > 0) {
+        const { data: podEvents } = await supabase
+          .from("pod_events")
+          .select("*")
+          .in("pod_id", podIds)
+          .order("date", { ascending: true })
+
+        const podColorKeys = Object.keys(POD_COLORS)
+        podEventsMapped = (podEvents || []).map((pe: any, idx: number) => {
+          const colorKey = podColorKeys[idx % podColorKeys.length]
+          const colors = POD_COLORS[colorKey]
+          return {
+            id: `pod-event-${pe.id}`,
+            _podEventId: pe.id, // real ID for RSVP
+            title: pe.title,
+            date: pe.date,
+            time: pe.time ?? undefined,
+            endTime: pe.end_time ?? undefined,
+            type: "pod" as EventType,
+            podId: pe.pod_id,
+            podName: podNameMap[pe.pod_id] || "Pod",
+            color: colors.bg,
+            textColor: colors.text,
+            description: pe.description ?? undefined,
+            location: pe.location ?? undefined,
+          } as CalEvent & { _podEventId: string }
+        })
+
+        // Fetch user's RSVPs for these pod events
+        const podEventIds = (podEvents || []).map((pe: any) => pe.id)
+        if (podEventIds.length > 0) {
+          const { data: userRsvps } = await supabase
+            .from("event_rsvps")
+            .select("event_id, status")
+            .eq("user_id", user.id)
+            .in("event_id", podEventIds)
+
+          const rsvpMap: Record<string, string> = {}
+          for (const r of userRsvps || []) {
+            rsvpMap[r.event_id] = r.status
+          }
+          setRsvps(rsvpMap)
+        }
       }
-      if (podMemberships) {
-        setMyPods(podMemberships.map((m: any) => ({ id: m.pods.id, name: m.pods.name })))
-      }
+
+      const personalEvents = (calEvents || []).map(mapSupabaseToCalEvent)
+      setEvents([...personalEvents, ...podEventsMapped])
+      setMyPods(pods)
       setLoading(false)
     }
     fetchData()
   }, [user])
+
+  const handleRsvp = async (podEventId: string, status: string) => {
+    if (!user) return
+    setRsvpSaving(podEventId)
+    try {
+      const supabase = createClient()
+      await supabase.from("event_rsvps").upsert({
+        event_id: podEventId,
+        user_id: user.id,
+        status,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "event_id,user_id" })
+      setRsvps((prev) => ({ ...prev, [podEventId]: status }))
+    } catch (err) {
+      console.error("Failed to RSVP:", err)
+    } finally {
+      setRsvpSaving(null)
+    }
+  }
 
   const YEARS = [startYear, startYear + 1, startYear + 2]
 
@@ -648,7 +757,14 @@ export default function CalendarPage() {
                 {selectedEvents
                   .sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""))
                   .map((e) => (
-                    <EventCard key={e.id} event={e} onDelete={deleteEvent} />
+                    <EventCard
+                      key={e.id}
+                      event={e}
+                      onDelete={deleteEvent}
+                      rsvpStatus={(e as any)._podEventId ? rsvps[(e as any)._podEventId] : undefined}
+                      onRsvp={handleRsvp}
+                      rsvpSaving={rsvpSaving === (e as any)?._podEventId}
+                    />
                   ))}
               </div>
             )}

@@ -103,6 +103,14 @@ export default function ProfilePage() {
   const [igEditing, setIgEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Avatar crop state
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [cropScale, setCropScale] = useState(1)
+  const [cropOffsetX, setCropOffsetX] = useState(0)
+  const [cropOffsetY, setCropOffsetY] = useState(0)
+  const cropCanvasRef = useRef<HTMLCanvasElement>(null)
+  const cropImgRef = useRef<HTMLImageElement | null>(null)
+
   // Derived from profile context (persisted in Supabase)
   const isPublic = profile?.isPublic ?? true
   const bio = profile?.bio || ""
@@ -114,11 +122,36 @@ export default function ProfilePage() {
     if (file) {
       const reader = new FileReader()
       reader.onload = () => {
-        const dataUrl = reader.result as string
-        updateProfile({ avatarUrl: dataUrl })
+        setCropSrc(reader.result as string)
+        setCropScale(1)
+        setCropOffsetX(0)
+        setCropOffsetY(0)
       }
       reader.readAsDataURL(file)
     }
+    // Reset input so re-selecting same file works
+    e.target.value = ""
+  }
+
+  const handleCropSave = () => {
+    if (!cropImgRef.current) return
+    const canvas = document.createElement("canvas")
+    const size = 256
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    const img = cropImgRef.current
+    const minDim = Math.min(img.naturalWidth, img.naturalHeight)
+    const scaledDim = minDim / cropScale
+    const cx = (img.naturalWidth / 2) + (cropOffsetX / 100) * img.naturalWidth - scaledDim / 2
+    const cy = (img.naturalHeight / 2) + (cropOffsetY / 100) * img.naturalHeight - scaledDim / 2
+
+    ctx.drawImage(img, cx, cy, scaledDim, scaledDim, 0, 0, size, size)
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85)
+    updateProfile({ avatarUrl: dataUrl })
+    setCropSrc(null)
   }
 
   const handleSaveInstagram = () => {
@@ -213,6 +246,88 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Avatar crop modal */}
+      {cropSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-base font-bold text-zinc-900 mb-4">Adjust your photo</h3>
+            {/* Preview */}
+            <div className="w-48 h-48 mx-auto rounded-full overflow-hidden border-4 border-zinc-100 mb-4 relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={(el) => { cropImgRef.current = el }}
+                src={cropSrc}
+                alt="Crop preview"
+                className="absolute"
+                style={{
+                  width: `${cropScale * 100}%`,
+                  height: `${cropScale * 100}%`,
+                  objectFit: "cover",
+                  left: `${50 - (cropScale * 50) + cropOffsetX}%`,
+                  top: `${50 - (cropScale * 50) + cropOffsetY}%`,
+                }}
+                draggable={false}
+              />
+            </div>
+            {/* Zoom slider */}
+            <div className="mb-3">
+              <label className="block text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Zoom</label>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.05"
+                value={cropScale}
+                onChange={(e) => setCropScale(parseFloat(e.target.value))}
+                className="w-full accent-amber-500"
+              />
+            </div>
+            {/* Position sliders */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Left / Right</label>
+                <input
+                  type="range"
+                  min="-30"
+                  max="30"
+                  step="1"
+                  value={cropOffsetX}
+                  onChange={(e) => setCropOffsetX(parseFloat(e.target.value))}
+                  className="w-full accent-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">Up / Down</label>
+                <input
+                  type="range"
+                  min="-30"
+                  max="30"
+                  step="1"
+                  value={cropOffsetY}
+                  onChange={(e) => setCropOffsetY(parseFloat(e.target.value))}
+                  className="w-full accent-amber-500"
+                />
+              </div>
+            </div>
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCropSrc(null)}
+                className="flex-1 py-2.5 text-sm font-semibold text-zinc-500 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCropSave}
+                className="flex-1 py-2.5 text-sm font-semibold text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-colors"
+              >
+                Save photo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Profile card */}
       <div className="bg-white border border-zinc-100 rounded-3xl p-6 mb-6 shadow-softer">
         <div className="flex items-start gap-4 mb-6">
@@ -306,10 +421,16 @@ export default function ProfilePage() {
             <div className="mt-2">
               {instagramHandle && instagramHandle.length > 0 && !igEditing ? (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 text-sm text-zinc-500">
+                  <a
+                    href={`https://instagram.com/${instagramHandle}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-pink-600 transition-colors"
+                  >
                     <InstagramLogo size={14} weight="duotone" />
                     <span>@{instagramHandle}</span>
-                  </div>
+                    <ArrowUpRight size={11} className="opacity-50" />
+                  </a>
                   <button
                     onClick={() => { setIgInput(instagramHandle); setIgEditing(true) }}
                     className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"

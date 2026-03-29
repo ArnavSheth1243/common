@@ -12,6 +12,9 @@ import {
   Newspaper,
   ChartLineUp,
   ChatCircle,
+  UsersThree,
+  Lightning,
+  FolderUser,
 } from "@phosphor-icons/react"
 import { UserStatsProvider, useUserStats } from "@/app/context/user-stats"
 import { UserProfileProvider, useUserProfile } from "@/app/context/user-profile"
@@ -21,14 +24,16 @@ import { MedalsProvider } from "@/app/context/medals"
 import { FloatingPaths } from "@/components/ui/background-paths"
 
 const navItems = [
-  { href: "/dashboard", label: "Home",     icon: House },
-  { href: "/pods",      label: "Pods",     icon: Compass },
-  { href: "/checkin",   label: "Check in", icon: PlusCircle },
-  { href: "/tracker",   label: "Tracker",  icon: ChartLineUp },
-  { href: "/calendar",  label: "Calendar", icon: CalendarBlank },
-  { href: "/media",     label: "Media",    icon: Newspaper },
-  { href: "/messages",  label: "Messages", icon: ChatCircle },
-  { href: "/profile",   label: "Profile",  icon: User },
+  { href: "/dashboard",   label: "Home",       icon: House },
+  { href: "/pods",        label: "Pods",       icon: Compass },
+  { href: "/my-pods",     label: "My Pods",    icon: FolderUser },
+  { href: "/people",      label: "People",     icon: UsersThree },
+  { href: "/challenges",  label: "Challenges", icon: Lightning },
+  { href: "/checkin",     label: "Check in",   icon: PlusCircle },
+  { href: "/tracker",     label: "Tracker",    icon: ChartLineUp },
+  { href: "/calendar",    label: "Calendar",   icon: CalendarBlank },
+  { href: "/messages",    label: "Messages",   icon: ChatCircle },
+  { href: "/profile",     label: "Profile",    icon: User },
 ]
 
 function SidebarStreakFooter() {
@@ -39,9 +44,13 @@ function SidebarStreakFooter() {
   return (
     <div className="border-t border-white/8 pt-4 px-1">
       <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-white/8 transition-colors">
-        <div className="w-8 h-8 rounded-full bg-[#f5f0e6] flex items-center justify-center text-zinc-900 text-xs font-bold flex-shrink-0">
-          {initials}
-        </div>
+        {profile.avatarUrl ? (
+          <img src={profile.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-[#f5f0e6] flex items-center justify-center text-zinc-900 text-xs font-bold flex-shrink-0">
+            {initials}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold text-[#f5f0e6] truncate">{profile.displayName}</div>
           <div className="flex items-center gap-1 text-[11px] text-zinc-500 font-medium">
