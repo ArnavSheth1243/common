@@ -80,9 +80,23 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       // Get the other members of each conversation
       const { data: allMembers } = await supabase
         .from("conversation_members")
-        .select("conversation_id, user_id, profiles(id, display_name, avatar_url)")
+        .select("conversation_id, user_id")
         .in("conversation_id", convIds)
         .neq("user_id", user.id)
+
+      // Get unique other user IDs and fetch their profiles separately
+      const otherUserIds = [...new Set((allMembers || []).map((m: any) => m.user_id))]
+      const { data: profiles } = otherUserIds.length > 0
+        ? await supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url")
+            .in("id", otherUserIds)
+        : { data: [] }
+
+      const profileMap: Record<string, any> = {}
+      for (const p of profiles || []) {
+        profileMap[p.id] = p
+      }
 
       // Get conversations with updated_at
       const { data: convos } = await supabase
@@ -111,7 +125,9 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
       // Build a map of other user per conversation
       const otherUserMap: Record<string, any> = {}
       for (const m of allMembers || []) {
-        otherUserMap[m.conversation_id] = m.profiles
+        if (profileMap[m.user_id]) {
+          otherUserMap[m.conversation_id] = profileMap[m.user_id]
+        }
       }
 
       const mapped: Conversation[] = (convos || [])

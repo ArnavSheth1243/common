@@ -153,32 +153,8 @@ export default function WelcomePage() {
           <p className="sr-only">I&apos;m looking for people to run with every morning</p>
 
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-4xl mx-auto">
-            <span className="block">I&apos;m looking for people to</span>
-            <span className="flex items-baseline whitespace-nowrap">
-              <span className="flex-1 text-right">
-                <span
-                  className="inline-block text-amber-500"
-                  style={{
-                    opacity: activityFading ? 0 : 1,
-                    transition: `opacity ${FADE_OUT_MS}ms ease`,
-                  }}
-                >
-                  {activityText}
-                </span>
-              </span>
-              <span className="shrink-0">&nbsp;</span>
-              <span className="flex-1 text-left">
-                <span
-                  className="inline-block text-forest-500"
-                  style={{
-                    opacity: cadenceFading ? 0 : 1,
-                    transition: `opacity ${FADE_OUT_MS}ms ease`,
-                  }}
-                >
-                  {cadenceText}
-                </span>
-              </span>
-            </span>
+            <span className="block">Your solution to</span>
+            <span className="block text-amber-500">Accountability</span>
           </h1>
 
           <p className="text-lg text-zinc-500 leading-relaxed max-w-[34ch] mx-auto mb-12">
