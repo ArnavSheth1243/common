@@ -9,12 +9,6 @@ import {
   PlusCircle,
   User,
   Flame,
-  CalendarBlank,
-  Newspaper,
-  ChartLineUp,
-  ChatCircle,
-  UsersThree,
-  Lightning,
   FolderUser,
   List,
   X,
@@ -22,20 +16,13 @@ import {
 import { UserStatsProvider, useUserStats } from "@/app/context/user-stats"
 import { UserProfileProvider, useUserProfile } from "@/app/context/user-profile"
 import { PodStateProvider } from "@/app/context/pod-state"
-import { MessagesProvider, useMessages } from "@/app/context/messages"
+import { MessagesProvider } from "@/app/context/messages"
 import { MedalsProvider } from "@/app/context/medals"
-import { FloatingPaths } from "@/components/ui/background-paths"
-
 const navItems = [
   { href: "/dashboard",   label: "Home",       icon: House },
   { href: "/pods",        label: "Pods",       icon: Compass },
+  { href: "/checkin",     label: "Check In",   icon: PlusCircle },
   { href: "/my-pods",     label: "My Pods",    icon: FolderUser },
-  { href: "/people",      label: "People",     icon: UsersThree },
-  { href: "/challenges",  label: "Challenges", icon: Lightning },
-  { href: "/checkin",     label: "Check in",   icon: PlusCircle },
-  { href: "/tracker",     label: "Tracker",    icon: ChartLineUp },
-  { href: "/calendar",    label: "Calendar",   icon: CalendarBlank },
-  { href: "/messages",    label: "Messages",   icon: ChatCircle },
   { href: "/profile",     label: "Profile",    icon: User },
 ]
 
@@ -66,8 +53,7 @@ function SidebarStreakFooter() {
   )
 }
 
-function NavItemLink({ item, active, onClick, unreadCount }: { item: typeof navItems[0]; active: boolean; onClick?: () => void; unreadCount?: number }) {
-  const isMessages = item.href === "/messages"
+function NavItemLink({ item, active, onClick }: { item: typeof navItems[0]; active: boolean; onClick?: () => void }) {
   return (
     <Link
       href={item.href}
@@ -84,18 +70,12 @@ function NavItemLink({ item, active, onClick, unreadCount }: { item: typeof navI
         className={active ? "text-zinc-900" : ""}
       />
       {item.label}
-      {isMessages && unreadCount && unreadCount > 0 ? (
-        <span className="ml-auto flex items-center justify-center min-w-[18px] h-[18px] bg-rose-500 text-white text-[10px] font-bold rounded-full px-1">
-          {unreadCount > 9 ? "9+" : unreadCount}
-        </span>
-      ) : null}
     </Link>
   )
 }
 
 function Sidebar() {
   const pathname = usePathname()
-  const { unreadCount } = useMessages()
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 bg-zinc-900 z-40 py-8 px-4">
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
@@ -111,7 +91,7 @@ function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 space-y-0.5 relative">
         {navItems.map((item) => (
-          <NavItemLink key={item.href} item={item} active={pathname === item.href} unreadCount={unreadCount} />
+          <NavItemLink key={item.href} item={item} active={pathname === item.href} />
         ))}
       </nav>
 
@@ -123,7 +103,6 @@ function Sidebar() {
 function MobileMenu() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-  const { unreadCount } = useMessages()
 
   // Close menu on route change
   useEffect(() => {
@@ -149,9 +128,6 @@ function MobileMenu() {
         aria-label="Open menu"
       >
         <List size={20} className="text-[#f5f0e6]" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-zinc-900" />
-        )}
       </button>
 
       {/* Backdrop */}
@@ -191,7 +167,6 @@ function MobileMenu() {
               item={item}
               active={pathname === item.href}
               onClick={() => setOpen(false)}
-              unreadCount={unreadCount}
             />
           ))}
         </nav>
@@ -207,11 +182,6 @@ function MobileMenu() {
 function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#ede9df] relative">
-      {/* Background paths — fixed behind everything */}
-      <div className="fixed inset-0 z-0 pointer-events-none lg:pl-64">
-        <FloatingPaths position={1} />
-        <FloatingPaths position={-1} />
-      </div>
       <Sidebar />
       <MobileMenu />
       <main className="lg:pl-64 min-h-[100dvh] relative z-10 overflow-x-hidden">

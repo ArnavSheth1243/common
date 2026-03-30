@@ -11,13 +11,13 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: "Common — Better Together",
+  title: "Common — Your Solution to Accountability",
   description:
-    "Build habits and try new things with a small group working toward the same goal. Join a pod, check in daily, and stay accountable.",
-  keywords: ["habits", "accountability", "community", "pods", "daily check-in"],
+    "Join a pod of 3-7 people pursuing the same goal. Check in daily. Build streaks. The social pressure keeps you going.",
+  keywords: ["accountability", "habits", "pods", "streaks", "social commitment", "daily check-in"],
   openGraph: {
-    title: "Common — Better Together",
-    description: "Build habits and try new things with a small group working toward the same goal.",
+    title: "Common — Your Solution to Accountability",
+    description: "Join a pod. Check in daily. The group keeps you going.",
     type: "website",
   },
 }
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={outfit.variable}>
-      <body className="grain antialiased">
+      <body className="antialiased">
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
