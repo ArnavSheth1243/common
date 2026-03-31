@@ -74,16 +74,19 @@ const CADENCES = [
 function TextRotator({
   items,
   intervalMs,
+  initialDelay = 0,
   className,
 }: {
   items: string[]
   intervalMs: number
+  initialDelay?: number
   className?: string
 }) {
   const [index, setIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const containerRef = useRef<HTMLSpanElement>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Detect reduced motion preference
   useEffect(() => {
@@ -94,26 +97,35 @@ function TextRotator({
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Rotate through items
+  // Rotate through items with optional initial delay for staggering
   useEffect(() => {
     if (prefersReducedMotion) return
-    const id = setInterval(() => {
+
+    const tick = () => {
       setIsTransitioning(true)
       setTimeout(() => {
         setIndex((i) => (i + 1) % items.length)
         setIsTransitioning(false)
-      }, 280) // half of the crossfade duration
-    }, intervalMs)
-    return () => clearInterval(id)
-  }, [items.length, intervalMs, prefersReducedMotion])
+      }, 300)
+    }
+
+    const delayId = setTimeout(() => {
+      tick()
+      intervalRef.current = setInterval(tick, intervalMs)
+    }, initialDelay)
+
+    return () => {
+      clearTimeout(delayId)
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [items.length, intervalMs, initialDelay, prefersReducedMotion])
 
   return (
     <span
       ref={containerRef}
-      className={`inline-block transition-all duration-[560ms] ease-spring ${
-        isTransitioning ? "opacity-0 translate-y-1.5" : "opacity-100 translate-y-0"
+      className={`inline-block transition-all duration-500 ease-in-out ${
+        isTransitioning ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
       } ${className ?? ""}`}
-      // Screen readers see the full sentence; the rotating text is decorative enhancement
       aria-hidden="true"
     >
       {items[index]}
@@ -190,30 +202,34 @@ export default function WelcomePage() {
           <p className="sr-only">{srText}</p>
 
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
-            I&apos;m looking for people to{" "}
+            I&apos;m looking for people to
 
-            {/* Activity rotator */}
-            <span
-              className="inline-block text-left align-bottom"
-              style={activityMeasure.maxWidth ? { minWidth: activityMeasure.maxWidth + 4 } : undefined}
-            >
-              <TextRotator
-                items={ACTIVITIES}
-                intervalMs={2500}
-                className="text-amber-500"
-              />
-            </span>{" "}
+            {/* Rotator row — keeps both blocks on the same baseline */}
+            <span className="flex items-baseline justify-center gap-[0.3em] mt-1">
+              {/* Activity rotator */}
+              <span
+                className="inline-block text-left"
+                style={activityMeasure.maxWidth ? { minWidth: activityMeasure.maxWidth + 4 } : undefined}
+              >
+                <TextRotator
+                  items={ACTIVITIES}
+                  intervalMs={2800}
+                  className="text-amber-500"
+                />
+              </span>
 
-            {/* Cadence rotator */}
-            <span
-              className="inline-block text-left align-bottom"
-              style={cadenceMeasure.maxWidth ? { minWidth: cadenceMeasure.maxWidth + 4 } : undefined}
-            >
-              <TextRotator
-                items={CADENCES}
-                intervalMs={3200}
-                className="text-forest-500"
-              />
+              {/* Cadence rotator — staggered by half the interval */}
+              <span
+                className="inline-block text-left"
+                style={cadenceMeasure.maxWidth ? { minWidth: cadenceMeasure.maxWidth + 4 } : undefined}
+              >
+                <TextRotator
+                  items={CADENCES}
+                  intervalMs={2800}
+                  initialDelay={1400}
+                  className="text-forest-500"
+                />
+              </span>
             </span>
           </h1>
 
