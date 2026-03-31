@@ -186,6 +186,7 @@ export default function WelcomePage() {
               intervalMs={2800}
               className="text-amber-500"
             />
+            <span className="text-zinc-900">with</span>
             <TextRotator
               items={CADENCES}
               intervalMs={2800}
