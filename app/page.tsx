@@ -178,21 +178,21 @@ export default function WelcomePage() {
           <p className="sr-only">{srText}</p>
 
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
-            I&apos;m looking for people to{" "}
-            <span className="whitespace-nowrap">
-              <TextRotator
-                items={ACTIVITIES}
-                intervalMs={2800}
-                className="text-amber-500"
-              />{" "}
-              <TextRotator
-                items={CADENCES}
-                intervalMs={2800}
-                initialDelay={1400}
-                className="text-forest-500"
-              />
-            </span>
+            I&apos;m looking for people to
           </h1>
+          <div className="flex items-baseline justify-center gap-[0.35em] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight leading-[1.1] mb-5">
+            <TextRotator
+              items={ACTIVITIES}
+              intervalMs={2800}
+              className="text-amber-500"
+            />
+            <TextRotator
+              items={CADENCES}
+              intervalMs={2800}
+              initialDelay={1400}
+              className="text-forest-500"
+            />
+          </div>
 
           <p className="text-lg text-zinc-500 leading-relaxed max-w-[34ch] mx-auto mb-12">
             Join a pod, pursue your passions together.
