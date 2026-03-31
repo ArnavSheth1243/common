@@ -339,7 +339,7 @@ export default function PodsPage() {
         <div className="mb-6">
           <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.12em] mb-2.5">Discover</p>
           <h1 className="text-[28px] sm:text-[36px] lg:text-[42px] font-bold text-zinc-900 tracking-tighter leading-none">Pods</h1>
-          <p className="text-sm sm:text-base text-zinc-400 mt-2">Find your people. Pick a pod, show up daily.</p>
+          <p className="text-sm sm:text-base text-zinc-400 mt-2">Find your group</p>
         </div>
         <Link
           href="/pods/new"

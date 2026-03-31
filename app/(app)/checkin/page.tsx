@@ -109,41 +109,34 @@ function CheckinForm() {
   }
 
   if (submitted) {
-    const newStreak = currentStreak + 1
     return (
       <div className="min-h-screen pb-32 lg:pb-0 flex flex-col items-center justify-center px-5 text-center">
-        {/* Streak celebration */}
-        <div className="relative mb-8">
-          <div className="w-28 h-28 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.3)] animate-[scale-in_0.5s_ease-out]">
-            <div className="text-center">
-              <Flame size={24} weight="fill" className="text-white mx-auto mb-1" />
-              <span className="text-3xl font-bold text-white tracking-tight tabular-nums">{newStreak}</span>
-            </div>
-          </div>
-          {/* Decorative ring */}
-          <div className="absolute inset-0 w-28 h-28 rounded-full border-2 border-amber-300/30 animate-ping" style={{ animationDuration: "1.5s", animationIterationCount: "2" }} />
+        <div className="w-20 h-20 bg-amber-50 border border-amber-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle size={36} weight="fill" className="text-amber-500" />
         </div>
-
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-2">
-          Day {newStreak}. Your pod can see this.
-        </h1>
+        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-2">Checked in</h1>
         <p className="text-zinc-500 text-[15px] leading-relaxed max-w-[34ch] mb-2">
           {selectedPodData
-            ? <>Checked in to{" "}<span className="font-semibold text-zinc-700">{selectedPodData.name}</span>.</>
-            : "Your update is live."}
+            ? <>Your update is live in{" "}<span className="font-semibold text-zinc-700">{selectedPodData.name}</span>.</>
+            : "Your update is live on the feed."}
         </p>
-        {newStreak >= 7 && (
-          <p className="text-sm font-semibold text-amber-600 mb-6">
-            {newStreak >= 30 ? "Legendary consistency. Don't stop now." : newStreak >= 14 ? "You're building real momentum." : "One week strong. Keep going."}
-          </p>
-        )}
-        {newStreak < 7 && <div className="mb-6" />}
+        <p className="text-xs text-zinc-400 mb-8">
+          {visibility === "public" && "Visible to everyone on the public feed"}
+          {visibility === "pod" && "Visible to your pod members only"}
+          {visibility === "private" && "Only visible to you"}
+        </p>
+        <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-2xl px-5 py-3 mb-8">
+          <Flame size={18} weight="fill" className="text-amber-500" />
+          <span className="text-sm font-bold text-amber-700">
+            {currentStreak} check-ins
+          </span>
+        </div>
         <div className="flex gap-3">
           <button
             onClick={() => router.push("/dashboard")}
-            className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold px-6 py-3 rounded-2xl transition-all duration-200"
+            className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold px-5 py-3 rounded-2xl transition-all duration-200"
           >
-            Back to dashboard
+            See the feed
           </button>
           <button
             onClick={() => {
@@ -152,7 +145,7 @@ function CheckinForm() {
             }}
             className="text-sm font-medium text-zinc-500 hover:text-zinc-700 px-5 py-3 transition-colors"
           >
-            Check in to another pod
+            Check into another pod
           </button>
         </div>
       </div>
@@ -174,7 +167,7 @@ function CheckinForm() {
       <div className="mb-6 sm:mb-8">
         <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mb-1">New check-in</h1>
         <p className="text-sm text-zinc-500">
-          What did you do today? Even a one-word check-in counts. The point is showing up.
+          Share what you did{cadenceVerb ? ` ${cadenceVerb}` : ""}. Keep it honest.
         </p>
       </div>
 

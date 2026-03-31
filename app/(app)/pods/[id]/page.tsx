@@ -251,7 +251,6 @@ export default function PodDetailPage() {
   const podState = usePodState()
 
   const [pod, setPod] = useState<any | null>(null)
-  const [todayCheckinUsers, setTodayCheckinUsers] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
   const [openCommentId, setOpenCommentId] = useState<string | null>(null)
@@ -291,18 +290,6 @@ export default function PodDetailPage() {
         .in("visibility", ["public", "pod"])
         .order("created_at", { ascending: false })
         .limit(20)
-
-      // Fetch today's checkins for this pod
-      const todayStart = new Date()
-      todayStart.setHours(0, 0, 0, 0)
-      const { data: todayCheckins } = await supabase
-        .from("checkins")
-        .select("user_id")
-        .eq("pod_id", podId)
-        .gte("created_at", todayStart.toISOString())
-
-      const todayUserIds = new Set((todayCheckins || []).map((c: any) => c.user_id))
-      setTodayCheckinUsers(todayUserIds)
 
       // Collect all user IDs for profile lookup
       const allUserIds = new Set<string>()
@@ -910,96 +897,6 @@ export default function PodDetailPage() {
       {appToast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 text-white text-sm font-medium px-4 py-2.5 rounded-2xl shadow-lg animate-fade-up">
           {appToast}
-        </div>
-      )}
-
-      {/* Today's Check-ins — accountability mechanic */}
-      {effectivelyMember && (
-        <div className="bg-white border border-zinc-100 rounded-3xl p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Today&apos;s check-ins</h2>
-            <span className="text-xs font-semibold text-zinc-500">
-              {todayCheckinUsers.size}/{pod.podMembers?.length || 0}
-            </span>
-          </div>
-          {/* Progress bar */}
-          <div className="h-2 bg-zinc-100 rounded-full overflow-hidden mb-4">
-            <div
-              className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-              style={{ width: `${pod.podMembers?.length ? Math.round((todayCheckinUsers.size / pod.podMembers.length) * 100) : 0}%` }}
-            />
-          </div>
-          <div className="space-y-2">
-            {/* Members who checked in */}
-            {pod.podMembers?.filter((m: any) => todayCheckinUsers.has(m.userId)).map((member: any) => (
-              <div key={member.userId} className="flex items-center gap-3 px-2 py-1.5 bg-emerald-50 rounded-xl">
-                <div className={`w-7 h-7 rounded-full ${member.color} flex items-center justify-center text-[10px] font-bold flex-shrink-0`}>
-                  {member.initials}
-                </div>
-                <span className="text-sm font-medium text-emerald-800 flex-1">
-                  {member.name}{member.isYou && " (you)"}
-                </span>
-                <CheckCircle size={14} weight="fill" className="text-emerald-500" />
-              </div>
-            ))}
-            {/* Members who haven't checked in */}
-            {pod.podMembers?.filter((m: any) => !todayCheckinUsers.has(m.userId)).map((member: any) => (
-              <div key={member.userId} className="flex items-center gap-3 px-2 py-1.5 opacity-50">
-                <div className="w-7 h-7 rounded-full bg-zinc-200 flex items-center justify-center text-[10px] font-bold text-zinc-500 flex-shrink-0">
-                  {member.initials}
-                </div>
-                <span className="text-sm text-zinc-400 flex-1">
-                  {member.name}{member.isYou && " (you)"}
-                </span>
-                <span className="text-[10px] text-zinc-400 italic">not yet</span>
-              </div>
-            ))}
-          </div>
-          {/* CTA if user hasn't checked in */}
-          {user && !todayCheckinUsers.has(user.id) && (
-            <Link
-              href={`/checkin?pod=${pod.id}`}
-              className="flex items-center justify-center gap-2 w-full mt-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold rounded-2xl transition-all active:scale-[0.98]"
-            >
-              <Plus size={14} weight="bold" />
-              Check in now
-            </Link>
-          )}
-        </div>
-      )}
-
-      {/* Streak Board */}
-      {effectivelyMember && pod.podMembers?.length > 0 && (
-        <div className="bg-white border border-zinc-100 rounded-3xl p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Flame size={14} weight="fill" className="text-amber-500" />
-            <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Streak Board</h2>
-          </div>
-          <div className="space-y-1">
-            {[...pod.podMembers]
-              .sort((a: any, b: any) => (b.streak || 0) - (a.streak || 0))
-              .map((member: any, i: number) => (
-                <Link
-                  key={member.userId}
-                  href={member.isYou ? "/profile" : `/profile/${member.userId}`}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                    member.isYou ? "bg-amber-50 border border-amber-100" : "hover:bg-zinc-50"
-                  }`}
-                >
-                  <span className="text-xs font-bold text-zinc-400 w-5 text-center tabular-nums">{i + 1}</span>
-                  <div className={`w-8 h-8 rounded-full ${member.color} flex items-center justify-center text-[10px] font-bold flex-shrink-0`}>
-                    {member.initials}
-                  </div>
-                  <span className={`text-sm font-medium flex-1 ${member.isYou ? "text-amber-800" : "text-zinc-700"}`}>
-                    {member.name}{member.isYou && " (you)"}
-                  </span>
-                  <div className="flex items-center gap-1 text-sm font-bold text-amber-600 tabular-nums">
-                    <Flame size={12} weight="fill" />
-                    <span>{member.streak || 0}</span>
-                  </div>
-                </Link>
-              ))}
-          </div>
         </div>
       )}
 
