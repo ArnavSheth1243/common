@@ -133,36 +133,12 @@ function TextRotator({
   )
 }
 
-// ─── Measure widest item to prevent layout shift ─────────────────────────────
-
-function useMaxWidth(items: string[]) {
-  const measureRef = useRef<HTMLSpanElement>(null)
-  const [maxWidth, setMaxWidth] = useState<number | undefined>(undefined)
-
-  useEffect(() => {
-    if (!measureRef.current) return
-    const el = measureRef.current
-    let max = 0
-    const original = el.textContent
-    for (const item of items) {
-      el.textContent = item
-      max = Math.max(max, el.offsetWidth)
-    }
-    el.textContent = original
-    setMaxWidth(max)
-  }, [items])
-
-  return { measureRef, maxWidth }
-}
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function WelcomePage() {
   const [visible, setVisible] = useState(false)
   const screenSize = useScreenSize()
 
-  const activityMeasure = useMaxWidth(ACTIVITIES)
-  const cadenceMeasure = useMaxWidth(CADENCES)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 120)
@@ -202,48 +178,21 @@ export default function WelcomePage() {
           <p className="sr-only">{srText}</p>
 
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
-            I&apos;m looking for people to
-
-            {/* Rotator row — keeps both blocks on the same baseline */}
-            <span className="flex items-baseline justify-center gap-[0.3em] mt-1">
-              {/* Activity rotator */}
-              <span
-                className="inline-block text-left"
-                style={activityMeasure.maxWidth ? { minWidth: activityMeasure.maxWidth + 4 } : undefined}
-              >
-                <TextRotator
-                  items={ACTIVITIES}
-                  intervalMs={2800}
-                  className="text-amber-500"
-                />
-              </span>
-
-              {/* Cadence rotator — staggered by half the interval */}
-              <span
-                className="inline-block text-left"
-                style={cadenceMeasure.maxWidth ? { minWidth: cadenceMeasure.maxWidth + 4 } : undefined}
-              >
-                <TextRotator
-                  items={CADENCES}
-                  intervalMs={2800}
-                  initialDelay={1400}
-                  className="text-forest-500"
-                />
-              </span>
+            I&apos;m looking for people to{" "}
+            <span className="whitespace-nowrap">
+              <TextRotator
+                items={ACTIVITIES}
+                intervalMs={2800}
+                className="text-amber-500"
+              />{" "}
+              <TextRotator
+                items={CADENCES}
+                intervalMs={2800}
+                initialDelay={1400}
+                className="text-forest-500"
+              />
             </span>
           </h1>
-
-          {/* Hidden measurement spans (off-screen, same font styling as h1) */}
-          <span
-            ref={activityMeasure.measureRef}
-            className="absolute -left-[9999px] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight whitespace-nowrap"
-            aria-hidden="true"
-          />
-          <span
-            ref={cadenceMeasure.measureRef}
-            className="absolute -left-[9999px] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight whitespace-nowrap"
-            aria-hidden="true"
-          />
 
           <p className="text-lg text-zinc-500 leading-relaxed max-w-[34ch] mx-auto mb-12">
             Join a pod, pursue your passions together.
