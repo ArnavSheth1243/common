@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={outfit.variable}>
-      <body className="grain antialiased">
+      <body className="antialiased">
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

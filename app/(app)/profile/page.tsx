@@ -26,6 +26,12 @@ import { useUserProfile } from "@/app/context/user-profile"
 import { useMedals, RARITY_STYLES, CATEGORY_LABELS, type MedalCategory } from "@/app/context/medals"
 import { useSession } from "@/app/context/session"
 import { createClient } from "@/lib/supabase/client"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { UserAvatar } from "@/components/ui/user-avatar"
+import { StatBlock } from "@/components/ui/stat-block"
+import { EmptyState } from "@/components/ui/empty-state"
+import { cn } from "@/lib/utils"
 
 type ProfileTab = "overview" | "posts" | "events" | "medals"
 
@@ -214,43 +220,47 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="max-w-2xl mx-auto px-5 lg:px-8 py-8 flex items-center justify-center min-h-[60vh]">
-        <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="w-6 h-6 border-2 border-border border-t-primary rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-5 lg:px-8 py-8">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* Header */}
-      <div className="flex items-start justify-between mb-6 sm:mb-8 animate-fade-up">
-        <h1 className="text-[28px] sm:text-[36px] font-bold text-zinc-900 tracking-tighter leading-none">Profile</h1>
-        <div className="flex items-center gap-3">
-          <button
+      <div className="flex items-start justify-between mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Profile</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => updateProfile({ isPublic: !isPublic })}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all ${
+            className={cn(
+              "gap-1.5",
               isPublic
-                ? "bg-emerald-50 border-emerald-100 text-emerald-700"
-                : "bg-zinc-100 border-zinc-200 text-zinc-500"
-            }`}
+                ? "bg-forest-50 border-forest-100 text-forest-700 hover:bg-forest-100"
+                : "bg-muted border-border text-muted-foreground",
+            )}
           >
             {isPublic ? <Globe size={11} /> : <Lock size={11} />}
             {isPublic ? "Public" : "Private"}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => { setEditName(profile?.displayName || ""); setEditBio(profile?.bio || ""); setIsEditingProfile(true) }}
-            className="text-sm font-medium text-zinc-500 hover:text-zinc-800 transition-colors"
           >
             Edit
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Avatar crop modal */}
       {cropSrc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl">
-            <h3 className="text-base font-bold text-zinc-900 mb-4">Adjust your photo</h3>
+          <div className="bg-card rounded-2xl p-6 w-full max-w-sm shadow-3">
+            <h3 className="text-base font-bold text-foreground mb-4">Adjust your photo</h3>
             {/* Preview */}
             <div className="w-48 h-48 mx-auto rounded-full overflow-hidden border-4 border-zinc-100 mb-4 relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -311,25 +321,19 @@ export default function ProfilePage() {
             </div>
             {/* Actions */}
             <div className="flex gap-2">
-              <button
-                onClick={() => setCropSrc(null)}
-                className="flex-1 py-2.5 text-sm font-semibold text-zinc-500 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
-              >
+              <Button variant="secondary" className="flex-1" onClick={() => setCropSrc(null)}>
                 Cancel
-              </button>
-              <button
-                onClick={handleCropSave}
-                className="flex-1 py-2.5 text-sm font-semibold text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-colors"
-              >
+              </Button>
+              <Button className="flex-1" onClick={handleCropSave}>
                 Save photo
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
 
       {/* Profile card */}
-      <div className="bg-white border border-zinc-100 rounded-3xl p-6 mb-6 shadow-softer">
+      <Card className="p-5 sm:p-6 mb-6">
         <div className="flex items-start gap-4 mb-6">
           {/* Avatar */}
           <div className="relative flex-shrink-0 group">
@@ -485,49 +489,44 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Stats bento */}
-        <div className="grid grid-cols-3 gap-3 mt-2">
-          {/* Streak — featured, amber */}
-          <div className="bg-amber-500 rounded-3xl p-4 sm:p-5 flex flex-col justify-between min-h-[100px]">
-            <Flame size={18} weight="fill" className="text-white/80" />
+        {/* Stats grid */}
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="bg-amber-500 rounded-xl p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
+            <Flame size={16} weight="fill" className="text-white/80" />
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-white tracking-tighter tabular-nums leading-none">
+              <div className="text-2xl font-bold text-white tracking-tighter tabular-nums leading-none">
                 {currentStreak}
               </div>
-              <div className="text-[9px] sm:text-[10px] font-semibold text-white/70 uppercase tracking-widest mt-1">
+              <div className="text-[9px] font-medium text-white/70 uppercase tracking-wider mt-1">
                 Streak
               </div>
             </div>
           </div>
-          {/* Total check-ins */}
-          <div className="bg-zinc-900 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between">
-            <div className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Posts</div>
-            <div className="text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tighter">{totalCheckins}</div>
+          <div className="bg-zinc-900 rounded-xl p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
+            <div className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider">Posts</div>
+            <div className="text-2xl font-bold text-zinc-50 tabular-nums tracking-tighter">{totalCheckins}</div>
           </div>
-          {/* People met */}
-          <div className="bg-white border border-zinc-100 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between shadow-softer">
-            <Users size={16} className="text-zinc-400" />
+          <div className="bg-card border border-border rounded-xl p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
+            <Users size={14} className="text-muted-foreground" />
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{profile?.peopleMet ?? 0}</div>
-              <div className="text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest">People met</div>
+              <div className="text-2xl font-bold text-foreground tabular-nums tracking-tighter">{profile?.peopleMet ?? 0}</div>
+              <div className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">People met</div>
             </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 mt-3">
-          {/* Pods joined */}
-          <div className="bg-white border border-zinc-100 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between shadow-softer">
-            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Pods</div>
-            <div className="text-2xl sm:text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{myPods.length}</div>
+          <div className="bg-card border border-border rounded-xl p-3 sm:p-4 flex flex-col justify-between">
+            <div className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">Pods</div>
+            <div className="text-2xl font-bold text-foreground tabular-nums tracking-tighter">{myPods.length}</div>
           </div>
-          {/* Best streak */}
-          <div className="bg-white border border-zinc-100 rounded-3xl px-3 sm:px-4 py-3 sm:py-4 flex flex-col justify-between shadow-softer">
-            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Best streak</div>
-            <div className="text-2xl sm:text-3xl font-bold text-zinc-900 tabular-nums tracking-tighter">{longestStreak}</div>
+          <div className="bg-card border border-border rounded-xl p-3 sm:p-4 flex flex-col justify-between">
+            <div className="text-[9px] font-medium text-muted-foreground uppercase tracking-wider">Best streak</div>
+            <div className="text-2xl font-bold text-foreground tabular-nums tracking-tighter">{longestStreak}</div>
           </div>
         </div>
 
         {/* Rank progress */}
-        <div className="mt-4 pt-4 border-t border-zinc-100">
+        <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${rank.color} ${rank.textColor}`}>
@@ -546,10 +545,10 @@ export default function ProfilePage() {
             />
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Tab bar */}
-      <div className="flex bg-zinc-100 rounded-2xl p-1 mb-6 overflow-x-auto scrollbar-hide">
+      <div className="flex bg-muted rounded-xl p-1 mb-6 overflow-x-auto scrollbar-hide">
         {([
           { id: "overview", label: "Overview" },
           { id: "posts", label: "Posts" },
@@ -559,11 +558,12 @@ export default function ProfilePage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 min-w-[70px] py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 whitespace-nowrap ${
+            className={cn(
+              "flex-1 min-w-[70px] py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap",
               activeTab === tab.id
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-400 hover:text-zinc-600"
-            }`}
+                ? "bg-card text-foreground shadow-1"
+                : "text-muted-foreground hover:text-foreground",
+            )}
           >
             {tab.label}
           </button>
@@ -574,7 +574,7 @@ export default function ProfilePage() {
       {activeTab === "overview" && <>
 
       {/* Activity */}
-      <div className="bg-white border border-zinc-100 rounded-3xl p-6 mb-6">
+      <Card className="p-5 sm:p-6 mb-6">
         <div className="mb-5">
           <h3 className="text-sm font-semibold text-zinc-800">Activity — last 35 days</h3>
         </div>
@@ -640,10 +640,10 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
       {!isPublic && (
-        <div className="bg-zinc-50 border border-zinc-100 rounded-2xl px-4 py-3 mb-6 text-center">
+        <div className="bg-muted border border-border rounded-xl px-4 py-3 mb-6 text-center">
           <Lock size={14} className="text-zinc-400 mx-auto mb-1" />
           <p className="text-xs text-zinc-400">Your profile is private. Only you can see your pods and check-ins.</p>
         </div>
@@ -669,7 +669,7 @@ export default function ProfilePage() {
               <Link
                 key={pod.id}
                 href={`/pods/${pod.id}`}
-                className="flex items-center gap-4 bg-white border border-zinc-100 rounded-2xl p-4 hover:border-zinc-200 hover:shadow-softer transition-all duration-200 group"
+                className="flex items-center gap-4 bg-card border border-border rounded-xl p-4 hover:border-zinc-300 hover:shadow-2 transition-all duration-150 group"
               >
                 <div
                   className={`w-10 h-10 rounded-2xl ${pod.memberColors[0]} flex items-center justify-center text-white flex-shrink-0`}
@@ -724,7 +724,7 @@ export default function ProfilePage() {
                 <Link
                   key={pod.id}
                   href={`/pods/${pod.id}`}
-                  className="flex items-center gap-4 bg-white border border-zinc-100 rounded-2xl p-4 hover:border-zinc-200 hover:shadow-softer transition-all duration-200 group"
+                  className="flex items-center gap-4 bg-card border border-border rounded-xl p-4 hover:border-zinc-300 hover:shadow-2 transition-all duration-150 group"
                 >
                   <div className={`w-10 h-10 rounded-2xl ${pod.memberColors[0]} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
                     {pod.name[0]}
@@ -747,13 +747,10 @@ export default function ProfilePage() {
       )}
 
       {/* Sign out */}
-      <div className="mt-10 pt-6 border-t border-zinc-100 text-center">
-        <button
-          onClick={handleSignOut}
-          className="text-sm text-zinc-400 hover:text-zinc-600 transition-colors"
-        >
+      <div className="mt-10 pt-6 border-t border-border text-center">
+        <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground">
           Sign out
-        </button>
+        </Button>
       </div>
 
       </> /* end Overview tab */}
@@ -766,7 +763,7 @@ export default function ProfilePage() {
               {myPosts.map((post) => {
                 const initials = (profile?.displayName || "U").split(" ").map((w: string) => w[0]).join("").slice(0, 2)
                 return (
-                  <div key={post.id} className="bg-white border border-zinc-100 rounded-3xl p-5 hover:border-zinc-200 transition-all">
+                  <div key={post.id} className="bg-card border border-border rounded-xl p-4 hover:border-zinc-300 hover:shadow-2 transition-all duration-150">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                         {initials}
@@ -804,7 +801,7 @@ export default function ProfilePage() {
               })}
             </div>
           ) : (
-            <div className="bg-white border border-zinc-100 rounded-3xl p-10 text-center">
+            <div className="bg-card border border-border rounded-xl p-10 text-center">
               <Article size={32} className="text-zinc-200 mx-auto mb-3" />
               <p className="text-sm text-zinc-400">No posts yet.</p>
               <p className="text-xs text-zinc-300 mt-1">Check into a pod to share your progress.</p>
@@ -821,7 +818,7 @@ export default function ProfilePage() {
               {allEvents.map((event) => {
                 const myRsvp = eventRsvps[event.id]
                 return (
-                  <div key={event.id} className="bg-white border border-zinc-100 rounded-3xl p-5 hover:border-zinc-200 transition-all">
+                  <div key={event.id} className="bg-card border border-border rounded-xl p-4 hover:border-zinc-300 hover:shadow-2 transition-all duration-150">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
                         <p className="text-xs font-semibold text-amber-600 mb-0.5">{event.dateLabel} · {event.time}</p>
@@ -866,7 +863,7 @@ export default function ProfilePage() {
               })}
             </div>
           ) : (
-            <div className="bg-white border border-zinc-100 rounded-3xl p-10 text-center">
+            <div className="bg-card border border-border rounded-xl p-10 text-center">
               <CalendarBlank size={32} className="text-zinc-200 mx-auto mb-3" />
               <p className="text-sm text-zinc-400">No upcoming events.</p>
               <p className="text-xs text-zinc-300 mt-1">Events from your pods will appear here.</p>

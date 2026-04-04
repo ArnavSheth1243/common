@@ -149,7 +149,7 @@ export default function WelcomePage() {
   const srText = "I'm looking for people to run every morning"
 
   return (
-    <div className="min-h-[100dvh] bg-[#ede9df] flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
       {/* Pixel trail — full screen interactive layer */}
       <PixelTrail
         pixelSize={screenSize.lessThan("md") ? 40 : 64}
@@ -166,7 +166,7 @@ export default function WelcomePage() {
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(10px)" }}
         >
           <img src="/logo.svg" alt="Common" className="w-8 h-8" />
-          <span className="text-xl font-bold text-zinc-900 tracking-tight">Common</span>
+          <span className="text-xl font-bold text-foreground tracking-tight">Common</span>
         </div>
 
         {/* ── New Headline ── */}
@@ -177,25 +177,25 @@ export default function WelcomePage() {
           {/* Screen-reader-only static sentence */}
           <p className="sr-only">{srText}</p>
 
-          <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
+          <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-foreground tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
             I&apos;m looking for people to
           </h1>
           <div className="flex items-baseline justify-center gap-[0.35em] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight leading-[1.1] mb-5">
             <TextRotator
               items={ACTIVITIES}
               intervalMs={2800}
-              className="text-amber-500"
+              className="text-primary"
             />
-            <span className="text-zinc-900">with</span>
+            <span className="text-foreground">with</span>
             <TextRotator
               items={CADENCES}
               intervalMs={2800}
               initialDelay={1400}
-              className="text-forest-500"
+              className="text-success"
             />
           </div>
 
-          <p className="text-lg text-zinc-500 leading-relaxed max-w-[34ch] mx-auto mb-12">
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-[34ch] mx-auto mb-12">
             Join a pod, pursue your passions together.
           </p>
         </div>
@@ -207,14 +207,14 @@ export default function WelcomePage() {
         >
           <Link
             href="/auth?tab=signup"
-            className="inline-flex items-center gap-2.5 bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-base px-8 py-4 rounded-2xl transition-all duration-200 shadow-[0_8px_30px_-8px_rgba(0,0,0,0.2)] active:scale-[0.98]"
+            className="inline-flex items-center gap-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-semibold text-base px-8 py-4 rounded-2xl transition-all duration-150 shadow-2 active:scale-[0.98]"
           >
             Get Started
             <ArrowRight size={17} weight="bold" />
           </Link>
-          <p className="text-sm text-zinc-400 mt-5">
+          <p className="text-sm text-muted-foreground mt-5">
             Already have an account?{" "}
-            <Link href="/auth" className="text-zinc-600 font-semibold hover:text-amber-600 transition-colors">
+            <Link href="/auth" className="text-foreground font-semibold hover:text-primary transition-colors">
               Sign in
             </Link>
           </p>

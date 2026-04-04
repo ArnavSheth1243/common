@@ -27,6 +27,7 @@ import {
   Drop,
   MapPin,
   Lock,
+  Compass,
 } from "@phosphor-icons/react"
 import type { FC } from "react"
 import { CADENCE_LABELS } from "@/lib/data"
@@ -34,6 +35,11 @@ import type { Pod } from "@/lib/data"
 import { usePodState } from "@/app/context/pod-state"
 import { useSession } from "@/app/context/session"
 import { createClient } from "@/lib/supabase/client"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/ui/page-header"
+import { EmptyState } from "@/components/ui/empty-state"
+import { cn } from "@/lib/utils"
 
 const CATEGORY_IMAGES: Record<string, string> = {
   running:      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&h=200&fit=crop&q=75",
@@ -61,26 +67,11 @@ const CATEGORY_IMAGES: Record<string, string> = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categoryIcons: Record<string, FC<any>> = {
-  running: Sneaker,
-  cycling: Bicycle,
-  swimming: Drop,
-  yoga: Leaf,
-  strength: Barbell,
-  hiking: Mountains,
-  reading: BookOpen,
-  writing: PencilSimple,
-  journaling: NotePencil,
-  meditation: Leaf,
-  cooking: ForkKnife,
-  learning: GraduationCap,
-  music: MusicNote,
-  art: PaintBrush,
-  photography: Camera,
-  finance: CurrencyDollar,
-  fitness: Barbell,
-  mindfulness: Leaf,
-  productivity: GraduationCap,
-  creativity: PaintBrush,
+  running: Sneaker, cycling: Bicycle, swimming: Drop, yoga: Leaf,
+  strength: Barbell, hiking: Mountains, reading: BookOpen, writing: PencilSimple,
+  journaling: NotePencil, meditation: Leaf, cooking: ForkKnife, learning: GraduationCap,
+  music: MusicNote, art: PaintBrush, photography: Camera, finance: CurrencyDollar,
+  fitness: Barbell, mindfulness: Leaf, productivity: GraduationCap, creativity: PaintBrush,
   other: Tag,
 }
 
@@ -97,114 +88,95 @@ function PodCard({ pod, featured = false }: { pod: any; featured?: boolean }) {
   return (
     <Link
       href={`/pods/${pod.id}`}
-      className="group block bg-white border border-zinc-100 rounded-3xl overflow-hidden shadow-softer hover:shadow-card-hover hover:border-zinc-200 hover:-translate-y-0.5 transition-all duration-300 ease-spring"
+      className="group block overflow-hidden"
     >
-      <div className={`${featured ? "h-48" : "h-32"} overflow-hidden relative`}>
-        {imgUrl ? (
-          <img
-            src={imgUrl}
-            alt=""
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full bg-zinc-100" />
-        )}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-amber-100 rounded-full px-2.5 py-1">
-          <Flame size={11} weight="fill" className="text-amber-500" />
-          <span className="text-xs font-bold text-amber-700">{pod.streak || 0}</span>
+      <Card className="overflow-hidden hover:shadow-2 hover:border-zinc-300 transition-all duration-150">
+        {/* Image */}
+        <div className={cn("overflow-hidden relative", featured ? "h-44" : "h-32")}>
+          {imgUrl ? (
+            <img
+              src={imgUrl}
+              alt=""
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full bg-muted" />
+          )}
+          {pod.streak > 0 && (
+            <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-md px-2 py-1">
+              <Flame size={11} weight="fill" className="text-amber-500" />
+              <span className="text-xs font-bold text-amber-700">{pod.streak}</span>
+            </div>
+          )}
+          {pod.visibility === "private" && (
+            <div className="absolute top-2.5 left-2.5 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-md px-2 py-1">
+              <Lock size={10} weight="fill" className="text-white/90" />
+              <span className="text-[10px] font-bold text-white/90">Private</span>
+            </div>
+          )}
         </div>
-        {pod.visibility === "private" && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1">
-            <Lock size={10} weight="fill" className="text-white/90" />
-            <span className="text-[10px] font-bold text-white/90">Private</span>
-          </div>
-        )}
-        {pod.location ? (
-          <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-8"
-            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)" }}
-          >
-            <div className="flex items-center gap-1.5">
-              <MapPin size={11} weight="fill" className="text-white/90 flex-shrink-0" />
-              <span className="text-xs font-semibold text-white/90 truncate">{pod.location}</span>
-            </div>
-          </div>
-        ) : null}
-      </div>
 
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-zinc-50 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-amber-50 transition-colors">
-              <Icon
-                size={20}
-                weight="duotone"
-                className="text-zinc-500 group-hover:text-amber-600 transition-colors"
-              />
+        {/* Content */}
+        <div className="p-4">
+          <div className="flex items-start gap-3 mb-2">
+            <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center flex-shrink-0">
+              <Icon size={18} weight="duotone" className="text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
-            <div>
-              <h3 className="text-[15px] font-semibold text-zinc-900 leading-tight">{pod.name}</h3>
-              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                <span
-                  className={`text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full ${
-                    pod.type === "Habit"
-                      ? "bg-amber-50 text-amber-700"
-                      : "bg-emerald-50 text-emerald-700"
-                  }`}
-                >
-                  {pod.type}
-                </span>
-                <span className="flex items-center gap-1 text-[10px] text-zinc-400">
-                  <ArrowsClockwise size={9} />
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-semibold text-foreground leading-tight truncate">
+                {pod.name}
+              </h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[10px] font-medium text-muted-foreground">
                   {CADENCE_LABELS[pod.cadence as keyof typeof CADENCE_LABELS] || pod.cadence}
                 </span>
+                {pod.location && (
+                  <>
+                    <span className="text-zinc-300">·</span>
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      {pod.location}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
-        </div>
 
-        <p className="text-sm text-zinc-500 leading-relaxed mb-4 line-clamp-2">{pod.description || "No description"}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2">
+            {pod.description || "No description"}
+          </p>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-1.5">
-              {(pod.memberProfiles || []).slice(0, 4).map((m: any, i: number) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full bg-zinc-900 text-white flex items-center justify-center text-[8px] font-bold border-2 border-white"
-                  title={m.name}
-                >
-                  {m.initials}
-                </div>
-              ))}
-              {pod.member_count > 4 && (
-                <div className="w-6 h-6 rounded-full bg-zinc-200 text-zinc-500 flex items-center justify-center text-[8px] font-bold border-2 border-white">
-                  +{pod.member_count - 4}
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-1.5">
+                {(pod.memberProfiles || []).slice(0, 4).map((m: any, i: number) => (
+                  <div
+                    key={i}
+                    className="w-5 h-5 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center text-[7px] font-bold border-2 border-card"
+                    title={m.name}
+                  >
+                    {m.initials}
+                  </div>
+                ))}
+              </div>
+              <span className="text-[11px] text-muted-foreground">
+                {membersDisplay} members
+              </span>
+            </div>
+            <span
+              className={cn(
+                "text-[11px] font-medium px-2 py-0.5 rounded-md",
+                isFull
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-zinc-900 text-zinc-50",
               )}
-            </div>
-            <div className="flex items-center gap-1 text-xs text-zinc-400">
-              <Users size={12} />
-              <span>{membersDisplay}</span>
-            </div>
+            >
+              {spotsLabel}
+            </span>
           </div>
-          <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-              isFull ? "bg-zinc-100 text-zinc-400" : "bg-zinc-900 text-white"
-            }`}
-          >
-            {spotsLabel}
-          </span>
         </div>
-      </div>
+      </Card>
     </Link>
-  )
-}
-
-function EmptySection({ type }: { type: "Habit" | "Explore" }) {
-  return (
-    <div className="col-span-full py-10 text-center">
-      <p className="text-sm text-zinc-400">No {type.toLowerCase()} pods match this filter</p>
-    </div>
   )
 }
 
@@ -226,18 +198,13 @@ export default function PodsPage() {
     const fetchPods = async () => {
       const sb = createClient()
       try {
-        // Fetch all pods with their members
-        // Fetch pods
         const { data: pods, error: podsError } = await sb
           .from("pods")
           .select("*, pod_members(user_id)")
           .order("created_at", { ascending: false })
 
-        if (podsError) {
-          console.error("Supabase pods query error:", podsError)
-        }
+        if (podsError) console.error("Supabase pods query error:", podsError)
 
-        // Fetch all profiles for member name lookups
         const memberUserIds = new Set<string>()
         ;(pods || []).forEach((p: any) => {
           (p.pod_members || []).forEach((m: any) => memberUserIds.add(m.user_id))
@@ -249,13 +216,11 @@ export default function PodsPage() {
             .from("profiles")
             .select("id, display_name")
             .in("id", Array.from(memberUserIds))
-
           ;(profiles || []).forEach((p: any) => {
             profileMap[p.id] = p.display_name || "?"
           })
         }
 
-        // Attach member initials to each pod
         const podsWithMembers = (pods || []).map((p: any) => ({
           ...p,
           memberProfiles: (p.pod_members || []).slice(0, 5).map((m: any) => {
@@ -269,13 +234,11 @@ export default function PodsPage() {
 
         setAllPods(podsWithMembers)
 
-        // Fetch user's pod memberships
         if (user) {
           const { data: memberships } = await sb
             .from("pod_members")
             .select("pod_id")
             .eq("user_id", user.id)
-
           setMyPodIds(new Set((memberships || []).map((m: any) => m.pod_id)))
         }
       } catch (err) {
@@ -284,7 +247,6 @@ export default function PodsPage() {
         setLoading(false)
       }
     }
-
     fetchPods()
   }, [user])
 
@@ -318,84 +280,85 @@ export default function PodsPage() {
   const filteredMy = useMemo(() => myPods.filter(filterFn), [myPods, sizeFilter, typeFilter, locationFilter, query])
   const filteredHabit = useMemo(
     () => discoverPods.filter((p) => p.type === "Habit").filter(filterFn),
-    [discoverPods, sizeFilter, typeFilter, locationFilter, query]
+    [discoverPods, sizeFilter, typeFilter, locationFilter, query],
   )
   const filteredExplore = useMemo(
     () => discoverPods.filter((p) => p.type === "Explore").filter(filterFn),
-    [discoverPods, sizeFilter, typeFilter, locationFilter, query]
+    [discoverPods, sizeFilter, typeFilter, locationFilter, query],
   )
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-5 lg:px-8 py-8">
-        <div className="text-center py-12 text-zinc-400">Loading pods...</div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center py-16">
+          <div className="w-6 h-6 border-2 border-border border-t-primary rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">Loading pods...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-5 lg:px-8 py-8">
-      <div className="mb-8 sm:mb-10 animate-fade-up">
-        <div className="mb-6">
-          <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.12em] mb-2.5">Discover</p>
-          <h1 className="text-[28px] sm:text-[36px] lg:text-[42px] font-bold text-zinc-900 tracking-tighter leading-none">Pods</h1>
-          <p className="text-sm sm:text-base text-zinc-400 mt-2">Find your group</p>
-        </div>
-        <Link
-          href="/pods/new"
-          className="flex items-center justify-center gap-2.5 w-full bg-amber-500 hover:bg-amber-600 text-white text-sm sm:text-base font-bold px-6 py-4 rounded-2xl transition-all duration-200 ease-spring active:scale-[0.98] shadow-[0_4px_20px_-4px_rgba(245,158,11,0.4)]"
-        >
-          <Plus size={18} weight="bold" />
-          Create a pod
-        </Link>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Header */}
+      <PageHeader
+        title="Discover Pods"
+        description="Find your group and build accountability together."
+        action={
+          <Button asChild className="bg-primary hover:bg-primary/90">
+            <Link href="/pods/new" className="gap-2">
+              <Plus size={16} weight="bold" />
+              Create pod
+            </Link>
+          </Button>
+        }
+      />
 
-      {/* Search + Filter toggle */}
+      {/* Search + Filter */}
       <div className="flex gap-2 mb-3">
         <div className="relative flex-1">
           <MagnifyingGlass
             size={16}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
           />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search pods..."
-            className="w-full bg-white border border-zinc-200 shadow-softer focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all duration-200"
+            className="w-full bg-card border border-border focus:border-primary rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150"
           />
         </div>
-        <button
+        <Button
+          variant={showFilters || sizeFilter !== "any" || typeFilter !== "all" || locationFilter ? "default" : "outline"}
+          size="default"
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-1.5 px-4 py-3.5 rounded-2xl border text-sm font-medium transition-all duration-200 flex-shrink-0 ${
-            showFilters || sizeFilter !== "any" || typeFilter !== "all" || locationFilter
-              ? "bg-zinc-900 border-zinc-900 text-white"
-              : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
-          }`}
+          className="gap-1.5"
         >
           <Faders size={16} />
           Filters
           {(sizeFilter !== "any" || typeFilter !== "all" || locationFilter) && (
             <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
           )}
-        </button>
+        </Button>
       </div>
 
-      {/* Quick type pills — always visible */}
-      <div className="flex gap-1.5 mb-4">
+      {/* Type pills */}
+      <div className="flex gap-1.5 mb-5">
         {[
           { label: "All", value: "all" },
           { label: "Habit", value: "Habit" },
           { label: "Explore", value: "Explore" },
-        ].map(opt => (
+        ].map((opt) => (
           <button
             key={opt.value}
             onClick={() => setTypeFilter(opt.value)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-150 ${
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150",
               typeFilter === opt.value
-                ? "bg-zinc-900 border-zinc-900 text-white"
-                : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
-            }`}
+                ? "bg-zinc-900 border-zinc-900 text-zinc-50"
+                : "bg-card border-border text-muted-foreground hover:border-zinc-300",
+            )}
           >
             {opt.label}
           </button>
@@ -404,103 +367,102 @@ export default function PodsPage() {
 
       {/* Expanded filters */}
       {showFilters && (
-        <div className="bg-white border border-zinc-100 rounded-3xl p-5 mb-6 space-y-4 animate-fade-up">
-          {/* Size */}
-          <div>
-            <label className="block text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">Group size</label>
-            <div className="flex gap-1.5 flex-wrap">
-              {[
-                { label: "Any", value: "any" },
-                { label: "3–6", value: "3-6" },
-                { label: "7–10", value: "7-10" },
-                { label: "10+", value: "10+" },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setSizeFilter(opt.value)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all duration-150 ${
-                    sizeFilter === opt.value
-                      ? "bg-zinc-900 border-zinc-900 text-white"
-                      : "bg-zinc-50 border-zinc-200 text-zinc-500 hover:border-zinc-300"
-                  }`}
+        <Card className="mb-5">
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                Group size
+              </label>
+              <div className="flex gap-1.5 flex-wrap">
+                {[
+                  { label: "Any", value: "any" },
+                  { label: "3-6", value: "3-6" },
+                  { label: "7-10", value: "7-10" },
+                  { label: "10+", value: "10+" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSizeFilter(opt.value)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150",
+                      sizeFilter === opt.value
+                        ? "bg-zinc-900 border-zinc-900 text-zinc-50"
+                        : "bg-accent border-border text-muted-foreground hover:border-zinc-300",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+                Location
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                <input
+                  type="text"
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  placeholder="City or neighborhood..."
+                  className="flex-1 min-w-[140px] bg-accent border border-border focus:border-primary rounded-xl px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none transition-all"
+                />
+                <select
+                  value={radiusFilter}
+                  onChange={(e) => setRadiusFilter(e.target.value)}
+                  className="bg-accent border border-border rounded-xl px-3 py-2 text-xs text-muted-foreground outline-none focus:border-primary transition-all"
                 >
-                  {opt.label}
-                </button>
-              ))}
+                  <option value="any">Any radius</option>
+                  <option value="5">5 mi</option>
+                  <option value="10">10 mi</option>
+                  <option value="25">25 mi</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          {/* Location */}
-          <div>
-            <label className="block text-[10px] font-semibold text-zinc-400 uppercase tracking-widest mb-2">Location</label>
-            <div className="flex gap-2 flex-wrap">
-              <input
-                type="text"
-                value={locationFilter}
-                onChange={e => setLocationFilter(e.target.value)}
-                placeholder="City or neighborhood..."
-                className="flex-1 min-w-[140px] bg-zinc-50 border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
-              />
-              <select
-                value={radiusFilter}
-                onChange={e => setRadiusFilter(e.target.value)}
-                className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs text-zinc-600 outline-none focus:border-amber-400 transition-all"
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              <button
+                onClick={handleClearFilters}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
-                <option value="any">Any radius</option>
-                <option value="5">5 mi</option>
-                <option value="10">10 mi</option>
-                <option value="25">25 mi</option>
-              </select>
+                Clear all
+              </button>
+              <Button
+                size="sm"
+                variant={savedPrefs ? "secondary" : "default"}
+                onClick={handleSavePreferences}
+              >
+                {savedPrefs ? "Saved" : "Save"}
+              </Button>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-2 border-t border-zinc-50">
-            <button
-              onClick={handleClearFilters}
-              className="text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors"
-            >
-              Clear all
-            </button>
-            <button
-              onClick={handleSavePreferences}
-              className={`text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                savedPrefs
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-zinc-900 text-white hover:bg-zinc-800"
-              }`}
-            >
-              {savedPrefs ? "Saved" : "Save"}
-            </button>
-          </div>
-        </div>
+        </Card>
       )}
 
-      {/* Section: My pods */}
+      {/* My pods */}
       {filteredMy.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-4">
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">
             My pods
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-3">
             {filteredMy.map((pod) => (
               <PodCard key={pod.id} pod={pod} />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Section: Habit Pods */}
+      {/* Habit Pods */}
       {(typeFilter === "all" || typeFilter === "Habit") && (
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-bold text-zinc-900 tracking-tight">Habit Pods</h2>
-              <span className="text-xs text-zinc-400">Build something consistent</span>
-            </div>
+        <section className="mb-8">
+          <div className="flex items-baseline gap-2 mb-3">
+            <h2 className="text-base font-bold text-foreground">Habit Pods</h2>
+            <span className="text-xs text-muted-foreground">Build something consistent</span>
           </div>
           {filteredHabit.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-3">
               {filteredHabit.map((pod, i) => (
                 <div key={pod.id} className={i === 0 ? "md:col-span-2" : ""}>
                   <PodCard pod={pod} featured={i === 0} />
@@ -508,22 +470,24 @@ export default function PodsPage() {
               ))}
             </div>
           ) : (
-            <EmptySection type="Habit" />
+            <EmptyState
+              icon={<Compass size={36} />}
+              title="No habit pods found"
+              description="Try adjusting your filters or create your own."
+            />
           )}
-        </div>
+        </section>
       )}
 
-      {/* Section: Explore Pods */}
+      {/* Explore Pods */}
       {(typeFilter === "all" || typeFilter === "Explore") && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-bold text-zinc-900 tracking-tight">Explore Pods</h2>
-              <span className="text-xs text-zinc-400">Try something new</span>
-            </div>
+        <section>
+          <div className="flex items-baseline gap-2 mb-3">
+            <h2 className="text-base font-bold text-foreground">Explore Pods</h2>
+            <span className="text-xs text-muted-foreground">Try something new</span>
           </div>
           {filteredExplore.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-3">
               {filteredExplore.map((pod, i) => (
                 <div key={pod.id} className={i === 0 ? "md:col-span-2" : ""}>
                   <PodCard pod={pod} featured={i === 0} />
@@ -531,9 +495,13 @@ export default function PodsPage() {
               ))}
             </div>
           ) : (
-            <EmptySection type="Explore" />
+            <EmptyState
+              icon={<Compass size={36} />}
+              title="No explore pods found"
+              description="Try adjusting your filters or create your own."
+            />
           )}
-        </div>
+        </section>
       )}
     </div>
   )
