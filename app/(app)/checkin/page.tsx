@@ -167,7 +167,7 @@ function CheckinForm() {
       <div className="mb-6 sm:mb-8">
         <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mb-1">New check-in</h1>
         <p className="text-sm text-zinc-500">
-          Share what you did{cadenceVerb ? ` ${cadenceVerb}` : ""}. Keep it honest.
+          Share what you did{cadenceVerb ? ` ${cadenceVerb}` : ""}. Your pod wants to hear about it.
         </p>
       </div>
 
@@ -232,13 +232,13 @@ function CheckinForm() {
         {/* Text input */}
         <div>
           <label className="block text-sm font-semibold text-zinc-700 mb-2">
-            How&apos;s progress going?
+            What have you been up to?
           </label>
           <div className="relative">
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value.slice(0, maxLength))}
-              placeholder={selectedPod === "solo" ? "What did you work on today?" : `Share something with your ${cadenceLabel.toLowerCase()} pod — keep it real.`}
+              placeholder={selectedPod === "solo" ? "What did you work on today?" : `Share something with your ${cadenceLabel.toLowerCase()} pod.`}
               rows={5}
               className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3.5 text-[15px] text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
             />

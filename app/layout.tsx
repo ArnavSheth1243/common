@@ -11,13 +11,13 @@ const outfit = Outfit({
 })
 
 export const metadata: Metadata = {
-  title: "Common — Better Together",
+  title: "Common — Find Something to Do",
   description:
-    "Build habits and try new things with a small group working toward the same goal. Join a pod, check in daily, and stay accountable.",
-  keywords: ["habits", "accountability", "community", "pods", "daily check-in"],
+    "Thousands of recurring activities with real people. Pick one, join a pod, and show up together. Running, reading, cooking, coding — whatever you're into.",
+  keywords: ["activities", "pods", "recurring events", "things to do", "group activities", "streaks"],
   openGraph: {
-    title: "Common — Better Together",
-    description: "Build habits and try new things with a small group working toward the same goal.",
+    title: "Common — Find Something to Do",
+    description: "Thousands of recurring activities with real people. Pick one, join a pod, show up.",
     type: "website",
   },
 }

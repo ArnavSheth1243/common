@@ -291,6 +291,11 @@ export default function OnboardingPage() {
     router.push("/dashboard")
   }
 
+  const handleSkip = async () => {
+    await updateProfile({ onboardingComplete: true })
+    router.push("/dashboard")
+  }
+
   const canNext =
     step === 1 ? name.trim().length > 0 :
     step === 3 ? goals.length > 0 :
@@ -311,10 +316,18 @@ export default function OnboardingPage() {
     <div className="min-h-[100dvh] bg-[#ede9df] flex flex-col items-center justify-center px-5 py-10">
       <div className="w-full max-w-lg">
 
-        {/* Logo */}
-        <div className="flex items-center gap-2 mb-8">
-          <img src="/logo.svg" alt="Common" className="w-6 h-6" />
-          <span className="text-[15px] font-bold text-zinc-900 tracking-tight">Common</span>
+        {/* Logo + Skip */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <img src="/logo.svg" alt="Common" className="w-6 h-6" />
+            <span className="text-[15px] font-bold text-zinc-900 tracking-tight">Common</span>
+          </div>
+          <button
+            onClick={handleSkip}
+            className="text-sm font-medium text-zinc-400 hover:text-zinc-600 transition-colors"
+          >
+            Skip for now
+          </button>
         </div>
 
         {/* Progress */}
@@ -340,7 +353,7 @@ export default function OnboardingPage() {
               What should<br />we call you?
             </h1>
             <p className="text-zinc-400 mb-8 text-[15px]">
-              This is how your pod members will know you.
+              This is how people in your pods will know you.
             </p>
             <input
               type="text"

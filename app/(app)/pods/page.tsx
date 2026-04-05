@@ -303,7 +303,7 @@ export default function PodsPage() {
       {/* Header */}
       <PageHeader
         title="Discover Pods"
-        description="Find your group and build accountability together."
+        description="Thousands of recurring activities. Find one, join a pod, show up."
         action={
           <Button asChild className="bg-primary hover:bg-primary/90">
             <Link href="/pods/new" className="gap-2">

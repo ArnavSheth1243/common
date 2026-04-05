@@ -602,7 +602,7 @@ export default function DashboardPage() {
                     rows={3}
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value.slice(0, 300))}
-                    placeholder="How's progress going?"
+                    placeholder="What have you been up to?"
                     className="w-full text-sm text-foreground placeholder:text-muted-foreground bg-accent border border-border focus:border-primary focus:bg-card rounded-xl px-3 py-2.5 outline-none resize-none transition-all"
                     autoFocus
                   />
@@ -653,7 +653,7 @@ export default function DashboardPage() {
               <EmptyState
                 icon={<ChatCircle size={40} />}
                 title="No check-ins yet"
-                description="Join a pod and post your first check-in to get started."
+                description="Browse activities, join a pod, and share what you're up to."
                 action={
                   <Button asChild>
                     <Link href="/pods">Browse pods</Link>

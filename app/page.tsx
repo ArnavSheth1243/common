@@ -1,10 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
-import { ArrowRight } from "@phosphor-icons/react"
-import { PixelTrail } from "@/components/ui/pixel-trail"
-import { useScreenSize } from "@/components/hooks/use-screen-size"
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 // Extend these arrays to 200+ items — they're designed to be CMS-replaceable.
@@ -137,8 +135,6 @@ function TextRotator({
 
 export default function WelcomePage() {
   const [visible, setVisible] = useState(false)
-  const screenSize = useScreenSize()
-
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 120)
@@ -146,20 +142,11 @@ export default function WelcomePage() {
   }, [])
 
   // Static fallback text for screen readers
-  const srText = "I'm looking for people to run every morning"
+  const srText = "Find people to run with every morning"
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
-      {/* Pixel trail — full screen interactive layer */}
-      <PixelTrail
-        pixelSize={screenSize.lessThan("md") ? 40 : 64}
-        fadeDuration={0}
-        delay={900}
-        pixelClassName="rounded-full bg-amber-400/60"
-      />
-
-      {/* Content — above the trail */}
-      <div className="relative z-10 pointer-events-none flex flex-col items-center">
+      <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
         <div
           className="flex items-center gap-2 mb-14 transition-all duration-700"
@@ -178,7 +165,7 @@ export default function WelcomePage() {
           <p className="sr-only">{srText}</p>
 
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-foreground tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
-            I&apos;m looking for people to
+            Find people to
           </h1>
           <div className="flex items-baseline justify-center gap-[0.35em] text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold tracking-tight leading-[1.1] mb-5">
             <TextRotator
@@ -195,14 +182,14 @@ export default function WelcomePage() {
             />
           </div>
 
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-[34ch] mx-auto mb-12">
-            Join a pod, pursue your passions together.
+          <p className="text-lg text-muted-foreground leading-relaxed max-w-[38ch] mx-auto mb-12">
+            Thousands of recurring activities. Pick one, join a pod, show up with real people.
           </p>
         </div>
 
-        {/* CTA — needs pointer-events back */}
+        {/* CTA */}
         <div
-          className="pointer-events-auto transition-all duration-700 delay-300"
+          className="transition-all duration-700 delay-300"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(14px)" }}
         >
           <Link
