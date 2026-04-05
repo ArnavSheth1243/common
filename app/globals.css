@@ -5,42 +5,42 @@
 @layer base {
   :root {
     /* ─── Background & Surface ─── */
-    --background: 36 24% 93%;       /* #f5f2eb — warm page bg */
-    --foreground: 36 16% 10%;       /* #1a1814 — primary text */
+    --background: 0 0% 100%;         /* pure white */
+    --foreground: 0 0% 4%;           /* #0A0A0A — near-black */
 
-    --card: 40 33% 97%;             /* #faf8f4 — card surface */
-    --card-foreground: 36 16% 10%;
+    --card: 0 0% 100%;               /* white cards */
+    --card-foreground: 0 0% 4%;
 
-    --popover: 40 33% 97%;
-    --popover-foreground: 36 16% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
 
-    /* ─── Accent (warm amber-orange) ─── */
-    --primary: 30 80% 52%;          /* #e67e22 */
+    /* ─── Accent (vibrant violet) ─── */
+    --primary: 262 83% 58%;          /* #7C3AED */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 12% 92%;        /* warm muted bg */
-    --secondary-foreground: 36 16% 10%;
+    --secondary: 240 5% 96%;         /* cool light gray */
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 36 10% 90%;
-    --muted-foreground: 24 8% 45%;  /* #7a7470 */
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;  /* #71717A */
 
-    --accent: 36 12% 92%;
-    --accent-foreground: 36 16% 10%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 0 0% 9%;
 
-    --destructive: 4 70% 50%;       /* #dc4a3d */
+    --destructive: 0 84% 60%;        /* vivid red */
     --destructive-foreground: 0 0% 100%;
 
-    /* ─── Success (forest green) ─── */
-    --success: 152 50% 35%;         /* #2d8659 */
+    /* ─── Success (vibrant green) ─── */
+    --success: 142 71% 45%;          /* #22C55E */
     --success-foreground: 0 0% 100%;
 
     /* ─── Borders & Inputs ─── */
-    --border: 36 16% 88%;           /* #e8e4dc */
-    --input: 36 16% 88%;
-    --ring: 30 80% 52%;             /* matches primary */
+    --border: 240 6% 90%;            /* #E4E4E7 — cool light gray */
+    --input: 240 6% 90%;
+    --ring: 262 83% 58%;             /* matches primary */
 
     /* ─── Radius ─── */
-    --radius: 0.75rem;              /* 12px base */
+    --radius: 0.75rem;               /* 12px base */
   }
 }
 
@@ -65,8 +65,8 @@
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(36, 10%, 78%); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(36, 10%, 65%); }
+::-webkit-scrollbar-thumb { background: hsl(240, 4%, 80%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(240, 4%, 65%); }
 
 /* ─── Focus ─── */
 :focus-visible {
@@ -94,6 +94,14 @@ img, video, iframe, svg { max-width: 100%; }
 
   .animate-fade-up { opacity: 0; }
   .ease-spring { transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+
+  /* Gradient text utility */
+  .text-gradient {
+    background: linear-gradient(135deg, #7C3AED 0%, #EC4899 50%, #F59E0B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 @keyframes marquee {

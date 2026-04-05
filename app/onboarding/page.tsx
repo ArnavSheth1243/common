@@ -99,7 +99,7 @@ const TOUR_FEATURES = [
   {
     key: "checkin",
     icon: Flame,
-    color: "bg-amber-500",
+    color: "bg-violet-500",
     label: "Daily check-ins",
     sub: "Post what you did. Build a streak. Keep the momentum going.",
     preview: (
@@ -179,7 +179,7 @@ const TOUR_FEATURES = [
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: 28 }, (_, i) => (
             <div key={i} className={`h-4 rounded-sm text-center text-[8px] leading-4 font-semibold
-              ${i === 7 ? "bg-amber-400 text-zinc-900" :
+              ${i === 7 ? "bg-violet-400 text-white" :
                 [3,11,18,22].includes(i) ? "bg-white/25 text-white" :
                 "text-white/30"}`}
             >
@@ -306,14 +306,14 @@ export default function OnboardingPage() {
 
   if (profileLoading) {
     return (
-      <div className="min-h-[100dvh] bg-[#ede9df] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+      <div className="min-h-[100dvh] bg-white flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#ede9df] flex flex-col items-center justify-center px-5 py-10">
+    <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-5 py-10">
       <div className="w-full max-w-lg">
 
         {/* Logo + Skip */}
@@ -340,7 +340,7 @@ export default function OnboardingPage() {
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                i < step ? "bg-zinc-900" : "bg-zinc-200"
+                i < step ? "bg-gradient-to-r from-violet-500 to-pink-500" : "bg-zinc-200"
               }`}
             />
           ))}
@@ -361,7 +361,7 @@ export default function OnboardingPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
               autoFocus
-              className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-5 py-4 text-xl text-zinc-900 placeholder:text-zinc-300 outline-none transition-all font-semibold"
+              className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-5 py-4 text-xl text-zinc-900 placeholder:text-zinc-300 outline-none transition-all font-semibold"
             />
           </div>
         )}
@@ -385,7 +385,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. 26"
                   min={13}
                   max={100}
-                  className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-5 py-4 text-lg text-zinc-900 placeholder:text-zinc-300 outline-none transition-all font-semibold"
+                  className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-5 py-4 text-lg text-zinc-900 placeholder:text-zinc-300 outline-none transition-all font-semibold"
                 />
                 <p className="text-xs text-zinc-300 mt-1.5 ml-1">Optional — we keep this private.</p>
               </div>
@@ -399,7 +399,7 @@ export default function OnboardingPage() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="e.g. Brooklyn, NY or Remote"
-                  className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-5 py-4 text-base text-zinc-900 placeholder:text-zinc-300 outline-none transition-all"
+                  className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-5 py-4 text-base text-zinc-900 placeholder:text-zinc-300 outline-none transition-all"
                 />
                 <p className="text-xs text-zinc-300 mt-1.5 ml-1">Optional — helps with in-person pods.</p>
               </div>
@@ -430,8 +430,8 @@ export default function OnboardingPage() {
         {/* ── Step 3 — Welcome callout (transition slide) ────────────────────── */}
         {step === 3 && (
           <div className="animate-fade-up">
-            <div className="mb-6 inline-flex items-center gap-2 bg-amber-50 border border-amber-100 text-amber-700 text-sm font-semibold px-4 py-2 rounded-full">
-              <Star size={14} weight="fill" className="text-amber-500" />
+            <div className="mb-6 inline-flex items-center gap-2 bg-violet-50 border border-violet-100 text-violet-700 text-sm font-semibold px-4 py-2 rounded-full">
+              <Star size={14} weight="fill" className="text-violet-500" />
               Hey, {name.split(" ")[0] || "friend"} 👋
             </div>
             <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-tight mb-4">
@@ -453,7 +453,7 @@ export default function OnboardingPage() {
                         : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
-                    <Icon size={18} weight={selected ? "fill" : "regular"} className={selected ? "text-amber-400" : "text-zinc-400"} />
+                    <Icon size={18} weight={selected ? "fill" : "regular"} className={selected ? "text-white/80" : "text-zinc-400"} />
                     <span className="leading-snug">{label}</span>
                   </button>
                 )
@@ -527,7 +527,7 @@ export default function OnboardingPage() {
                   onClick={() => setTimePreference(value)}
                   className={`flex flex-col items-center gap-2 py-4 rounded-2xl border-2 text-sm font-semibold transition-all duration-150 ${
                     timePreference === value
-                      ? "border-amber-400 bg-amber-50 text-amber-700"
+                      ? "border-violet-400 bg-violet-50 text-violet-700"
                       : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
                   }`}
                 >
@@ -542,7 +542,7 @@ export default function OnboardingPage() {
         {/* ── Step 6 — App tour ─────────────────────────────────────────────── */}
         {step === 6 && (
           <div className="animate-fade-up">
-            <div className="mb-2 inline-flex items-center gap-2 bg-zinc-900 text-[#f5f0e6] text-xs font-bold px-3 py-1.5 rounded-full">
+            <div className="mb-2 inline-flex items-center gap-2 bg-foreground text-white text-xs font-bold px-3 py-1.5 rounded-full">
               <Compass size={12} weight="fill" /> Quick tour
             </div>
             <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-tight mb-2 mt-3">
@@ -671,7 +671,7 @@ export default function OnboardingPage() {
                   value={referralSource === "__ig__" ? "" : (igHandle || "")}
                   onChange={(e) => setIgHandle(e.target.value.replace(/^@/, "").trim())}
                   placeholder="yourhandle"
-                  className="flex-1 bg-zinc-50 border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 outline-none transition-all"
+                  className="flex-1 bg-zinc-50 border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-300 outline-none transition-all"
                 />
               </div>
             </div>
@@ -705,7 +705,7 @@ export default function OnboardingPage() {
                 }}
                 className="w-full flex items-center gap-4 bg-zinc-900 text-white rounded-3xl p-5 mb-4 transition-all active:scale-[0.98]"
               >
-                <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-pink-500 rounded-2xl flex items-center justify-center flex-shrink-0">
                   <BellRinging size={24} weight="fill" className="text-white" />
                 </div>
                 <div className="text-left flex-1">
@@ -737,7 +737,7 @@ export default function OnboardingPage() {
                       setNotifMessages(!notifMessages)
                       localStorage.setItem("notif_messages", String(!notifMessages))
                     }}
-                    className={`w-11 h-6 rounded-full transition-all duration-200 relative ${notifMessages ? "bg-amber-500" : "bg-zinc-200"}`}
+                    className={`w-11 h-6 rounded-full transition-all duration-200 relative ${notifMessages ? "bg-violet-500" : "bg-zinc-200"}`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${notifMessages ? "left-[22px]" : "left-0.5"}`} />
                   </button>
@@ -760,7 +760,7 @@ export default function OnboardingPage() {
                         setNotifPodReminders(!notifPodReminders)
                         localStorage.setItem("notif_pod_reminders", String(!notifPodReminders))
                       }}
-                      className={`w-11 h-6 rounded-full transition-all duration-200 relative ${notifPodReminders ? "bg-amber-500" : "bg-zinc-200"}`}
+                      className={`w-11 h-6 rounded-full transition-all duration-200 relative ${notifPodReminders ? "bg-violet-500" : "bg-zinc-200"}`}
                     >
                       <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${notifPodReminders ? "left-[22px]" : "left-0.5"}`} />
                     </button>
@@ -801,8 +801,8 @@ export default function OnboardingPage() {
         {/* ── Step 10 — Done ────────────────────────────────────────────────── */}
         {step === 10 && (
           <div className="animate-fade-up text-center">
-            <div className="w-20 h-20 bg-amber-50 border-2 border-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle size={36} weight="fill" className="text-amber-500" />
+            <div className="w-20 h-20 bg-violet-50 border-2 border-violet-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle size={36} weight="fill" className="text-violet-500" />
             </div>
             <h1 className="text-[36px] font-bold text-zinc-900 tracking-tighter leading-tight mb-3">
               You&apos;re in,<br />{name.split(" ")[0] || "friend"}.
@@ -819,8 +819,8 @@ export default function OnboardingPage() {
                 { icon: CalendarBlank, text: "Add to calendar",      sub: "Never miss an event" },
               ].map(({ icon: Icon, text, sub }) => (
                 <div key={text} className="bg-white border border-zinc-100 rounded-2xl p-3 flex items-start gap-2.5 shadow-softer">
-                  <div className="w-7 h-7 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Icon size={14} weight="fill" className="text-amber-500" />
+                  <div className="w-7 h-7 bg-violet-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Icon size={14} weight="fill" className="text-violet-500" />
                   </div>
                   <div>
                     <div className="text-xs font-bold text-zinc-900">{text}</div>
@@ -832,7 +832,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={handleFinish}
-              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-base py-4 rounded-2xl transition-all duration-200 active:scale-[0.98] shadow-[0_4px_20px_-4px_rgba(245,158,11,0.5)]"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-pink-500 hover:from-violet-500 hover:to-pink-400 text-white font-bold text-base py-4 rounded-full transition-all duration-200 active:scale-[0.97] shadow-[0_4px_20px_-4px_rgba(124,58,237,0.4)]"
             >
               <Flame size={18} weight="fill" />
               Let&apos;s go
@@ -868,7 +868,7 @@ export default function OnboardingPage() {
               <button
                 onClick={handleNext}
                 disabled={!canNext}
-                className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-2xl transition-all duration-200 active:scale-[0.98]"
+                className="flex items-center gap-2 bg-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-full transition-all duration-200 active:scale-[0.97]"
               >
                 Continue
                 <ArrowRight size={15} weight="bold" />

@@ -11,12 +11,12 @@ interface StatBlockProps {
 export function StatBlock({ value, label, icon, className }: StatBlockProps) {
   return (
     <div className={cn(
-      "flex flex-col items-center gap-0.5 rounded-xl bg-card border border-border p-3 text-center",
+      "flex flex-col items-center gap-1 rounded-2xl bg-zinc-50 p-3.5 text-center",
       className,
     )}>
-      {icon && <div className="mb-1 text-muted-foreground">{icon}</div>}
+      {icon && <div className="mb-0.5">{icon}</div>}
       <span className="text-xl font-bold tabular-nums text-foreground">{value}</span>
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</span>
     </div>
   )
 }

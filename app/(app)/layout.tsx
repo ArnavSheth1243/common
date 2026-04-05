@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   { href: "/dashboard",   label: "Home",       icon: House },
-  { href: "/pods",        label: "Pods",       icon: Compass },
+  { href: "/pods",        label: "Explore",    icon: Compass },
   { href: "/my-pods",     label: "My Pods",    icon: FolderUser },
   { href: "/people",      label: "People",     icon: UsersThree },
   { href: "/challenges",  label: "Challenges", icon: Lightning },
@@ -46,10 +46,10 @@ function SidebarStreakFooter() {
   if (!profile) return null
 
   return (
-    <div className="border-t border-zinc-800 pt-4 px-1">
+    <div className="border-t border-zinc-100 pt-4 px-1">
       <Link
         href="/profile"
-        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-800 transition-colors"
+        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 transition-colors"
       >
         <UserAvatar
           name={profile.displayName || ""}
@@ -57,11 +57,11 @@ function SidebarStreakFooter() {
           size="sm"
         />
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-zinc-100 truncate">
+          <div className="text-sm font-semibold text-foreground truncate">
             {profile.displayName}
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-zinc-500 font-medium">
-            <Flame size={10} weight="fill" className="text-amber-400" />
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
+            <Flame size={10} weight="fill" className="text-violet-500" />
             <span>{totalCheckins} check-ins</span>
           </div>
         </div>
@@ -89,14 +89,14 @@ function NavItemLink({
       className={cn(
         "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 relative",
         active
-          ? "bg-zinc-800 text-zinc-100"
-          : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60",
+          ? "bg-zinc-100 text-foreground"
+          : "text-zinc-500 hover:text-foreground hover:bg-zinc-50",
       )}
     >
       <item.icon
         size={18}
         weight={active ? "fill" : "regular"}
-        className={active ? "text-amber-400" : ""}
+        className={active ? "text-violet-600" : ""}
       />
       {item.label}
       {isMessages && unreadCount && unreadCount > 0 ? (
@@ -113,14 +113,14 @@ function Sidebar() {
   const { unreadCount } = useMessages()
 
   return (
-    <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-60 bg-zinc-950 z-40 py-6 px-3 border-r border-zinc-900">
+    <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-60 bg-white z-40 py-6 px-3 border-r border-border">
       {/* Logo */}
       <Link
         href="/dashboard"
         className="flex items-center gap-2.5 mb-8 px-3"
       >
-        <img src="/logo.svg" alt="Common" className="w-6 h-6 opacity-90" />
-        <span className="text-base font-bold text-zinc-100 tracking-tight">
+        <img src="/logo.svg" alt="Common" className="w-6 h-6" />
+        <span className="text-base font-bold text-foreground tracking-tight">
           Common
         </span>
       </Link>
@@ -160,8 +160,7 @@ function MobileHeader() {
 
   return (
     <>
-      {/* Top bar for mobile — compact with hamburger for secondary nav */}
-      <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between h-12 px-4 bg-background/95 backdrop-blur-lg border-b border-border">
+      <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between h-12 px-4 bg-white/80 backdrop-blur-xl border-b border-border/60">
         <Link href="/dashboard" className="flex items-center gap-2">
           <img src="/logo.svg" alt="Common" className="w-5 h-5" />
           <span className="text-sm font-bold text-foreground tracking-tight">
@@ -170,7 +169,7 @@ function MobileHeader() {
         </Link>
         <button
           onClick={() => setOpen(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-400 hover:text-foreground hover:bg-zinc-100 transition-colors"
           aria-label="Open menu"
         >
           <List size={20} />
@@ -183,24 +182,24 @@ function MobileHeader() {
       {/* Backdrop */}
       <div
         className={cn(
-          "lg:hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-200",
+          "lg:hidden fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm transition-opacity duration-200",
           open ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onClick={() => setOpen(false)}
       />
 
-      {/* Slide-out for secondary nav */}
+      {/* Slide-out */}
       <aside
         className={cn(
-          "lg:hidden fixed top-0 right-0 h-full w-72 bg-zinc-950 z-[70] py-6 px-3 transform transition-transform duration-200 ease-out",
+          "lg:hidden fixed top-0 right-0 h-full w-72 bg-white z-[70] py-6 px-3 transform transition-transform duration-200 ease-out shadow-3",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="flex items-center justify-between mb-6 px-3">
-          <span className="text-sm font-bold text-zinc-100">Menu</span>
+          <span className="text-sm font-bold text-foreground">Menu</span>
           <button
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-foreground hover:bg-zinc-100 transition-colors"
             aria-label="Close menu"
           >
             <X size={18} />
@@ -229,7 +228,7 @@ function MobileHeader() {
 
 function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="min-h-[100dvh] bg-zinc-50">
       <Sidebar />
       <MobileHeader />
       <main className="lg:pl-60 min-h-[100dvh] pb-16 lg:pb-0">

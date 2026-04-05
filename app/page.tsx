@@ -5,7 +5,6 @@ import Link from "next/link"
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr"
 
 // ─── Data ────────────────────────────────────────────────────────────────────
-// Extend these arrays to 200+ items — they're designed to be CMS-replaceable.
 
 const ACTIVITIES = [
   "run",
@@ -42,7 +41,7 @@ const ACTIVITIES = [
 
 const CADENCES = [
   "every morning",
-  "3× a week",
+  "3\u00d7 a week",
   "daily",
   "every evening",
   "on weekends",
@@ -57,7 +56,7 @@ const CADENCES = [
   "once a month",
   "every Monday",
   "at sunrise",
-  "4× a week",
+  "4\u00d7 a week",
   "every night",
   "on Saturdays",
   "twice a month",
@@ -86,7 +85,6 @@ function TextRotator({
   const containerRef = useRef<HTMLSpanElement>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Detect reduced motion preference
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
     setPrefersReducedMotion(mq.matches)
@@ -95,7 +93,6 @@ function TextRotator({
     return () => mq.removeEventListener("change", handler)
   }, [])
 
-  // Rotate through items with optional initial delay for staggering
   useEffect(() => {
     if (prefersReducedMotion) return
 
@@ -141,27 +138,29 @@ export default function WelcomePage() {
     return () => clearTimeout(t)
   }, [])
 
-  // Static fallback text for screen readers
   const srText = "Find people to run with every morning"
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+      {/* Subtle gradient orbs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-violet-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-pink-200/30 rounded-full blur-3xl pointer-events-none" />
+
       <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
         <div
-          className="flex items-center gap-2 mb-14 transition-all duration-700"
+          className="flex items-center gap-2.5 mb-14 transition-all duration-700"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(10px)" }}
         >
           <img src="/logo.svg" alt="Common" className="w-8 h-8" />
           <span className="text-xl font-bold text-foreground tracking-tight">Common</span>
         </div>
 
-        {/* ── New Headline ── */}
+        {/* Headline */}
         <div
           className="transition-all duration-700 delay-100"
           style={{ opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(14px)" }}
         >
-          {/* Screen-reader-only static sentence */}
           <p className="sr-only">{srText}</p>
 
           <h1 className="text-[32px] sm:text-[42px] md:text-[56px] lg:text-[64px] font-bold text-foreground tracking-tight leading-[1.1] mb-5 max-w-3xl mx-auto">
@@ -171,18 +170,18 @@ export default function WelcomePage() {
             <TextRotator
               items={ACTIVITIES}
               intervalMs={2800}
-              className="text-primary"
+              className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent"
             />
             <span className="text-foreground">with</span>
             <TextRotator
               items={CADENCES}
               intervalMs={2800}
               initialDelay={1400}
-              className="text-success"
+              className="bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent"
             />
           </div>
 
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-[38ch] mx-auto mb-12">
+          <p className="text-lg text-zinc-500 leading-relaxed max-w-[38ch] mx-auto mb-12">
             Thousands of recurring activities. Pick one, join a pod, show up with real people.
           </p>
         </div>
@@ -194,14 +193,14 @@ export default function WelcomePage() {
         >
           <Link
             href="/auth?tab=signup"
-            className="inline-flex items-center gap-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-50 font-semibold text-base px-8 py-4 rounded-2xl transition-all duration-150 shadow-2 active:scale-[0.98]"
+            className="inline-flex items-center gap-2.5 bg-gradient-to-r from-violet-600 to-pink-500 hover:from-violet-500 hover:to-pink-400 text-white font-semibold text-base px-8 py-4 rounded-full transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.4)] hover:shadow-[0_8px_30px_-4px_rgba(124,58,237,0.5)] active:scale-[0.97]"
           >
             Get Started
             <ArrowRight size={17} weight="bold" />
           </Link>
-          <p className="text-sm text-muted-foreground mt-5">
+          <p className="text-sm text-zinc-400 mt-5">
             Already have an account?{" "}
-            <Link href="/auth" className="text-foreground font-semibold hover:text-primary transition-colors">
+            <Link href="/auth" className="text-foreground font-semibold hover:text-violet-600 transition-colors">
               Sign in
             </Link>
           </p>

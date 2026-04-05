@@ -104,8 +104,8 @@ function PodCard({ pod, featured = false }: { pod: any; featured?: boolean }) {
           )}
           {pod.streak > 0 && (
             <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-md px-2 py-1">
-              <Flame size={11} weight="fill" className="text-amber-500" />
-              <span className="text-xs font-bold text-amber-700">{pod.streak}</span>
+              <Flame size={11} weight="fill" className="text-violet-500" />
+              <span className="text-xs font-bold text-violet-700">{pod.streak}</span>
             </div>
           )}
           {pod.visibility === "private" && (
@@ -152,7 +152,7 @@ function PodCard({ pod, featured = false }: { pod: any; featured?: boolean }) {
                 {(pod.memberProfiles || []).slice(0, 4).map((m: any, i: number) => (
                   <div
                     key={i}
-                    className="w-5 h-5 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center text-[7px] font-bold border-2 border-card"
+                    className="w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center text-[7px] font-bold border-2 border-card"
                     title={m.name}
                   >
                     {m.initials}
@@ -168,7 +168,7 @@ function PodCard({ pod, featured = false }: { pod: any; featured?: boolean }) {
                 "text-[11px] font-medium px-2 py-0.5 rounded-md",
                 isFull
                   ? "bg-muted text-muted-foreground"
-                  : "bg-zinc-900 text-zinc-50",
+                  : "bg-foreground text-background",
               )}
             >
               {spotsLabel}
@@ -338,7 +338,7 @@ export default function PodsPage() {
           <Faders size={16} />
           Filters
           {(sizeFilter !== "any" || typeFilter !== "all" || locationFilter) && (
-            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+            <span className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
           )}
         </Button>
       </div>
@@ -356,7 +356,7 @@ export default function PodsPage() {
             className={cn(
               "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150",
               typeFilter === opt.value
-                ? "bg-zinc-900 border-zinc-900 text-zinc-50"
+                ? "bg-foreground border-foreground text-background"
                 : "bg-card border-border text-muted-foreground hover:border-zinc-300",
             )}
           >
@@ -386,7 +386,7 @@ export default function PodsPage() {
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150",
                       sizeFilter === opt.value
-                        ? "bg-zinc-900 border-zinc-900 text-zinc-50"
+                        ? "bg-foreground border-foreground text-background"
                         : "bg-accent border-border text-muted-foreground hover:border-zinc-300",
                     )}
                   >

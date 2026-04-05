@@ -59,7 +59,6 @@ function CheckinForm() {
 
   const [selectedPod, setSelectedPod] = useState<string>(preselected || "")
 
-  // Once pods load, auto-select first pod if nothing selected
   useEffect(() => {
     if (!selectedPod && allMyPods.length > 0) {
       setSelectedPod(preselected && allMyPods.find((p) => p.id === preselected) ? preselected : allMyPods[0].id)
@@ -111,13 +110,13 @@ function CheckinForm() {
   if (submitted) {
     return (
       <div className="min-h-screen pb-32 lg:pb-0 flex flex-col items-center justify-center px-5 text-center">
-        <div className="w-20 h-20 bg-amber-50 border border-amber-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle size={36} weight="fill" className="text-amber-500" />
+        <div className="w-20 h-20 bg-violet-50 border border-violet-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle size={36} weight="fill" className="text-violet-500" />
         </div>
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-2">Checked in</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Checked in</h1>
         <p className="text-zinc-500 text-[15px] leading-relaxed max-w-[34ch] mb-2">
           {selectedPodData
-            ? <>Your update is live in{" "}<span className="font-semibold text-zinc-700">{selectedPodData.name}</span>.</>
+            ? <>Your update is live in{" "}<span className="font-semibold text-foreground">{selectedPodData.name}</span>.</>
             : "Your update is live on the feed."}
         </p>
         <p className="text-xs text-zinc-400 mb-8">
@@ -125,16 +124,16 @@ function CheckinForm() {
           {visibility === "pod" && "Visible to your pod members only"}
           {visibility === "private" && "Only visible to you"}
         </p>
-        <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-2xl px-5 py-3 mb-8">
-          <Flame size={18} weight="fill" className="text-amber-500" />
-          <span className="text-sm font-bold text-amber-700">
+        <div className="flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-full px-5 py-3 mb-8">
+          <Flame size={18} weight="fill" className="text-violet-500" />
+          <span className="text-sm font-bold text-violet-700">
             {currentStreak} check-ins
           </span>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => router.push("/dashboard")}
-            className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-semibold px-5 py-3 rounded-2xl transition-all duration-200"
+            className="inline-flex items-center gap-2 bg-foreground hover:opacity-90 text-white text-sm font-semibold px-5 py-3 rounded-full transition-all duration-200"
           >
             See the feed
           </button>
@@ -143,7 +142,7 @@ function CheckinForm() {
               setSubmitted(false)
               setText("")
             }}
-            className="text-sm font-medium text-zinc-500 hover:text-zinc-700 px-5 py-3 transition-colors"
+            className="text-sm font-medium text-zinc-500 hover:text-foreground px-5 py-3 rounded-full transition-colors"
           >
             Check into another pod
           </button>
@@ -157,7 +156,7 @@ function CheckinForm() {
       {/* Back */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-600 transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-foreground transition-colors mb-8"
       >
         <ArrowLeft size={14} />
         Back
@@ -165,7 +164,7 @@ function CheckinForm() {
 
       {/* Header */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mb-1">New check-in</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight mb-1">New check-in</h1>
         <p className="text-sm text-zinc-500">
           Share what you did{cadenceVerb ? ` ${cadenceVerb}` : ""}. Your pod wants to hear about it.
         </p>
@@ -174,21 +173,21 @@ function CheckinForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Pod selector */}
         <div>
-          <label className="block text-sm font-semibold text-zinc-700 mb-3">Which pod?</label>
+          <label className="block text-sm font-semibold text-foreground mb-3">Which pod?</label>
           <div className="flex gap-2 sm:gap-3 flex-wrap">
             {allMyPods.map((pod) => (
               <button
                 key={pod.id}
                 type="button"
                 onClick={() => setSelectedPod(pod.id)}
-                className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl border-2 text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center gap-2.5 px-4 py-3 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
                   selectedPod === pod.id
-                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    ? "border-foreground bg-foreground text-white"
                     : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-lg ${pod.memberColors[0]} flex items-center justify-center text-white text-[9px] font-bold`}
+                  className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold"
                 >
                   {pod.name[0]}
                 </div>
@@ -198,7 +197,7 @@ function CheckinForm() {
                   </div>
                   <div
                     className={`text-[10px] mt-0.5 ${
-                      selectedPod === pod.id ? "text-zinc-300" : "text-zinc-400"
+                      selectedPod === pod.id ? "text-zinc-400" : "text-zinc-400"
                     }`}
                   >
                     {CADENCE_LABELS[pod.cadence]}
@@ -206,22 +205,22 @@ function CheckinForm() {
                 </div>
               </button>
             ))}
-            {/* Solo / no pod option */}
+            {/* Solo */}
             <button
               type="button"
               onClick={() => setSelectedPod("solo")}
-              className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl border-2 text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-full border-2 text-sm font-medium transition-all duration-200 ${
                 selectedPod === "solo"
-                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  ? "border-foreground bg-foreground text-white"
                   : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
               }`}
             >
-              <div className="w-5 h-5 rounded-lg bg-zinc-400 flex items-center justify-center text-white text-[9px] font-bold">
+              <div className="w-5 h-5 rounded-full bg-zinc-300 flex items-center justify-center text-white text-[9px] font-bold">
                 ✦
               </div>
               <div className="text-left">
                 <div className="text-xs font-semibold leading-none">Just me</div>
-                <div className={`text-[10px] mt-0.5 ${selectedPod === "solo" ? "text-zinc-300" : "text-zinc-400"}`}>
+                <div className={`text-[10px] mt-0.5 ${selectedPod === "solo" ? "text-zinc-400" : "text-zinc-400"}`}>
                   No pod
                 </div>
               </div>
@@ -231,7 +230,7 @@ function CheckinForm() {
 
         {/* Text input */}
         <div>
-          <label className="block text-sm font-semibold text-zinc-700 mb-2">
+          <label className="block text-sm font-semibold text-foreground mb-2">
             What have you been up to?
           </label>
           <div className="relative">
@@ -240,14 +239,14 @@ function CheckinForm() {
               onChange={(e) => setText(e.target.value.slice(0, maxLength))}
               placeholder={selectedPod === "solo" ? "What did you work on today?" : `Share something with your ${cadenceLabel.toLowerCase()} pod.`}
               rows={5}
-              className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3.5 text-[15px] text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
+              className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3.5 text-[15px] text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
             />
             <span
               className={`absolute bottom-3 right-4 text-xs font-medium tabular-nums ${
                 remaining < 30
                   ? remaining < 10
                     ? "text-rose-400"
-                    : "text-amber-400"
+                    : "text-orange-400"
                   : "text-zinc-300"
               }`}
             >
@@ -281,11 +280,11 @@ function CheckinForm() {
             <button
               type="button"
               onClick={() => photoRef.current?.click()}
-              className="flex items-center gap-2.5 w-full bg-zinc-50 border-2 border-dashed border-zinc-200 hover:border-amber-300 hover:bg-amber-50/30 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-400 hover:text-amber-600 transition-all duration-200 group"
+              className="flex items-center gap-2.5 w-full bg-zinc-50 border-2 border-dashed border-zinc-200 hover:border-violet-300 hover:bg-violet-50/30 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-400 hover:text-violet-600 transition-all duration-200 group"
             >
               <Camera
                 size={18}
-                className="text-zinc-300 group-hover:text-amber-500 transition-colors"
+                className="text-zinc-300 group-hover:text-violet-500 transition-colors"
               />
               Add a photo (optional)
             </button>
@@ -294,7 +293,7 @@ function CheckinForm() {
 
         {/* Visibility */}
         <div>
-          <label className="block text-sm font-semibold text-zinc-700 mb-2">Who can see this?</label>
+          <label className="block text-sm font-semibold text-foreground mb-2">Who can see this?</label>
           <div className="grid grid-cols-3 gap-2">
             {([
               { value: "public", label: "Public feed", sub: "Everyone", icon: Globe },
@@ -307,7 +306,7 @@ function CheckinForm() {
                 onClick={() => setVisibility(value)}
                 className={`flex flex-col items-center gap-1.5 py-3.5 px-2 rounded-2xl border-2 text-center transition-all duration-200 ${
                   visibility === value
-                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    ? "border-foreground bg-foreground text-white"
                     : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
                 }`}
               >
@@ -329,7 +328,7 @@ function CheckinForm() {
           <button
             type="submit"
             disabled={!text.trim() || submitting}
-            className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-2xl transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.4)] active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-pink-500 hover:from-violet-500 hover:to-pink-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-full transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.4)] active:scale-[0.97]"
           >
             {submitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -351,7 +350,7 @@ export default function CheckinPage() {
     <Suspense
       fallback={
         <div className="min-h-[100dvh] flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
         </div>
       }
     >

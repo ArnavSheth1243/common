@@ -41,13 +41,9 @@ function AuthForm() {
           },
         })
         if (signUpError) throw signUpError
-        // If email confirmation is required, Supabase returns a user with identities = []
-        // or session = null. Show confirmation message instead of redirecting.
         if (data.session) {
-          // Auto-confirmed (e.g. email confirmation disabled in Supabase)
           window.location.href = "/onboarding"
         } else {
-          // Email confirmation required
           setConfirmationSent(true)
           setLoading(false)
           return
@@ -92,7 +88,7 @@ function AuthForm() {
       <div className="w-full max-w-sm text-center">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-600 transition-colors mb-8"
+          className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft size={14} />
           Back
@@ -101,16 +97,16 @@ function AuthForm() {
           <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <ArrowRight size={28} className="text-emerald-500" />
           </div>
-          <h2 className="text-xl font-bold text-zinc-900 tracking-tight mb-2">Check your email</h2>
+          <h2 className="text-xl font-bold text-foreground tracking-tight mb-2">Check your email</h2>
           <p className="text-sm text-zinc-500 mb-4">
-            We sent a confirmation link to <span className="font-semibold text-zinc-700">{email}</span>.
+            We sent a confirmation link to <span className="font-semibold text-foreground">{email}</span>.
             Click the link in the email to activate your account.
           </p>
           <p className="text-xs text-zinc-400">
             Didn&apos;t get it? Check your spam folder or{" "}
             <button
               onClick={() => { setConfirmationSent(false); setTab("signup") }}
-              className="text-amber-600 font-semibold hover:text-amber-700"
+              className="text-violet-600 font-semibold hover:text-violet-700"
             >
               try again
             </button>.
@@ -122,22 +118,21 @@ function AuthForm() {
 
   return (
     <div className="w-full max-w-sm">
-      {/* Back to home */}
       <Link
         href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-600 transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-foreground transition-colors mb-8"
       >
         <ArrowLeft size={14} />
         Back
       </Link>
 
       {/* Tab switcher */}
-      <div className="flex bg-zinc-100 rounded-2xl p-1 mb-8">
+      <div className="flex bg-zinc-100 rounded-full p-1 mb-8">
         <button
           onClick={() => { setTab("signin"); setError(null) }}
-          className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+          className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${
             tab === "signin"
-              ? "bg-white text-zinc-900 shadow-sm"
+              ? "bg-white text-foreground shadow-sm"
               : "text-zinc-400 hover:text-zinc-600"
           }`}
         >
@@ -145,9 +140,9 @@ function AuthForm() {
         </button>
         <button
           onClick={() => { setTab("signup"); setError(null) }}
-          className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+          className={`flex-1 py-2.5 text-sm font-semibold rounded-full transition-all duration-200 ${
             tab === "signup"
-              ? "bg-white text-zinc-900 shadow-sm"
+              ? "bg-white text-foreground shadow-sm"
               : "text-zinc-400 hover:text-zinc-600"
           }`}
         >
@@ -155,9 +150,8 @@ function AuthForm() {
         </button>
       </div>
 
-      {/* Heading */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-1.5">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1.5">
           {tab === "signin" ? "Welcome back." : "Get started."}
         </h1>
         <p className="text-sm text-zinc-500">
@@ -167,17 +161,15 @@ function AuthForm() {
         </p>
       </div>
 
-      {/* Error banner */}
       {error && (
         <div className="mb-4 px-4 py-3 bg-rose-50 border border-rose-100 rounded-2xl text-sm text-rose-600 font-medium">
           {error}
         </div>
       )}
 
-      {/* Google SSO */}
       <button
         onClick={handleGoogleSSO}
-        className="w-full flex items-center justify-center gap-3 bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 text-zinc-700 font-medium text-sm px-4 py-3 rounded-2xl transition-all duration-200 mb-6 active:scale-[0.98]"
+        className="w-full flex items-center justify-center gap-3 bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 text-zinc-700 font-medium text-sm px-4 py-3 rounded-full transition-all duration-200 mb-6 active:scale-[0.97]"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -188,14 +180,12 @@ function AuthForm() {
         Continue with Google
       </button>
 
-      {/* Divider */}
       <div className="flex items-center gap-3 mb-6">
         <div className="flex-1 h-px bg-zinc-100" />
         <span className="text-xs text-zinc-400">or</span>
         <div className="flex-1 h-px bg-zinc-100" />
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {tab === "signup" && (
           <div>
@@ -205,7 +195,7 @@ function AuthForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
           </div>
         )}
@@ -217,7 +207,7 @@ function AuthForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+            className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
           />
         </div>
         <div>
@@ -225,15 +215,15 @@ function AuthForm() {
             <label className="block text-sm font-medium text-zinc-700">Password</label>
             {tab === "signin" && (
               forgotSent ? (
-                <span className="text-xs text-emerald-600 font-medium">Reset email sent ✓</span>
+                <span className="text-xs text-emerald-600 font-medium">Reset email sent</span>
               ) : (
                 <button
                   type="button"
                   disabled={forgotLoading}
                   onClick={handleForgotPassword}
-                  className="text-xs text-zinc-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+                  className="text-xs text-zinc-400 hover:text-violet-600 transition-colors disabled:opacity-50"
                 >
-                  {forgotLoading ? "Sending…" : "Forgot password?"}
+                  {forgotLoading ? "Sending..." : "Forgot password?"}
                 </button>
               )
             )}
@@ -245,7 +235,7 @@ function AuthForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={tab === "signup" ? "At least 6 characters" : "Your password"}
-              className="w-full bg-white border border-zinc-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl px-4 py-3 pr-11 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 pr-11 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
             <button
               type="button"
@@ -260,7 +250,7 @@ function AuthForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold text-sm px-4 py-3.5 rounded-2xl transition-all duration-200 active:scale-[0.98] mt-2"
+          className="w-full flex items-center justify-center gap-2 bg-foreground hover:opacity-90 disabled:opacity-60 text-white font-semibold text-sm px-4 py-3.5 rounded-full transition-all duration-200 active:scale-[0.97] mt-2"
         >
           {loading ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -273,14 +263,13 @@ function AuthForm() {
         </button>
       </form>
 
-      {/* Switch tab */}
       <p className="text-center text-sm text-zinc-400 mt-6">
         {tab === "signin" ? (
           <>
             Don&apos;t have an account?{" "}
             <button
               onClick={() => { setTab("signup"); setError(null) }}
-              className="text-zinc-700 font-semibold hover:text-amber-600 transition-colors"
+              className="text-foreground font-semibold hover:text-violet-600 transition-colors"
             >
               Sign up
             </button>
@@ -290,7 +279,7 @@ function AuthForm() {
             Already have an account?{" "}
             <button
               onClick={() => { setTab("signin"); setError(null) }}
-              className="text-zinc-700 font-semibold hover:text-amber-600 transition-colors"
+              className="text-foreground font-semibold hover:text-violet-600 transition-colors"
             >
               Sign in
             </button>
@@ -303,60 +292,60 @@ function AuthForm() {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-[100dvh] bg-[#ede9df] flex">
+    <div className="min-h-[100dvh] bg-white flex">
       {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col w-[420px] flex-shrink-0 bg-zinc-900 p-12 relative overflow-hidden">
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500 rounded-full opacity-[0.06] blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 right-0 w-48 h-48 rounded-full opacity-[0.08] blur-3xl pointer-events-none" />
+      <div className="hidden lg:flex flex-col w-[420px] flex-shrink-0 bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-12 relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-white rounded-full opacity-[0.06] blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 right-0 w-48 h-48 bg-pink-300 rounded-full opacity-[0.1] blur-3xl pointer-events-none" />
 
         <div className="flex items-center gap-2.5 relative z-10">
-          <img src="/logo.svg" alt="Common" className="w-7 h-7 opacity-90" />
-          <span className="text-xl font-bold text-[#f5f0e6] tracking-tight">Common</span>
+          <img src="/logo.svg" alt="Common" className="w-7 h-7 brightness-0 invert" />
+          <span className="text-xl font-bold text-white tracking-tight">Common</span>
         </div>
 
         <div className="flex-1 flex flex-col justify-center relative z-10">
-          <p className="text-4xl font-bold text-[#f5f0e6] tracking-tight leading-[1.05] mb-5">
-            Better<br />Together.
+          <p className="text-4xl font-bold text-white tracking-tight leading-[1.05] mb-5">
+            Find your<br />people.
           </p>
-          <p className="text-zinc-400 leading-relaxed text-[15px] max-w-[28ch]">
-            Join a small group working toward the same goal. Check in. Stay consistent.
+          <p className="text-white/60 leading-relaxed text-[15px] max-w-[28ch]">
+            Thousands of recurring activities. Pick one, join a pod, show up together.
           </p>
 
           <div className="mt-10 space-y-2.5">
             {[
-              { name: "Marcus R.", pod: "Morning Run Club",  streak: "12w", bg: "bg-[#f5f0e6]", fg: "text-zinc-900" },
-              { name: "Priya K.",  pod: "The Reader&apos;s Pod", streak: "16w", bg: "bg-amber-500",  fg: "text-white" },
-              { name: "Jordan L.", pod: "Morning Run Club",  streak: "10w", bg: "bg-zinc-600",   fg: "text-white" },
+              { name: "Marcus R.", pod: "Morning Run Club",  streak: "12w", bg: "bg-white",      fg: "text-violet-600" },
+              { name: "Priya K.",  pod: "The Reader\u2019s Pod", streak: "16w", bg: "bg-pink-400",   fg: "text-white" },
+              { name: "Jordan L.", pod: "Morning Run Club",  streak: "10w", bg: "bg-violet-300", fg: "text-white" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.07] rounded-2xl px-4 py-3">
+              <div key={i} className="flex items-center gap-3 bg-white/[0.08] border border-white/[0.12] rounded-2xl px-4 py-3">
                 <div className={`w-8 h-8 rounded-full ${item.bg} ${item.fg} flex items-center justify-center text-xs font-bold flex-shrink-0`}>
                   {item.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-[#f5f0e6] truncate">{item.name}</div>
-                  <div className="text-xs text-zinc-500 truncate">{item.pod}</div>
+                  <div className="text-sm font-semibold text-white truncate">{item.name}</div>
+                  <div className="text-xs text-white/40 truncate">{item.pod}</div>
                 </div>
-                <div className="text-xs font-bold text-amber-400">{item.streak}</div>
+                <div className="text-xs font-bold text-white/70">{item.streak}</div>
               </div>
             ))}
           </div>
         </div>
 
         <div className="relative z-10">
-          <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} Common.</p>
+          <p className="text-xs text-white/30">&copy; {new Date().getFullYear()} Common.</p>
         </div>
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 bg-[#ede9df]">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 bg-white">
         <div className="lg:hidden flex items-center gap-2 mb-10">
           <img src="/logo.svg" alt="Common" className="w-6 h-6" />
-          <span className="text-lg font-bold text-zinc-900 tracking-tight">Common</span>
+          <span className="text-lg font-bold text-foreground tracking-tight">Common</span>
         </div>
 
         <Suspense fallback={
           <div className="w-full max-w-sm flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
           </div>
         }>
           <AuthForm />
