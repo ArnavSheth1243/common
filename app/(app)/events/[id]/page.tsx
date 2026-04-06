@@ -254,12 +254,12 @@ export default function EventDetailPage() {
           {/* Meta */}
           <div className="space-y-2.5">
             <div className="flex items-center gap-2.5 text-sm text-foreground">
-              <CalendarBlank size={16} className="text-violet-500" />
+              <CalendarBlank size={16} className="text-blue-500" />
               <span className="font-medium">{formatDate(event.date)}</span>
             </div>
             {event.time && (
               <div className="flex items-center gap-2.5 text-sm text-foreground">
-                <Clock size={16} className="text-violet-500" />
+                <Clock size={16} className="text-blue-500" />
                 <span className="font-medium">
                   {formatTime(event.time)}
                   {event.end_time && ` – ${formatTime(event.end_time)}`}
@@ -268,7 +268,7 @@ export default function EventDetailPage() {
             )}
             {event.location && (
               <div className="flex items-center gap-2.5 text-sm text-foreground">
-                <MapPin size={16} className="text-violet-500" />
+                <MapPin size={16} className="text-blue-500" />
                 <span className="font-medium">{event.location}</span>
               </div>
             )}
@@ -282,9 +282,9 @@ export default function EventDetailPage() {
             {event.pods ? (
               <Link
                 href={`/pods/${event.pods.id}`}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-foreground hover:text-violet-600 transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-foreground hover:text-blue-700 transition-colors"
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-pink-500" />
+                <div className="w-7 h-7 rounded-full bg-blue-700" />
                 {event.pods.name}
               </Link>
             ) : (
@@ -324,7 +324,7 @@ export default function EventDetailPage() {
                       ? status === "going"
                         ? "bg-emerald-500 text-white"
                         : status === "maybe"
-                        ? "bg-violet-400 text-white"
+                        ? "bg-blue-500 text-white"
                         : "bg-zinc-300 text-zinc-700"
                       : "bg-zinc-50 text-zinc-500 hover:bg-zinc-100 border border-zinc-100",
                   )}

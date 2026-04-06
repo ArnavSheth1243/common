@@ -14,8 +14,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 4%;
 
-    /* ─── Accent (vibrant violet) ─── */
-    --primary: 262 83% 58%;          /* #7C3AED */
+    /* ─── Accent (deep cool blue) ─── */
+    --primary: 224 76% 38%;          /* #1D4ED8 */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 5% 96%;         /* cool light gray */
@@ -37,7 +37,7 @@
     /* ─── Borders & Inputs ─── */
     --border: 240 6% 90%;            /* #E4E4E7 — cool light gray */
     --input: 240 6% 90%;
-    --ring: 262 83% 58%;             /* matches primary */
+    --ring: 224 76% 38%;             /* matches primary */
 
     /* ─── Radius ─── */
     --radius: 0.75rem;               /* 12px base */

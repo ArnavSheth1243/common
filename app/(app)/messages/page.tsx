@@ -28,7 +28,7 @@ export default function MessagesPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin" />
         </div>
       ) : conversations.length === 0 ? (
         <div className="text-center py-20">

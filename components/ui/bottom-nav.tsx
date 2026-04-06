@@ -45,7 +45,7 @@ export function BottomNav() {
               {tab.accent ? (
                 <div className={cn(
                   "flex items-center justify-center w-11 h-11 rounded-full -mt-5 shadow-2 transition-all",
-                  "bg-gradient-to-br from-violet-500 to-pink-500",
+                  "bg-gradient-to-br from-blue-700 to-blue-900",
                 )}>
                   <tab.icon
                     size={22}

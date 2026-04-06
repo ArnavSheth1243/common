@@ -154,8 +154,8 @@ export default function WelcomePage() {
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
       {/* Subtle gradient orbs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-violet-200/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-pink-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-300/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-200/30 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
@@ -181,14 +181,14 @@ export default function WelcomePage() {
             <TextRotator
               items={ACTIVITIES}
               intervalMs={2800}
-              className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent"
             />
             <span className="text-foreground">with</span>
             <TextRotator
               items={CADENCES}
               intervalMs={2800}
               initialDelay={1400}
-              className="bg-gradient-to-r from-cyan-500 to-teal-400 bg-clip-text text-transparent"
+              className="text-foreground"
             />
           </div>
 
@@ -204,14 +204,14 @@ export default function WelcomePage() {
         >
           <Link
             href="/auth?tab=signup"
-            className="inline-flex items-center gap-2.5 bg-gradient-to-r from-violet-600 to-pink-500 hover:from-violet-500 hover:to-pink-400 text-white font-semibold text-base px-8 py-4 rounded-full transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.4)] hover:shadow-[0_8px_30px_-4px_rgba(124,58,237,0.5)] active:scale-[0.97]"
+            className="inline-flex items-center gap-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-base px-8 py-4 rounded-full transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(29,78,216,0.4)] hover:shadow-[0_8px_30px_-4px_rgba(29,78,216,0.5)] active:scale-[0.97]"
           >
             Get Started
             <ArrowRight size={17} weight="bold" />
           </Link>
           <p className="text-sm text-zinc-400 mt-5">
             Already have an account?{" "}
-            <Link href="/auth" className="text-foreground font-semibold hover:text-violet-600 transition-colors">
+            <Link href="/auth" className="text-foreground font-semibold hover:text-blue-700 transition-colors">
               Sign in
             </Link>
           </p>

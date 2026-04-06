@@ -176,8 +176,8 @@ function CheckinCard({
               </div>
               {checkin.streakCount > 0 && (
                 <div className="flex items-center gap-1 mt-0.5">
-                  <Flame size={11} weight="fill" className="text-violet-500" />
-                  <span className="text-xs font-medium text-violet-600 tabular-nums">
+                  <Flame size={11} weight="fill" className="text-blue-500" />
+                  <span className="text-xs font-medium text-blue-700 tabular-nums">
                     {checkin.streakCount} day streak
                   </span>
                 </div>
@@ -513,12 +513,12 @@ export default function DashboardPage() {
         <StatBlock
           value={currentStreak}
           label="Streak"
-          icon={<Flame size={18} weight="fill" className="text-violet-500" />}
+          icon={<Flame size={18} weight="fill" className="text-blue-500" />}
         />
         <StatBlock
           value={totalCheckins}
           label="Check-ins"
-          icon={<Trophy size={18} weight="fill" className="text-pink-500" />}
+          icon={<Trophy size={18} weight="fill" className="text-blue-700" />}
         />
         <StatBlock
           value={myPods.length}
@@ -537,7 +537,7 @@ export default function DashboardPage() {
                 href={`/pods/${pod.id}`}
                 className="flex-shrink-0 flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2 hover:border-zinc-300 hover:shadow-2 transition-all duration-150"
               >
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold">
+                <div className="w-6 h-6 rounded-lg bg-blue-700 flex items-center justify-center text-white text-[10px] font-bold">
                   {pod.name[0]}
                 </div>
                 <div>
@@ -700,7 +700,7 @@ export default function DashboardPage() {
         {/* Desktop Sidebar */}
         <div className="hidden lg:block space-y-4 sticky top-8">
           {/* Streak card */}
-          <Card className="bg-gradient-to-br from-violet-600 to-pink-500 border-0 overflow-hidden text-white">
+          <Card className="bg-gradient-to-br from-blue-700 via-blue-800 to-blue-950 border-0 overflow-hidden text-white shadow-[0_8px_30px_-8px_rgba(29,78,216,0.5)]">
             <div className="p-5">
               <div className="flex items-center gap-1.5 mb-3">
                 <Flame size={14} weight="fill" className="text-white/80" />
@@ -723,7 +723,7 @@ export default function DashboardPage() {
                       ? "You're building real momentum."
                       : "Legendary consistency."}
               </p>
-              <Button asChild className="w-full bg-white hover:bg-white/90 text-violet-700 font-bold">
+              <Button asChild className="w-full bg-white hover:bg-white/90 text-blue-800 font-bold">
                 <Link href="/checkin">Post a check-in</Link>
               </Button>
             </div>
@@ -740,7 +740,7 @@ export default function DashboardPage() {
                     href={`/pods/${pod.id}`}
                     className="flex items-center gap-2.5 group"
                   >
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                    <div className="w-7 h-7 rounded-lg bg-blue-700 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                       {pod.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -772,7 +772,7 @@ export default function DashboardPage() {
                       href={`/pods/${pod.id}`}
                       className="flex items-center gap-2.5 group"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-blue-700 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                         {pod.name[0]}
                       </div>
                       <div className="flex-1 min-w-0">

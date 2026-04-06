@@ -131,7 +131,7 @@ function EventCard({ event }: { event: EventRow }) {
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
           />
           <div className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-sm rounded-xl px-2.5 py-1 shadow-sm">
-            <div className="text-[9px] font-semibold uppercase tracking-wider text-violet-600 leading-none mb-0.5">
+            <div className="text-[9px] font-semibold uppercase tracking-wider text-blue-700 leading-none mb-0.5">
               {new Date(event.date + "T00:00:00").toLocaleDateString("en-US", { month: "short" })}
             </div>
             <div className="text-base font-bold text-foreground leading-none">
@@ -332,7 +332,7 @@ export default function EventsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search events..."
-          className="w-full bg-card border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-full pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150"
+          className="w-full bg-card border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-full pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150"
         />
       </div>
 

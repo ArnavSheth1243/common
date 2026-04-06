@@ -43,9 +43,9 @@ import { createClient } from "@/lib/supabase/client"
 import type { FC } from "react"
 
 const AVATAR_COLORS = [
-  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-violet-500 text-white",
-  "bg-emerald-500 text-white", "bg-sky-500 text-white", "bg-violet-500 text-white",
-  "bg-indigo-500 text-white", "bg-pink-500 text-white", "bg-teal-500 text-white",
+  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-blue-500 text-white",
+  "bg-emerald-500 text-white", "bg-sky-500 text-white", "bg-blue-500 text-white",
+  "bg-indigo-500 text-white", "bg-blue-500 text-white", "bg-teal-500 text-white",
   "bg-teal-500 text-white", "bg-cyan-500 text-white", "bg-fuchsia-500 text-white",
 ]
 function getAvatarColor(name: string): string {
@@ -153,8 +153,8 @@ function CheckinItem({
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <Link href={profileHref(checkin.author.name)} className="text-sm font-semibold text-zinc-900 hover:text-violet-600 transition-colors">{checkin.author.name}</Link>
-            <div className="flex items-center gap-1 text-xs text-violet-600 font-semibold bg-violet-50 rounded-full px-2 py-0.5">
+            <Link href={profileHref(checkin.author.name)} className="text-sm font-semibold text-zinc-900 hover:text-blue-700 transition-colors">{checkin.author.name}</Link>
+            <div className="flex items-center gap-1 text-xs text-blue-700 font-semibold bg-blue-50 rounded-full px-2 py-0.5">
               <Flame size={9} weight="fill" />
               <span>{checkin.streakCount}</span>
             </div>
@@ -204,7 +204,7 @@ function CheckinItem({
                   </Link>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-1.5">
-                      <Link href={profileHref(comment.author.name)} className="text-xs font-semibold text-zinc-800 hover:text-violet-600 transition-colors">{comment.author.name}</Link>
+                      <Link href={profileHref(comment.author.name)} className="text-xs font-semibold text-zinc-800 hover:text-blue-700 transition-colors">{comment.author.name}</Link>
                       <span className="text-[10px] text-zinc-400">{comment.time}</span>
                     </div>
                     <p className="text-sm text-zinc-600 leading-relaxed mt-0.5">{comment.text}</p>
@@ -221,7 +221,7 @@ function CheckinItem({
             <div className="w-7 h-7 rounded-full bg-zinc-900 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
               {"?"}
             </div>
-            <div className="flex-1 flex items-center gap-2 bg-zinc-50 border border-zinc-200 focus-within:border-violet-400 focus-within:bg-white rounded-2xl px-3 py-2 transition-all">
+            <div className="flex-1 flex items-center gap-2 bg-zinc-50 border border-zinc-200 focus-within:border-blue-500 focus-within:bg-white rounded-2xl px-3 py-2 transition-all">
               <input
                 type="text"
                 value={commentText}
@@ -233,7 +233,7 @@ function CheckinItem({
               <button
                 onClick={handleSubmitComment}
                 disabled={!commentText.trim()}
-                className="text-zinc-300 hover:text-violet-500 disabled:opacity-30 transition-colors flex-shrink-0"
+                className="text-zinc-300 hover:text-blue-500 disabled:opacity-30 transition-colors flex-shrink-0"
               >
                 <PaperPlaneTilt size={15} weight="fill" />
               </button>
@@ -410,7 +410,7 @@ export default function PodDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin" />
       </div>
     )
   }
@@ -501,9 +501,9 @@ export default function PodDetailPage() {
             {/* Gradient overlay for text legibility */}
             <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%)" }} />
             {/* Streak badge */}
-            <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-violet-100 rounded-full px-2.5 py-1">
-              <Flame size={11} weight="fill" className="text-violet-500" />
-              <span className="text-xs font-bold text-violet-700">{pod.streak}</span>
+            <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm border border-blue-100 rounded-full px-2.5 py-1">
+              <Flame size={11} weight="fill" className="text-blue-500" />
+              <span className="text-xs font-bold text-blue-800">{pod.streak}</span>
             </div>
             {/* Pod name overlaid at bottom of image */}
             <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
@@ -512,7 +512,7 @@ export default function PodDetailPage() {
                 <span
                   className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                     pod.type === "Habit"
-                      ? "bg-violet-400/90 text-white"
+                      ? "bg-blue-500/90 text-white"
                       : "bg-emerald-400/90 text-white"
                   }`}
                 >
@@ -536,7 +536,7 @@ export default function PodDetailPage() {
                     <span
                       className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                         pod.type === "Habit"
-                          ? "bg-violet-50 text-violet-700"
+                          ? "bg-blue-50 text-blue-800"
                           : "bg-emerald-50 text-emerald-700"
                       }`}
                     >
@@ -545,9 +545,9 @@ export default function PodDetailPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-100 rounded-2xl px-3 py-2 flex-shrink-0">
-                <Flame size={14} weight="fill" className="text-violet-500" />
-                <span className="text-sm font-bold text-violet-700">{pod.streak}</span>
+              <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 rounded-2xl px-3 py-2 flex-shrink-0">
+                <Flame size={14} weight="fill" className="text-blue-500" />
+                <span className="text-sm font-bold text-blue-800">{pod.streak}</span>
               </div>
             </div>
           )}
@@ -629,7 +629,7 @@ export default function PodDetailPage() {
                         {member.isYou && <span className="ml-1.5 text-xs text-zinc-400 font-normal">(you)</span>}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs font-semibold text-violet-600">
+                    <div className="flex items-center gap-1 text-xs font-semibold text-blue-700">
                       <Flame size={10} weight="fill" />
                       <span>{member.streak}</span>
                     </div>
@@ -664,7 +664,7 @@ export default function PodDetailPage() {
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pod.location)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+              className="text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors"
             >
               Directions →
             </a>
@@ -686,7 +686,7 @@ export default function PodDetailPage() {
                   {/* Date + title */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <p className="text-xs font-semibold text-violet-600 mb-0.5">{event.dateLabel} · {event.time}</p>
+                      <p className="text-xs font-semibold text-blue-700 mb-0.5">{event.dateLabel} · {event.time}</p>
                       <p className="text-sm font-semibold text-zinc-900 leading-tight">{event.title}</p>
                       {event.description && (
                         <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{event.description}</p>
@@ -697,7 +697,7 @@ export default function PodDetailPage() {
                             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-violet-600 transition-colors"
+                            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-blue-700 transition-colors"
                           >
                             <MapPin size={11} weight="fill" />
                             {event.location} →
@@ -721,7 +721,7 @@ export default function PodDetailPage() {
                                 ? status === "going"
                                   ? "bg-emerald-500 text-white"
                                   : status === "maybe"
-                                  ? "bg-violet-400 text-white"
+                                  ? "bg-blue-500 text-white"
                                   : "bg-zinc-300 text-zinc-700"
                                 : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 border border-zinc-100"
                             }`}
@@ -789,7 +789,7 @@ export default function PodDetailPage() {
                       onChange={(e) => setApplicationText(e.target.value)}
                       placeholder="Why do you want to join? What will you bring to the pod?"
                       rows={3}
-                      className="w-full bg-zinc-50 border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none"
+                      className="w-full bg-zinc-50 border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none"
                     />
                     <div className="flex gap-2">
                       <button
@@ -850,7 +850,7 @@ export default function PodDetailPage() {
             <TrendUp size={14} className="text-zinc-400" />
             <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Applications</h2>
             {visibleApps.length > 0 && (
-              <span className="ml-auto text-xs font-bold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">
+              <span className="ml-auto text-xs font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
                 {visibleApps.length} pending
               </span>
             )}

@@ -289,7 +289,7 @@ export default function ProfilePage() {
                 step="0.05"
                 value={cropScale}
                 onChange={(e) => setCropScale(parseFloat(e.target.value))}
-                className="w-full accent-violet-500"
+                className="w-full accent-blue-500"
               />
             </div>
             {/* Position sliders */}
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                   step="1"
                   value={cropOffsetX}
                   onChange={(e) => setCropOffsetX(parseFloat(e.target.value))}
-                  className="w-full accent-violet-500"
+                  className="w-full accent-blue-500"
                 />
               </div>
               <div>
@@ -315,7 +315,7 @@ export default function ProfilePage() {
                   step="1"
                   value={cropOffsetY}
                   onChange={(e) => setCropOffsetY(parseFloat(e.target.value))}
-                  className="w-full accent-violet-500"
+                  className="w-full accent-blue-500"
                 />
               </div>
             </div>
@@ -339,7 +339,7 @@ export default function ProfilePage() {
           <div className="relative flex-shrink-0 group">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-16 h-16 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2"
+              className="w-16 h-16 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               aria-label="Change profile photo"
             >
               {avatarUrl ? (
@@ -372,14 +372,14 @@ export default function ProfilePage() {
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Your name"
                   autoFocus
-                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-violet-400 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-900 outline-none transition-all"
+                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-blue-500 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-900 outline-none transition-all"
                 />
                 <input
                   type="text"
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
                   placeholder="Short bio (optional)"
-                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-violet-400 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none transition-all"
+                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-blue-500 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none transition-all"
                 />
                 <div className="flex gap-2 pt-1">
                   <button
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                     href={`https://instagram.com/${instagramHandle}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-pink-600 transition-colors"
+                    className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-blue-700 transition-colors"
                   >
                     <InstagramLogo size={14} weight="duotone" />
                     <span>@{instagramHandle}</span>
@@ -450,7 +450,7 @@ export default function ProfilePage() {
                 </div>
               ) : igEditing ? (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 focus-within:border-violet-400 transition-colors">
+                  <div className="flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 focus-within:border-blue-500 transition-colors">
                     <InstagramLogo size={13} className="text-zinc-400 flex-shrink-0" />
                     <span className="text-zinc-400 text-sm">@</span>
                     <input
@@ -491,7 +491,7 @@ export default function ProfilePage() {
 
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 mt-4">
-          <div className="bg-violet-500 rounded-xl p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
+          <div className="bg-blue-500 rounded-xl p-3 sm:p-4 flex flex-col justify-between min-h-[90px]">
             <Flame size={16} weight="fill" className="text-white/80" />
             <div>
               <div className="text-2xl font-bold text-white tracking-tighter tabular-nums leading-none">
@@ -540,7 +540,7 @@ export default function ProfilePage() {
           </div>
           <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-violet-400 rounded-full transition-all duration-700"
+              className="h-full bg-blue-500 rounded-full transition-all duration-700"
               style={{ width: `${progressToNext}%` }}
             />
           </div>
@@ -597,13 +597,13 @@ export default function ProfilePage() {
               <div
                 key={i}
                 className={`relative h-9 rounded-lg flex flex-col items-center justify-center gap-0.5 ${
-                  isToday ? "ring-2 ring-violet-400 bg-violet-50" : "hover:bg-zinc-50"
+                  isToday ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-zinc-50"
                 } transition-colors`}
               >
                 <span
                   className={`text-[11px] font-medium leading-none ${
                     isToday
-                      ? "text-violet-600 font-bold"
+                      ? "text-blue-700 font-bold"
                       : isFuture
                       ? "text-zinc-200"
                       : podIds.length > 0
@@ -655,7 +655,7 @@ export default function ProfilePage() {
           <h3 className="text-sm font-semibold text-zinc-800">My pods</h3>
           <Link
             href="/pods"
-            className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-0.5"
+            className="text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors flex items-center gap-0.5"
           >
             Browse
             <ArrowUpRight size={12} />
@@ -682,7 +682,7 @@ export default function ProfilePage() {
                     <span
                       className={`text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${
                         pod.type === "Habit"
-                          ? "bg-violet-50 text-violet-700"
+                          ? "bg-blue-50 text-blue-800"
                           : "bg-emerald-50 text-emerald-700"
                       }`}
                     >
@@ -694,7 +694,7 @@ export default function ProfilePage() {
                       <Users size={11} />
                       <span>{pod.members} members</span>
                     </div>
-                    <div className="flex items-center gap-1 text-violet-600 font-semibold">
+                    <div className="flex items-center gap-1 text-blue-700 font-semibold">
                       <Flame size={11} weight="fill" />
                       <span>{streak} · {CADENCE_LABELS[pod.cadence]}</span>
                     </div>
@@ -734,7 +734,7 @@ export default function ProfilePage() {
                     <span className="text-xs text-zinc-400">View applications</span>
                   </div>
                   {pendingCount > 0 && (
-                    <span className="text-xs font-bold bg-violet-100 text-violet-700 px-2.5 py-1 rounded-full flex-shrink-0">
+                    <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full flex-shrink-0">
                       {pendingCount} pending
                     </span>
                   )}
@@ -777,7 +777,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className="flex items-center gap-1 text-xs text-violet-600 font-semibold bg-violet-50 rounded-full px-2 py-0.5">
+                        <div className="flex items-center gap-1 text-xs text-blue-700 font-semibold bg-blue-50 rounded-full px-2 py-0.5">
                           <Flame size={9} weight="fill" />
                           <span>{post.streakCount}</span>
                         </div>
@@ -821,7 +821,7 @@ export default function ProfilePage() {
                   <div key={event.id} className="bg-card border border-border rounded-xl p-4 hover:border-zinc-300 hover:shadow-2 transition-all duration-150">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div>
-                        <p className="text-xs font-semibold text-violet-600 mb-0.5">{event.dateLabel} · {event.time}</p>
+                        <p className="text-xs font-semibold text-blue-700 mb-0.5">{event.dateLabel} · {event.time}</p>
                         <p className="text-sm font-semibold text-zinc-900 leading-tight">{event.title}</p>
                         {event.description && (
                           <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{event.description}</p>
@@ -849,7 +849,7 @@ export default function ProfilePage() {
                               ? status === "going"
                                 ? "bg-emerald-500 text-white"
                                 : status === "maybe"
-                                ? "bg-violet-400 text-white"
+                                ? "bg-blue-500 text-white"
                                 : "bg-zinc-300 text-zinc-700"
                               : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 border border-zinc-100"
                           }`}

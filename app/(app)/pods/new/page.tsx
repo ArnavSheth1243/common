@@ -37,8 +37,8 @@ const CADENCES: { value: PodCadence; label: string }[] = [
 ]
 
 const MEMBER_COLORS = [
-  "bg-rose-500","bg-violet-500","bg-emerald-500","bg-sky-500",
-  "bg-violet-500","bg-pink-500","bg-teal-500","bg-teal-500",
+  "bg-rose-500","bg-blue-500","bg-emerald-500","bg-sky-500",
+  "bg-blue-500","bg-blue-500","bg-teal-500","bg-teal-500",
   "bg-blue-600","bg-indigo-500","bg-zinc-900",
 ]
 
@@ -128,7 +128,7 @@ export default function NewPodPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Morning Run Club"
             maxLength={60}
-            className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
           />
         </div>
 
@@ -140,7 +140,7 @@ export default function NewPodPage() {
             onChange={(e) => setDescription(e.target.value.slice(0, 300))}
             placeholder="What's this pod about? What do members commit to?"
             rows={3}
-            className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none"
+            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none"
           />
           <div className="text-right text-xs text-zinc-300 mt-1">{description.length}/300</div>
         </div>
@@ -186,7 +186,7 @@ export default function NewPodPage() {
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center gap-2 w-full aspect-[3/1] border-2 border-dashed border-zinc-200 hover:border-violet-400 rounded-2xl cursor-pointer transition-all hover:bg-violet-50/30">
+            <label className="flex flex-col items-center justify-center gap-2 w-full aspect-[3/1] border-2 border-dashed border-zinc-200 hover:border-blue-500 rounded-2xl cursor-pointer transition-all hover:bg-blue-50/30">
               <UploadSimple size={24} className="text-zinc-400" />
               <span className="text-sm font-medium text-zinc-400">Click to upload</span>
               <span className="text-[11px] text-zinc-300">JPG, PNG, or WebP</span>
@@ -247,7 +247,7 @@ export default function NewPodPage() {
               value={customCadence}
               onChange={(e) => setCustomCadence(e.target.value)}
               placeholder="e.g. Every Monday and Thursday"
-              className="w-full mt-3 bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full mt-3 bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
             />
           )}
         </div>
@@ -262,7 +262,7 @@ export default function NewPodPage() {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="e.g. Prospect Park, Brooklyn or Remote"
-            className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
           />
         </div>
 
@@ -323,7 +323,7 @@ export default function NewPodPage() {
           <button
             onClick={handleCreate}
             disabled={!name.trim() || submitting}
-            className="w-full flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-2xl transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.4)] active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-2xl transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.4)] active:scale-[0.98]"
           >
             {submitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

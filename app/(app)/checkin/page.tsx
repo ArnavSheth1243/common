@@ -110,8 +110,8 @@ function CheckinForm() {
   if (submitted) {
     return (
       <div className="min-h-screen pb-32 lg:pb-0 flex flex-col items-center justify-center px-5 text-center">
-        <div className="w-20 h-20 bg-violet-50 border border-violet-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle size={36} weight="fill" className="text-violet-500" />
+        <div className="w-20 h-20 bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center mb-6">
+          <CheckCircle size={36} weight="fill" className="text-blue-500" />
         </div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Checked in</h1>
         <p className="text-zinc-500 text-[15px] leading-relaxed max-w-[34ch] mb-2">
@@ -124,9 +124,9 @@ function CheckinForm() {
           {visibility === "pod" && "Visible to your pod members only"}
           {visibility === "private" && "Only visible to you"}
         </p>
-        <div className="flex items-center gap-2 bg-violet-50 border border-violet-100 rounded-full px-5 py-3 mb-8">
-          <Flame size={18} weight="fill" className="text-violet-500" />
-          <span className="text-sm font-bold text-violet-700">
+        <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-5 py-3 mb-8">
+          <Flame size={18} weight="fill" className="text-blue-500" />
+          <span className="text-sm font-bold text-blue-800">
             {currentStreak} check-ins
           </span>
         </div>
@@ -187,7 +187,7 @@ function CheckinForm() {
                 }`}
               >
                 <div
-                  className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold"
+                  className="w-5 h-5 rounded-full bg-blue-700 flex items-center justify-center text-white text-[9px] font-bold"
                 >
                   {pod.name[0]}
                 </div>
@@ -239,7 +239,7 @@ function CheckinForm() {
               onChange={(e) => setText(e.target.value.slice(0, maxLength))}
               placeholder={selectedPod === "solo" ? "What did you work on today?" : `Share something with your ${cadenceLabel.toLowerCase()} pod.`}
               rows={5}
-              className="w-full bg-white border border-zinc-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl px-4 py-3.5 text-[15px] text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
+              className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3.5 text-[15px] text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
             />
             <span
               className={`absolute bottom-3 right-4 text-xs font-medium tabular-nums ${
@@ -280,11 +280,11 @@ function CheckinForm() {
             <button
               type="button"
               onClick={() => photoRef.current?.click()}
-              className="flex items-center gap-2.5 w-full bg-zinc-50 border-2 border-dashed border-zinc-200 hover:border-violet-300 hover:bg-violet-50/30 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-400 hover:text-violet-600 transition-all duration-200 group"
+              className="flex items-center gap-2.5 w-full bg-zinc-50 border-2 border-dashed border-zinc-200 hover:border-blue-300 hover:bg-blue-50/30 rounded-2xl px-5 py-4 text-sm font-medium text-zinc-400 hover:text-blue-700 transition-all duration-200 group"
             >
               <Camera
                 size={18}
-                className="text-zinc-300 group-hover:text-violet-500 transition-colors"
+                className="text-zinc-300 group-hover:text-blue-500 transition-colors"
               />
               Add a photo (optional)
             </button>
@@ -328,7 +328,7 @@ function CheckinForm() {
           <button
             type="submit"
             disabled={!text.trim() || submitting}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-pink-500 hover:from-violet-500 hover:to-pink-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-full transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.4)] active:scale-[0.97]"
+            className="w-full flex items-center justify-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[15px] py-4 rounded-full transition-all duration-200 shadow-[0_4px_20px_-4px_rgba(29,78,216,0.4)] active:scale-[0.97]"
           >
             {submitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -350,7 +350,7 @@ export default function CheckinPage() {
     <Suspense
       fallback={
         <div className="min-h-[100dvh] flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin" />
         </div>
       }
     >

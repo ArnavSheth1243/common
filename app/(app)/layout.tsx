@@ -63,7 +63,7 @@ function SidebarStreakFooter() {
             {profile.displayName}
           </div>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
-            <Flame size={10} weight="fill" className="text-violet-500" />
+            <Flame size={10} weight="fill" className="text-blue-500" />
             <span>{totalCheckins} check-ins</span>
           </div>
         </div>
@@ -98,7 +98,7 @@ function NavItemLink({
       <item.icon
         size={18}
         weight={active ? "fill" : "regular"}
-        className={active ? "text-violet-600" : ""}
+        className={active ? "text-blue-700" : ""}
       />
       {item.label}
       {isMessages && unreadCount && unreadCount > 0 ? (

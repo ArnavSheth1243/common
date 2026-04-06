@@ -127,8 +127,8 @@ function PodCard({ pod, featured = false }: { pod: any; featured?: boolean }) {
           )}
           {pod.streak > 0 && (
             <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-card/90 backdrop-blur-sm rounded-md px-2 py-1">
-              <Flame size={11} weight="fill" className="text-violet-500" />
-              <span className="text-xs font-bold text-violet-700">{pod.streak}</span>
+              <Flame size={11} weight="fill" className="text-blue-500" />
+              <span className="text-xs font-bold text-blue-800">{pod.streak}</span>
             </div>
           )}
           {pod.visibility === "private" && (
@@ -377,7 +377,7 @@ export default function PodsPage() {
           <Faders size={16} />
           Filters
           {(sizeFilter !== "any" || typeFilter !== "all" || locationFilter) && (
-            <span className="w-1.5 h-1.5 bg-violet-400 rounded-full" />
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
           )}
         </Button>
       </div>

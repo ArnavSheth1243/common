@@ -92,19 +92,19 @@ export const ALL_MEDALS: Medal[] = [
 
 export const RANKS: Rank[] = [
   { name: "Newcomer",   minMedals: 0,   color: "bg-zinc-100",      textColor: "text-zinc-500",    emoji: "○"  },
-  { name: "Member",     minMedals: 3,   color: "bg-violet-100",     textColor: "text-violet-700",   emoji: "◆"  },
+  { name: "Member",     minMedals: 3,   color: "bg-blue-100",     textColor: "text-blue-800",   emoji: "◆"  },
   { name: "Regular",    minMedals: 7,   color: "bg-emerald-100",   textColor: "text-emerald-700", emoji: "★"  },
   { name: "Veteran",    minMedals: 13,  color: "bg-sky-100",       textColor: "text-sky-700",     emoji: "◈"  },
-  { name: "Elite",      minMedals: 21,  color: "bg-violet-100",    textColor: "text-violet-700",  emoji: "⬟"  },
+  { name: "Elite",      minMedals: 21,  color: "bg-blue-100",    textColor: "text-blue-800",  emoji: "⬟"  },
   { name: "Champion",   minMedals: 30,  color: "bg-rose-100",      textColor: "text-rose-600",    emoji: "⬡"  },
-  { name: "Legend",     minMedals: 40,  color: "bg-gradient-to-r from-violet-100 to-pink-100", textColor: "text-violet-700", emoji: "♛" },
+  { name: "Legend",     minMedals: 40,  color: "bg-blue-200", textColor: "text-blue-900", emoji: "♛" },
 ]
 
 export const RARITY_STYLES: Record<MedalRarity, { bg: string; text: string; border: string; label: string; glow: string }> = {
   bronze:   { bg: "bg-rose-50",    text: "text-rose-700",  border: "border-rose-200",  label: "Bronze",    glow: "shadow-[0_0_12px_rgba(234,88,12,0.25)]"  },
   silver:   { bg: "bg-slate-50",     text: "text-slate-600",   border: "border-slate-200",   label: "Silver",    glow: "shadow-[0_0_12px_rgba(100,116,139,0.25)]" },
-  gold:     { bg: "bg-violet-50",     text: "text-violet-700",   border: "border-violet-300",   label: "Gold",      glow: "shadow-[0_0_16px_rgba(245,158,11,0.35)]"  },
-  platinum: { bg: "bg-violet-50",    text: "text-violet-700",  border: "border-violet-300",  label: "Platinum",  glow: "shadow-[0_0_20px_rgba(139,92,246,0.4)]"   },
+  gold:     { bg: "bg-blue-50",     text: "text-blue-800",   border: "border-blue-300",   label: "Gold",      glow: "shadow-[0_0_16px_rgba(245,158,11,0.35)]"  },
+  platinum: { bg: "bg-blue-50",    text: "text-blue-800",  border: "border-blue-300",  label: "Platinum",  glow: "shadow-[0_0_20px_rgba(139,92,246,0.4)]"   },
   diamond:  { bg: "bg-cyan-50",      text: "text-cyan-700",    border: "border-cyan-300",    label: "Diamond",   glow: "shadow-[0_0_24px_rgba(6,182,212,0.45)]"   },
 }
 

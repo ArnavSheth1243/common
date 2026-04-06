@@ -149,7 +149,7 @@ export default function NewEventPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Saturday morning trail run"
               required
-              className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
           </div>
 
@@ -164,7 +164,7 @@ export default function NewEventPage() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
+                className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
               />
             </div>
             <div>
@@ -175,7 +175,7 @@ export default function NewEventPage() {
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
+                className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
               />
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function NewEventPage() {
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
             />
           </div>
 
@@ -202,7 +202,7 @@ export default function NewEventPage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Golden Gate Park, San Francisco"
-              className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function NewEventPage() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Tell people what to expect..."
               rows={4}
-              className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none"
+              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none"
             />
           </div>
 
@@ -254,7 +254,7 @@ export default function NewEventPage() {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full bg-white border border-border focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
             <p className="text-[11px] text-muted-foreground mt-1.5">
               Leave blank to use a category default.
@@ -273,18 +273,18 @@ export default function NewEventPage() {
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left",
                   hostPodId === null
-                    ? "bg-violet-50 border-violet-400"
+                    ? "bg-blue-50 border-blue-500"
                     : "bg-white border-border hover:border-zinc-300",
                 )}
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center text-white text-xs font-bold">
                   ME
                 </div>
                 <div className="flex-1">
                   <div className="text-sm font-semibold text-foreground">Personal</div>
                   <div className="text-[11px] text-muted-foreground">Solo event you're hosting</div>
                 </div>
-                {hostPodId === null && <CheckCircle size={18} weight="fill" className="text-violet-500" />}
+                {hostPodId === null && <CheckCircle size={18} weight="fill" className="text-blue-500" />}
               </button>
 
               {userPods.map((pod) => (
@@ -295,16 +295,16 @@ export default function NewEventPage() {
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left",
                     hostPodId === pod.id
-                      ? "bg-violet-50 border-violet-400"
+                      ? "bg-blue-50 border-blue-500"
                       : "bg-white border-border hover:border-zinc-300",
                   )}
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500" />
+                  <div className="w-8 h-8 rounded-full bg-blue-700" />
                   <div className="flex-1">
                     <div className="text-sm font-semibold text-foreground">{pod.name}</div>
                     <div className="text-[11px] text-muted-foreground">Pod event</div>
                   </div>
-                  {hostPodId === pod.id && <CheckCircle size={18} weight="fill" className="text-violet-500" />}
+                  {hostPodId === pod.id && <CheckCircle size={18} weight="fill" className="text-blue-500" />}
                 </button>
               ))}
             </div>
@@ -322,11 +322,11 @@ export default function NewEventPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-3 rounded-xl border transition-all",
                   isPublic
-                    ? "bg-violet-50 border-violet-400"
+                    ? "bg-blue-50 border-blue-500"
                     : "bg-white border-border hover:border-zinc-300",
                 )}
               >
-                <Globe size={16} className={isPublic ? "text-violet-600" : "text-muted-foreground"} />
+                <Globe size={16} className={isPublic ? "text-blue-700" : "text-muted-foreground"} />
                 <div className="text-left flex-1">
                   <div className="text-xs font-semibold text-foreground">Public</div>
                   <div className="text-[10px] text-muted-foreground">Anyone can see and RSVP</div>
@@ -339,12 +339,12 @@ export default function NewEventPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-3 rounded-xl border transition-all",
                   !isPublic
-                    ? "bg-violet-50 border-violet-400"
+                    ? "bg-blue-50 border-blue-500"
                     : "bg-white border-border hover:border-zinc-300",
                   !hostPodId && "opacity-50 cursor-not-allowed",
                 )}
               >
-                <Lock size={16} className={!isPublic ? "text-violet-600" : "text-muted-foreground"} />
+                <Lock size={16} className={!isPublic ? "text-blue-700" : "text-muted-foreground"} />
                 <div className="text-left flex-1">
                   <div className="text-xs font-semibold text-foreground">Pod-only</div>
                   <div className="text-[10px] text-muted-foreground">Only pod members</div>
@@ -368,7 +368,7 @@ export default function NewEventPage() {
             <Button
               type="submit"
               disabled={submitting}
-              className="bg-gradient-to-r from-violet-600 to-pink-500 hover:from-violet-500 hover:to-pink-400 text-white rounded-full px-6"
+              className="bg-blue-700 hover:bg-blue-800 text-white rounded-full px-6"
             >
               {submitting ? "Creating..." : "Create event"}
             </Button>

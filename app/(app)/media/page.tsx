@@ -67,8 +67,8 @@ interface Challenge {
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const TAG_STYLES: Record<PostTag, { bg: string; text: string; label: string }> = {
-  announcement: { bg: "bg-violet-100",  text: "text-violet-700",  label: "Announcement" },
-  challenge:    { bg: "bg-violet-100", text: "text-violet-700", label: "Challenge" },
+  announcement: { bg: "bg-blue-100",  text: "text-blue-800",  label: "Announcement" },
+  challenge:    { bg: "bg-blue-100", text: "text-blue-800", label: "Challenge" },
   spotlight:    { bg: "bg-emerald-100",text: "text-emerald-700",label: "Spotlight" },
   event:        { bg: "bg-sky-100",    text: "text-sky-700",    label: "Event" },
   tip:          { bg: "bg-zinc-100",   text: "text-zinc-600",   label: "Tip" },
@@ -159,11 +159,11 @@ const CHALLENGES: Challenge[] = [
     category: "All pods",
     reward: "Consistency Badge",
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&h=600&fit=crop&q=80",
-    gradientFrom: "from-violet-950",
-    gradientVia: "via-violet-900/80",
-    accentText: "text-violet-400",
-    accentBg: "bg-violet-500/20",
-    buttonBg: "bg-violet-500 hover:bg-violet-400",
+    gradientFrom: "from-blue-950",
+    gradientVia: "via-blue-900/80",
+    accentText: "text-blue-500",
+    accentBg: "bg-blue-500/20",
+    buttonBg: "bg-blue-500 hover:bg-blue-500",
     difficulty: "Medium",
     featured: true,
     defaultJoined: false,
@@ -270,7 +270,7 @@ const CHALLENGES: Challenge[] = [
     leaderboard: [
       { name: "Morning Run Club", value: 78, initials: "MR", color: "bg-rose-500" },
       { name: "Coastal Runners", value: 63, initials: "CR", color: "bg-sky-500" },
-      { name: "Sunrise Squad", value: 51, initials: "SS", color: "bg-violet-500" },
+      { name: "Sunrise Squad", value: 51, initials: "SS", color: "bg-blue-500" },
       { name: "Weekend Warriors", value: 44, initials: "WW", color: "bg-emerald-500" },
     ],
   },
@@ -293,11 +293,11 @@ const CHALLENGES: Challenge[] = [
     category: "Reading",
     reward: "Pod Readers Badge",
     image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=900&h=600&fit=crop&q=80",
-    gradientFrom: "from-violet-950",
-    gradientVia: "via-violet-900/80",
-    accentText: "text-violet-300",
-    accentBg: "bg-violet-500/20",
-    buttonBg: "bg-violet-500 hover:bg-violet-400",
+    gradientFrom: "from-blue-950",
+    gradientVia: "via-blue-900/80",
+    accentText: "text-blue-300",
+    accentBg: "bg-blue-500/20",
+    buttonBg: "bg-blue-500 hover:bg-blue-500",
     difficulty: "Easy",
     featured: false,
     defaultJoined: false,
@@ -307,21 +307,21 @@ const CHALLENGES: Challenge[] = [
     metricUnit: "books",
     podTarget: 10,
     leaderboard: [
-      { name: "The Reader's Pod", value: 6, initials: "RP", color: "bg-violet-500" },
-      { name: "Sunday Book Club", value: 5, initials: "SB", color: "bg-violet-500" },
+      { name: "The Reader's Pod", value: 6, initials: "RP", color: "bg-blue-500" },
+      { name: "Sunday Book Club", value: 5, initials: "SB", color: "bg-blue-500" },
       { name: "Late Night Readers", value: 3, initials: "LN", color: "bg-sky-500" },
     ],
   },
 ]
 
 const AVATAR_COLORS = [
-  "bg-rose-500","bg-violet-500","bg-emerald-500",
-  "bg-sky-500","bg-violet-500","bg-pink-500","bg-violet-500","bg-teal-500",
+  "bg-rose-500","bg-blue-500","bg-emerald-500",
+  "bg-sky-500","bg-blue-500","bg-blue-500","bg-blue-500","bg-teal-500",
 ]
 
 const DIFFICULTY_STYLES = {
   Easy:   { bg: "bg-emerald-500/20", text: "text-emerald-300" },
-  Medium: { bg: "bg-violet-500/20",   text: "text-violet-300" },
+  Medium: { bg: "bg-blue-500/20",   text: "text-blue-300" },
   Hard:   { bg: "bg-rose-500/20",    text: "text-rose-300" },
 }
 
@@ -668,10 +668,10 @@ function ChallengeModal({ challenge, onClose }: { challenge: Challenge; onClose:
             )}
 
             {/* Reward */}
-            <div className="flex items-center gap-3 bg-violet-50 border border-violet-100 rounded-2xl p-4 mb-6">
-              <Trophy size={22} weight="fill" className="text-violet-500 flex-shrink-0" />
+            <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6">
+              <Trophy size={22} weight="fill" className="text-blue-500 flex-shrink-0" />
               <div>
-                <div className="text-xs font-bold text-violet-700 uppercase tracking-wide">Reward</div>
+                <div className="text-xs font-bold text-blue-800 uppercase tracking-wide">Reward</div>
                 <div className="text-sm font-semibold text-zinc-900">{challenge.reward}</div>
               </div>
             </div>
@@ -759,7 +759,7 @@ function PostCard({ post }: { post: MediaPost }) {
   const tag = TAG_STYLES[post.tag]
   const icon = TAG_ICONS[post.tag]
   return (
-    <div className={`bg-white border border-zinc-100 rounded-3xl overflow-hidden shadow-softer hover:shadow-card transition-all duration-300 ${post.pinned ? "ring-1 ring-violet-300/50" : ""}`}>
+    <div className={`bg-white border border-zinc-100 rounded-3xl overflow-hidden shadow-softer hover:shadow-card transition-all duration-300 ${post.pinned ? "ring-1 ring-blue-300/50" : ""}`}>
       {post.image && (
         <img src={post.image} alt={post.title} className="w-full h-44 object-cover" />
       )}
@@ -768,14 +768,14 @@ function PostCard({ post }: { post: MediaPost }) {
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${tag.bg} ${tag.text}`}>
             {icon}{tag.label}
           </span>
-          {post.pinned && <span className="text-[11px] font-semibold text-violet-600">Pinned</span>}
+          {post.pinned && <span className="text-[11px] font-semibold text-blue-700">Pinned</span>}
           <span className="ml-auto text-[11px] text-zinc-400">{post.date}</span>
         </div>
         <h3 className="text-base font-bold text-zinc-900 mb-2 leading-snug">{post.title}</h3>
         <p className="text-sm text-zinc-500 leading-relaxed">{post.body}</p>
         {post.meta && <p className="text-xs font-semibold text-zinc-400 mt-2">{post.meta}</p>}
         {post.cta && (
-          <button className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-zinc-900 hover:text-violet-600 transition-colors">
+          <button className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-zinc-900 hover:text-blue-700 transition-colors">
             {post.cta.label}<ArrowRight size={14} weight="bold" />
           </button>
         )}
@@ -827,7 +827,7 @@ export default function MediaPage() {
             ${tab === "challenges" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400 hover:text-zinc-700"}`}
         >
           Challenges
-          <span className="bg-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
             {CHALLENGES.length}
           </span>
         </button>
@@ -859,7 +859,7 @@ export default function MediaPage() {
           {/* Stats bar */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { icon: <Lightning size={15} weight="fill" className="text-violet-500" />, value: CHALLENGES.length, label: "Active" },
+              { icon: <Lightning size={15} weight="fill" className="text-blue-500" />, value: CHALLENGES.length, label: "Active" },
               { icon: <Users size={15} weight="fill" className="text-sky-500" />, value: "4.4k+", label: "Participants" },
               { icon: <SealCheck size={15} weight="fill" className="text-emerald-500" />, value: totalJoined, label: "Joined" },
             ].map((s, i) => (

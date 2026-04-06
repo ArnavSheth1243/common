@@ -128,7 +128,7 @@ export default function ChallengesPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin" />
         </div>
       ) : challenges.length === 0 ? (
         <div className="text-center py-16">
@@ -142,7 +142,7 @@ export default function ChallengesPage() {
           {myChallenges.length > 0 && (
             <div className="mb-8">
               <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-4">
-                <Lightning size={12} weight="fill" className="inline mr-1 text-violet-500" />
+                <Lightning size={12} weight="fill" className="inline mr-1 text-blue-500" />
                 Your active challenges
               </h2>
               <div className="space-y-3">
@@ -158,11 +158,11 @@ export default function ChallengesPage() {
                             {completed ? (
                               <CheckCircle size={16} weight="fill" className="text-emerald-500" />
                             ) : (
-                              <Target size={16} className="text-violet-500" />
+                              <Target size={16} className="text-blue-500" />
                             )}
                             <h3 className="text-sm font-bold text-zinc-900">{c.title}</h3>
                           </div>
-                          <Link href={`/pods/${c.podId}`} className="text-xs text-zinc-400 hover:text-violet-600 transition-colors">
+                          <Link href={`/pods/${c.podId}`} className="text-xs text-zinc-400 hover:text-blue-700 transition-colors">
                             {c.podName}
                           </Link>
                         </div>
@@ -182,7 +182,7 @@ export default function ChallengesPage() {
                         </div>
                         <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${completed ? "bg-emerald-500" : "bg-violet-500"}`}
+                            className={`h-full rounded-full transition-all duration-500 ${completed ? "bg-emerald-500" : "bg-blue-500"}`}
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -212,7 +212,7 @@ export default function ChallengesPage() {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <h3 className="text-sm font-bold text-zinc-900 mb-0.5">{c.title}</h3>
-                          <Link href={`/pods/${c.podId}`} className="text-xs text-zinc-400 hover:text-violet-600 transition-colors">
+                          <Link href={`/pods/${c.podId}`} className="text-xs text-zinc-400 hover:text-blue-700 transition-colors">
                             {c.podName}
                           </Link>
                         </div>
@@ -262,7 +262,7 @@ export default function ChallengesPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {completed ? (
-                            <Star size={14} weight="fill" className="text-violet-500" />
+                            <Star size={14} weight="fill" className="text-blue-500" />
                           ) : (
                             <Trophy size={14} className="text-zinc-300" />
                           )}
