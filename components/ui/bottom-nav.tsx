@@ -26,7 +26,11 @@ export function BottomNav() {
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-white/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-14">
         {tabs.map((tab) => {
-          const active = pathname === tab.href || pathname.startsWith(tab.href + "/")
+          let active = pathname === tab.href || pathname.startsWith(tab.href + "/")
+          // Explore tab also activates on /events
+          if (tab.href === "/pods" && (pathname === "/events" || pathname.startsWith("/events/"))) {
+            active = true
+          }
           return (
             <Link
               key={tab.href}

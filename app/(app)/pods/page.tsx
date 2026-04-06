@@ -326,7 +326,7 @@ export default function PodsPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* Header */}
       <PageHeader
-        title="Discover Pods"
+        title="Explore"
         description="Thousands of recurring activities. Find one, join a pod, show up."
         action={
           <Button asChild className="bg-primary hover:bg-primary/90">
@@ -337,6 +337,22 @@ export default function PodsPage() {
           </Button>
         }
       />
+
+      {/* Pods | Events segmented toggle */}
+      <div className="inline-flex bg-zinc-100 rounded-full p-1 mb-5">
+        <Link
+          href="/pods"
+          className="px-5 py-1.5 rounded-full text-sm font-semibold bg-white text-foreground shadow-sm transition-all"
+        >
+          Pods
+        </Link>
+        <Link
+          href="/events"
+          className="px-5 py-1.5 rounded-full text-sm font-semibold text-zinc-500 hover:text-foreground transition-all"
+        >
+          Events
+        </Link>
+      </div>
 
       {/* Search + Filter */}
       <div className="flex gap-2 mb-3">

@@ -24,6 +24,17 @@ export type PodCategory =
   | "art"
   | "photography"
   | "finance"
+  | "pickleball"
+  | "tennis"
+  | "basketball"
+  | "soccer"
+  | "golf"
+  | "volleyball"
+  | "martial_arts"
+  | "climbing"
+  | "surfing"
+  | "skating"
+  | "dance"
   | "other"
 export type PodCadence = "daily" | "3x_weekly" | "weekly" | "bi_weekly" | "monthly"
 export type Visibility = "public" | "private"
@@ -106,7 +117,7 @@ export interface CheckinComment {
 
 export interface PodEvent {
   id: string
-  pod_id: string
+  pod_id: string | null
   title: string
   date: string
   time: string | null
@@ -114,6 +125,9 @@ export interface PodEvent {
   location: string | null
   description: string | null
   created_by: string | null
+  is_public: boolean
+  image_url: string | null
+  category: string | null
   created_at: string
 }
 

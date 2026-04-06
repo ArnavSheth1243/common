@@ -709,13 +709,13 @@ export default function PodDetailPage() {
 
                   {/* My RSVP */}
                   {(() => {
-                    const myRsvp = podState.getRsvp(pod.id, event.id)
+                    const myRsvp = podState.getRsvp(event.id)
                     return (
                       <div className="flex items-center gap-2 mb-3">
                         {(["going", "maybe", "no"] as RsvpStatus[]).map((status) => (
                           <button
                             key={status}
-                            onClick={() => podState.setRsvp(pod.id, event.id, status)}
+                            onClick={() => podState.setRsvp(event.id, status)}
                             className={`flex-1 py-1.5 text-xs font-semibold rounded-xl transition-all ${
                               myRsvp === status
                                 ? status === "going"

@@ -10,6 +10,7 @@ import {
   User,
   Flame,
   CalendarBlank,
+  CalendarStar,
   ChartLineUp,
   ChatCircle,
   UsersThree,
@@ -30,6 +31,7 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { href: "/dashboard",   label: "Home",       icon: House },
   { href: "/pods",        label: "Explore",    icon: Compass },
+  { href: "/events",      label: "Events",     icon: CalendarStar },
   { href: "/my-pods",     label: "My Pods",    icon: FolderUser },
   { href: "/people",      label: "People",     icon: UsersThree },
   { href: "/challenges",  label: "Challenges", icon: Lightning },

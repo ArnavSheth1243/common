@@ -24,7 +24,7 @@ export interface StoredCheckin {
 interface PodStateData {
   joinedPodIds: string[]
   createdPods: CreatedPod[]
-  rsvps: Record<string, Record<string, RsvpStatus>>
+  rsvps: Record<string, RsvpStatus>
   checkins: StoredCheckin[]
 }
 
@@ -37,8 +37,8 @@ interface PodStateContext extends PodStateData {
   findPod: (podId: string) => CreatedPod | undefined
   sendApplication: (podId: string, message?: string) => Promise<void>
   hasApplied: (podId: string) => boolean
-  setRsvp: (podId: string, eventId: string, status: RsvpStatus) => Promise<void>
-  getRsvp: (podId: string, eventId: string) => RsvpStatus | undefined
+  setRsvp: (eventId: string, status: RsvpStatus) => Promise<void>
+  getRsvp: (eventId: string) => RsvpStatus | undefined
   acceptApp: (appId: string) => Promise<void>
   declineApp: (appId: string) => Promise<void>
   reviewApp: (appId: string) => void
@@ -94,6 +94,17 @@ export function PodStateProvider({ children }: { children: React.ReactNode }) {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
 
+        // Fetch user's RSVPs
+        const { data: rsvpRows } = await supabase
+          .from("event_rsvps")
+          .select("event_id, status")
+          .eq("user_id", user.id)
+
+        const rsvpMap: Record<string, RsvpStatus> = {}
+        for (const r of rsvpRows || []) {
+          rsvpMap[(r as any).event_id] = (r as any).status
+        }
+
         setState({
           joinedPodIds: joinedIds,
           createdPods: (created || []).map((p: any) => ({
@@ -102,7 +113,7 @@ export function PodStateProvider({ children }: { children: React.ReactNode }) {
             podMembers: [],
             recentCheckins: [],
           })),
-          rsvps: {},
+          rsvps: rsvpMap,
           checkins: (checkins || []).map((c: any) => ({
             id: c.id,
             podId: c.pod_id,
@@ -281,7 +292,7 @@ export function PodStateProvider({ children }: { children: React.ReactNode }) {
     return appliedPodIds.has(podId)
   }, [appliedPodIds])
 
-  const setRsvp = useCallback(async (podId: string, eventId: string, status: RsvpStatus) => {
+  const setRsvp = useCallback(async (eventId: string, status: RsvpStatus) => {
     if (!user) throw new Error("No user logged in")
 
     try {
@@ -291,13 +302,7 @@ export function PodStateProvider({ children }: { children: React.ReactNode }) {
 
       setState((prev) => ({
         ...prev,
-        rsvps: {
-          ...prev.rsvps,
-          [podId]: {
-            ...(prev.rsvps[podId] ?? {}),
-            [eventId]: status,
-          },
-        },
+        rsvps: { ...prev.rsvps, [eventId]: status },
       }))
     } catch (err) {
       console.error("Failed to set RSVP:", err)
@@ -305,8 +310,8 @@ export function PodStateProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, supabase])
 
-  const getRsvp = useCallback((podId: string, eventId: string): RsvpStatus | undefined => {
-    return state.rsvps[podId]?.[eventId]
+  const getRsvp = useCallback((eventId: string): RsvpStatus | undefined => {
+    return state.rsvps[eventId]
   }, [state.rsvps])
 
   const acceptApp = useCallback(async (appId: string) => {

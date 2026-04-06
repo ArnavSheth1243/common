@@ -118,6 +118,9 @@ create table if not exists pod_events (
   location text,
   description text,
   created_by uuid references auth.users(id) on delete set null,
+  is_public boolean default true,
+  image_url text,
+  category text,
   created_at timestamptz default now()
 );
 
@@ -246,8 +249,13 @@ create policy "comments_insert" on checkin_comments for insert with check (auth.
 create policy "events_select" on pod_events for select using (true);
 create policy "events_insert" on pod_events
   for insert with check (
-    auth.uid() in (select user_id from pod_members where pod_id = pod_events.pod_id)
+    -- solo events: created_by must equal auth.uid() and pod_id is null
+    (pod_id is null and auth.uid() = created_by)
+    -- pod events: user must be a member of the pod
+    or auth.uid() in (select user_id from pod_members where pod_id = pod_events.pod_id)
   );
+create policy "events_update" on pod_events for update using (auth.uid() = created_by);
+create policy "events_delete" on pod_events for delete using (auth.uid() = created_by);
 create policy "rsvps_select" on event_rsvps for select using (true);
 create policy "rsvps_upsert" on event_rsvps for all using (auth.uid() = user_id);
 
