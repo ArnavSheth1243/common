@@ -37,7 +37,6 @@ import {
   HandFist,
   Wall,
   Waves,
-  Skateboard,
 } from "@phosphor-icons/react"
 import type { FC } from "react"
 import { CADENCE_LABELS } from "@/lib/data"
@@ -95,7 +94,7 @@ const categoryIcons: Record<string, FC<any>> = {
   fitness: Barbell, mindfulness: Leaf, productivity: GraduationCap, creativity: PaintBrush,
   pickleball: Racquet, tennis: TennisBall, basketball: Basketball, soccer: SoccerBall,
   golf: Golf, volleyball: Volleyball, martial_arts: HandFist, climbing: Wall,
-  surfing: Waves, skating: Skateboard, dance: MusicNote,
+  surfing: Waves, skating: Sneaker, dance: MusicNote,
   other: Tag,
 }
 

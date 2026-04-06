@@ -49,7 +49,6 @@ import {
   HandFist,
   Wall,
   Waves,
-  Skateboard,
 } from "@phosphor-icons/react"
 import { useUserProfile } from "@/app/context/user-profile"
 import type { PodCategory } from "@/lib/data"
@@ -85,7 +84,7 @@ const CATEGORY_OPTIONS: { value: PodCategory; label: string; icon: React.Element
   { value: "martial_arts", label: "Martial Arts", icon: HandFist },
   { value: "climbing",    label: "Climbing",    icon: Wall },
   { value: "surfing",     label: "Surfing",     icon: Waves },
-  { value: "skating",     label: "Skating",     icon: Skateboard },
+  { value: "skating",     label: "Skating",     icon: Sneaker },
   { value: "dance",       label: "Dance",       icon: MusicNote },
   { value: "other",       label: "Other",       icon: Tag },
 ]
