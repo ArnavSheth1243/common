@@ -24,14 +24,14 @@ import { useSession } from "@/app/context/session"
 const AVATAR_COLORS = [
   "bg-zinc-900 text-white",
   "bg-rose-500 text-white",
-  "bg-amber-500 text-white",
+  "bg-violet-500 text-white",
   "bg-emerald-500 text-white",
   "bg-sky-500 text-white",
   "bg-violet-500 text-white",
   "bg-indigo-500 text-white",
   "bg-pink-500 text-white",
   "bg-teal-500 text-white",
-  "bg-orange-500 text-white",
+  "bg-teal-500 text-white",
   "bg-cyan-500 text-white",
   "bg-fuchsia-500 text-white",
 ]
@@ -161,7 +161,7 @@ export default function MemberProfilePage() {
           Back
         </button>
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
         </div>
       </div>
     )
@@ -215,7 +215,7 @@ export default function MemberProfilePage() {
                 {isPublic ? "Public" : "Private"}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-amber-600 font-semibold mb-2">
+            <div className="flex items-center gap-1.5 text-sm text-violet-600 font-semibold mb-2">
               <Flame size={13} weight="fill" />
               <span>{member.streak} check-in streak</span>
             </div>
@@ -272,7 +272,7 @@ export default function MemberProfilePage() {
           </div>
           <div className="bg-white px-3 py-3 text-center">
             <div className="flex items-center justify-center gap-0.5 mb-0.5">
-              <Flame size={13} weight="fill" className="text-amber-500" />
+              <Flame size={13} weight="fill" className="text-violet-500" />
               <span className="text-lg font-bold text-zinc-900">{member.streak}</span>
             </div>
             <div className="text-[10px] text-zinc-400 font-medium">Streak</div>
@@ -309,7 +309,7 @@ export default function MemberProfilePage() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-amber-600 font-semibold flex-shrink-0">
+                    <div className="flex items-center gap-1 text-xs text-violet-600 font-semibold flex-shrink-0">
                       <Flame size={10} weight="fill" />
                       <span>{pod.streak}</span>
                     </div>
@@ -352,7 +352,7 @@ export default function MemberProfilePage() {
                         <ChatCircle size={12} />
                         <span>{checkin.comments}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-amber-600 font-semibold ml-auto">
+                      <div className="flex items-center gap-1 text-xs text-violet-600 font-semibold ml-auto">
                         <Flame size={10} weight="fill" />
                         <span>{checkin.streakCount}</span>
                       </div>

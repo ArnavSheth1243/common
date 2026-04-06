@@ -177,7 +177,7 @@ export default function WelcomePage() {
               items={CADENCES}
               intervalMs={2800}
               initialDelay={1400}
-              className="bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-cyan-500 to-teal-400 bg-clip-text text-transparent"
             />
           </div>
 

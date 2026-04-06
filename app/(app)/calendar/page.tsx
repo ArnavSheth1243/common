@@ -46,7 +46,7 @@ const DAYS_SHORT = ["Su","Mo","Tu","We","Th","Fr","Sa"]
 
 const POD_COLORS: Record<string, { bg: string; text: string }> = {
   "1": { bg: "bg-rose-500",    text: "text-white" },
-  "2": { bg: "bg-amber-500",   text: "text-white" },
+  "2": { bg: "bg-violet-500",   text: "text-white" },
   "3": { bg: "bg-violet-500",  text: "text-white" },
   "4": { bg: "bg-emerald-500", text: "text-white" },
   "5": { bg: "bg-sky-500",     text: "text-white" },
@@ -57,7 +57,7 @@ const POD_COLORS: Record<string, { bg: string; text: string }> = {
 
 function mapSupabaseToCalEvent(row: any): CalEvent {
   const typeColor = row.type === "reminder"
-    ? { bg: "bg-amber-400", text: "text-white" }
+    ? { bg: "bg-violet-400", text: "text-white" }
     : { bg: "bg-zinc-700", text: "text-white" }
   return {
     id: row.id,
@@ -155,7 +155,7 @@ function EventCard({
             <div className="mt-2">
               <button
                 onClick={() => setShowMap(!showMap)}
-                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-amber-600 transition-colors"
+                className="flex items-center gap-1 text-xs text-zinc-400 hover:text-violet-600 transition-colors"
               >
                 <MapPin size={11} weight="fill" />
                 {event.location}
@@ -176,7 +176,7 @@ function EventCard({
                       ? status === "going"
                         ? "bg-emerald-500 border-emerald-500 text-white"
                         : status === "maybe"
-                          ? "bg-amber-500 border-amber-500 text-white"
+                          ? "bg-violet-500 border-violet-500 text-white"
                           : "bg-zinc-400 border-zinc-400 text-white"
                       : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                     } disabled:opacity-50`}
@@ -243,7 +243,7 @@ function AddEventForm({
       }])
       if (!error) {
         const selectedPod = podOptions.find((p) => p.id === podId)
-        const typeColor = type === "reminder" ? { bg: "bg-amber-400", text: "text-white" } : { bg: "bg-zinc-700", text: "text-white" }
+        const typeColor = type === "reminder" ? { bg: "bg-violet-400", text: "text-white" } : { bg: "bg-zinc-700", text: "text-white" }
         onAdd({
           id: `user-${Date.now()}`,
           title: title.trim(),
@@ -280,20 +280,20 @@ function AddEventForm({
           placeholder="Event title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
         />
         <div className="grid grid-cols-2 gap-2">
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+            className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
           />
           <input
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+            className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
           />
         </div>
         {/* Type selector */}
@@ -313,7 +313,7 @@ function AddEventForm({
           <select
             value={podId}
             onChange={(e) => setPodId(e.target.value)}
-            className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none focus:border-amber-400"
+            className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none focus:border-violet-400"
           >
             <option value="">Select a pod…</option>
             {podOptions.map((p) => (
@@ -325,14 +325,14 @@ function AddEventForm({
           placeholder="Location (optional)"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
         />
         <textarea
           placeholder="Notes (optional)"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
           rows={2}
-          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 resize-none"
+          className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 resize-none"
         />
         <button
           onClick={handleSubmit}
@@ -676,7 +676,7 @@ export default function CalendarPage() {
                 >
                   {/* Date number */}
                   <span className={`text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full mb-1 flex-shrink-0
-                    ${today_ && !selected_ ? "bg-amber-500 text-white" : ""}
+                    ${today_ && !selected_ ? "bg-violet-500 text-white" : ""}
                     ${selected_ ? "text-white" : "text-zinc-700"}
                   `}>
                     {day}

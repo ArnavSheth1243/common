@@ -49,10 +49,10 @@ interface PersonMet {
 }
 
 const AVATAR_COLORS = [
-  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-amber-500 text-white",
+  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-violet-500 text-white",
   "bg-emerald-500 text-white", "bg-sky-500 text-white", "bg-violet-500 text-white",
   "bg-indigo-500 text-white", "bg-pink-500 text-white", "bg-teal-500 text-white",
-  "bg-orange-500 text-white", "bg-cyan-500 text-white", "bg-fuchsia-500 text-white",
+  "bg-teal-500 text-white", "bg-cyan-500 text-white", "bg-fuchsia-500 text-white",
 ]
 
 function getAvatarColor(name: string): string {
@@ -247,8 +247,8 @@ export default function TrackerPage() {
           value: `${bestStreak}d`,
           sub: bestStreak > 0 ? "Your longest run" : "No streaks yet",
           icon: Flame,
-          color: "text-amber-600",
-          bgColor: "bg-amber-50",
+          color: "text-violet-600",
+          bgColor: "bg-violet-50",
         },
         {
           label: "Active Pods",
@@ -292,7 +292,7 @@ export default function TrackerPage() {
     return (
       <div className="max-w-4xl mx-auto px-5 lg:px-8 py-8">
         <div className="text-center py-20 text-zinc-400">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin mx-auto mb-3" />
           Loading your progress...
         </div>
       </div>
@@ -343,7 +343,7 @@ export default function TrackerPage() {
                 <div
                   className={`w-full max-w-[40px] rounded-xl transition-all duration-300 ${
                     day.count > 0
-                      ? "bg-gradient-to-t from-amber-500 to-amber-400"
+                      ? "bg-gradient-to-t from-violet-500 to-violet-400"
                       : "bg-zinc-100"
                   }`}
                   style={{
@@ -353,7 +353,7 @@ export default function TrackerPage() {
               </div>
               <span className="text-[10px] font-semibold text-zinc-400">{day.day}</span>
               {day.count > 0 && (
-                <span className="text-[10px] font-bold text-amber-600">{day.count}</span>
+                <span className="text-[10px] font-bold text-violet-600">{day.count}</span>
               )}
             </div>
           ))}
@@ -380,7 +380,7 @@ export default function TrackerPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-zinc-900 group-hover:text-amber-700 transition-colors truncate">{pod.name}</h3>
+                        <h3 className="text-sm font-semibold text-zinc-900 group-hover:text-violet-700 transition-colors truncate">{pod.name}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-[10px] text-zinc-400 capitalize">{pod.category}</span>
                           <span className="text-zinc-200">·</span>
@@ -393,9 +393,9 @@ export default function TrackerPage() {
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       {pod.currentStreak > 0 && (
-                        <div className="flex items-center gap-1 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5">
-                          <Flame size={10} weight="fill" className="text-amber-500" />
-                          <span className="text-xs font-bold text-amber-700">{pod.currentStreak}</span>
+                        <div className="flex items-center gap-1 bg-violet-50 border border-violet-100 rounded-full px-2 py-0.5">
+                          <Flame size={10} weight="fill" className="text-violet-500" />
+                          <span className="text-xs font-bold text-violet-700">{pod.currentStreak}</span>
                         </div>
                       )}
                       {pod.longestStreak > 0 && pod.longestStreak > pod.currentStreak && (
@@ -411,7 +411,7 @@ export default function TrackerPage() {
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-violet-400 to-violet-500 rounded-full transition-all duration-500"
                         style={{ width: `${clampedConsistency}%` }}
                       />
                     </div>
@@ -498,8 +498,8 @@ export default function TrackerPage() {
       {/* Motivational footer */}
       <div className="bg-zinc-900 rounded-3xl p-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Lightning size={16} weight="fill" className="text-amber-400" />
-          <Medal size={16} weight="fill" className="text-amber-400" />
+          <Lightning size={16} weight="fill" className="text-violet-400" />
+          <Medal size={16} weight="fill" className="text-violet-400" />
         </div>
         <p className="text-sm font-semibold text-[#f5f0e6]">Consistency compounds.</p>
         <p className="text-xs text-zinc-500 mt-1">Every check-in matters. Keep showing up.</p>

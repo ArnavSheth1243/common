@@ -15,10 +15,10 @@ import { useSession } from "@/app/context/session"
 import { createClient } from "@/lib/supabase/client"
 
 const AVATAR_COLORS = [
-  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-amber-500 text-white",
+  "bg-zinc-900 text-white", "bg-rose-500 text-white", "bg-violet-500 text-white",
   "bg-emerald-500 text-white", "bg-sky-500 text-white", "bg-violet-500 text-white",
   "bg-indigo-500 text-white", "bg-pink-500 text-white", "bg-teal-500 text-white",
-  "bg-orange-500 text-white", "bg-cyan-500 text-white", "bg-fuchsia-500 text-white",
+  "bg-teal-500 text-white", "bg-cyan-500 text-white", "bg-fuchsia-500 text-white",
 ]
 function getAvatarColor(name: string): string {
   let hash = 0
@@ -133,7 +133,7 @@ export default function PeoplePage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search people or pods..."
-          className="w-full bg-white border border-zinc-200 shadow-softer focus:border-amber-400 focus:ring-2 focus:ring-amber-100 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all duration-200"
+          className="w-full bg-white border border-zinc-200 shadow-softer focus:border-violet-400 focus:ring-2 focus:ring-violet-100 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all duration-200"
         />
       </div>
 
@@ -142,7 +142,7 @@ export default function PeoplePage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
@@ -165,7 +165,7 @@ export default function PeoplePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-semibold text-zinc-900 truncate group-hover:text-amber-700 transition-colors">
+                    <span className="text-sm font-semibold text-zinc-900 truncate group-hover:text-violet-700 transition-colors">
                       {person.displayName}
                     </span>
                     <span className={`flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${person.isPublic ? "bg-emerald-50 text-emerald-600" : "bg-zinc-100 text-zinc-400"}`}>
@@ -195,7 +195,7 @@ export default function PeoplePage() {
                   {/* Stats row */}
                   <div className="flex items-center gap-3">
                     {person.checkinCount > 0 && (
-                      <span className="flex items-center gap-1 text-[11px] text-amber-600 font-semibold">
+                      <span className="flex items-center gap-1 text-[11px] text-violet-600 font-semibold">
                         <Flame size={10} weight="fill" />
                         {person.checkinCount} check-in{person.checkinCount !== 1 ? "s" : ""}
                       </span>

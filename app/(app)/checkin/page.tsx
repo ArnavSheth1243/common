@@ -246,7 +246,7 @@ function CheckinForm() {
                 remaining < 30
                   ? remaining < 10
                     ? "text-rose-400"
-                    : "text-orange-400"
+                    : "text-rose-400"
                   : "text-zinc-300"
               }`}
             >

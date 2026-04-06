@@ -7,14 +7,14 @@ import { cn } from "@/lib/utils"
 const AVATAR_COLORS = [
   "bg-zinc-900 text-white",
   "bg-rose-500 text-white",
-  "bg-amber-500 text-white",
+  "bg-cyan-500 text-white",
   "bg-emerald-500 text-white",
   "bg-sky-500 text-white",
   "bg-violet-500 text-white",
   "bg-indigo-500 text-white",
   "bg-pink-500 text-white",
   "bg-teal-500 text-white",
-  "bg-orange-500 text-white",
+  "bg-lime-500 text-white",
   "bg-cyan-500 text-white",
   "bg-fuchsia-500 text-white",
 ]

@@ -169,7 +169,7 @@ export default function MyPodsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <div className="w-6 h-6 border-2 border-zinc-200 border-t-amber-500 rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-zinc-200 border-t-violet-500 rounded-full animate-spin" />
         </div>
       ) : pods.length === 0 ? (
         <div className="text-center py-16">
@@ -202,19 +202,19 @@ export default function MyPodsPage() {
                     <div>
                       <h3 className="text-base font-bold text-white leading-tight">{pod.name}</h3>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full ${pod.type === "Habit" ? "bg-amber-500/80 text-white" : "bg-emerald-500/80 text-white"}`}>
+                        <span className={`text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full ${pod.type === "Habit" ? "bg-violet-500/80 text-white" : "bg-emerald-500/80 text-white"}`}>
                           {pod.type}
                         </span>
                         {pod.isAdmin && (
-                          <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-300">
+                          <span className="flex items-center gap-0.5 text-[10px] font-semibold text-violet-300">
                             <Crown size={10} weight="fill" /> Admin
                           </span>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1">
-                      <Flame size={11} weight="fill" className="text-amber-500" />
-                      <span className="text-xs font-bold text-amber-700">{pod.streak}</span>
+                      <Flame size={11} weight="fill" className="text-violet-500" />
+                      <span className="text-xs font-bold text-violet-700">{pod.streak}</span>
                     </div>
                   </div>
                 </div>
