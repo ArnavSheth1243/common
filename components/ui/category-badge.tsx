@@ -22,6 +22,17 @@ const CATEGORY_COLORS: Record<string, string> = {
   mindfulness:  "bg-sky-50 text-sky-700",
   productivity: "bg-indigo-50 text-indigo-700",
   creativity:   "bg-fuchsia-50 text-fuchsia-700",
+  pickleball:   "bg-lime-50 text-lime-700",
+  tennis:       "bg-green-50 text-green-700",
+  basketball:   "bg-rose-50 text-rose-600",
+  soccer:       "bg-emerald-50 text-emerald-600",
+  golf:         "bg-teal-50 text-teal-700",
+  volleyball:   "bg-sky-50 text-sky-600",
+  martial_arts: "bg-red-50 text-red-700",
+  climbing:     "bg-stone-100 text-stone-700",
+  surfing:      "bg-cyan-50 text-cyan-600",
+  skating:      "bg-violet-50 text-violet-600",
+  dance:        "bg-pink-50 text-pink-600",
   other:        "bg-zinc-100 text-zinc-600",
 }
 

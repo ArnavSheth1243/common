@@ -28,6 +28,16 @@ import {
   MapPin,
   Lock,
   Compass,
+  Racquet,
+  TennisBall,
+  Basketball,
+  SoccerBall,
+  Golf,
+  Volleyball,
+  HandFist,
+  Wall,
+  Waves,
+  Skateboard,
 } from "@phosphor-icons/react"
 import type { FC } from "react"
 import { CADENCE_LABELS } from "@/lib/data"
@@ -62,6 +72,17 @@ const CATEGORY_IMAGES: Record<string, string> = {
   mindfulness:  "https://images.unsplash.com/photo-1528715471579-d1bcf0ba5e83?w=600&h=200&fit=crop&q=75",
   productivity: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=600&h=200&fit=crop&q=75",
   creativity:   "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&h=200&fit=crop&q=75",
+  pickleball:   "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=200&fit=crop&q=75",
+  tennis:       "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=200&fit=crop&q=75",
+  basketball:   "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&h=200&fit=crop&q=75",
+  soccer:       "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=600&h=200&fit=crop&q=75",
+  golf:         "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=600&h=200&fit=crop&q=75",
+  volleyball:   "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=600&h=200&fit=crop&q=75",
+  martial_arts: "https://images.unsplash.com/photo-1555597673-b21d5c935865?w=600&h=200&fit=crop&q=75",
+  climbing:     "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=600&h=200&fit=crop&q=75",
+  surfing:      "https://images.unsplash.com/photo-1502680390548-bdbac40e0100?w=600&h=200&fit=crop&q=75",
+  skating:      "https://images.unsplash.com/photo-1564429238961-2b3301e25e28?w=600&h=200&fit=crop&q=75",
+  dance:        "https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=600&h=200&fit=crop&q=75",
   other:        "https://images.unsplash.com/photo-1495592822108-9e6261896da8?w=600&h=200&fit=crop&q=75",
 }
 
@@ -72,6 +93,9 @@ const categoryIcons: Record<string, FC<any>> = {
   journaling: NotePencil, meditation: Leaf, cooking: ForkKnife, learning: GraduationCap,
   music: MusicNote, art: PaintBrush, photography: Camera, finance: CurrencyDollar,
   fitness: Barbell, mindfulness: Leaf, productivity: GraduationCap, creativity: PaintBrush,
+  pickleball: Racquet, tennis: TennisBall, basketball: Basketball, soccer: SoccerBall,
+  golf: Golf, volleyball: Volleyball, martial_arts: HandFist, climbing: Wall,
+  surfing: Waves, skating: Skateboard, dance: MusicNote,
   other: Tag,
 }
 

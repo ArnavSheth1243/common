@@ -37,6 +37,17 @@ const ACTIVITIES = [
   "garden",
   "volunteer",
   "practice mindfulness",
+  "play pickleball",
+  "play tennis",
+  "shoot hoops",
+  "play soccer",
+  "play golf",
+  "play volleyball",
+  "do martial arts",
+  "go climbing",
+  "go surfing",
+  "go skating",
+  "dance",
 ]
 
 const CADENCES = [

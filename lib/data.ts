@@ -19,6 +19,17 @@ export type PodCategory =
   | "art"
   | "photography"
   | "finance"
+  | "pickleball"
+  | "tennis"
+  | "basketball"
+  | "soccer"
+  | "golf"
+  | "volleyball"
+  | "martial_arts"
+  | "climbing"
+  | "surfing"
+  | "skating"
+  | "dance"
   | "other"
 
 export const CADENCE_LABELS: Record<PodCadence, string> = {
