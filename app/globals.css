@@ -114,6 +114,32 @@ img, video, iframe, svg { max-width: 100%; }
   100% { background-position: 200% 0; }
 }
 
+/* Drifting orb animations for landing page */
+@keyframes drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(60px, 40px) scale(1.1); }
+}
+@keyframes drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-50px, 30px) scale(1.05); }
+}
+@keyframes drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, -50px) scale(1.08); }
+}
+@keyframes drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-40px, -30px) scale(1.12); }
+}
+.orb { will-change: transform; }
+.orb-1 { animation: drift-1 18s ease-in-out infinite; }
+.orb-2 { animation: drift-2 22s ease-in-out infinite; }
+.orb-3 { animation: drift-3 20s ease-in-out infinite; }
+.orb-4 { animation: drift-4 24s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .orb-1, .orb-2, .orb-3, .orb-4 { animation: none; }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }

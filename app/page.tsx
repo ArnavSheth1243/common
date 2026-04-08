@@ -153,9 +153,11 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
-      {/* Subtle gradient orbs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-300/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-200/30 rounded-full blur-3xl pointer-events-none" />
+      {/* Subtle drifting color orbs — soft, slow, screenshot-friendly */}
+      <div className="orb orb-1 absolute top-[-15%] left-[-10%] w-[640px] h-[640px] bg-blue-300/35 rounded-full blur-3xl pointer-events-none" />
+      <div className="orb orb-2 absolute top-[-10%] right-[-15%] w-[560px] h-[560px] bg-indigo-300/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="orb orb-3 absolute bottom-[-20%] left-[10%] w-[600px] h-[600px] bg-rose-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="orb orb-4 absolute bottom-[-15%] right-[-5%] w-[580px] h-[580px] bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center">
         {/* Logo */}
