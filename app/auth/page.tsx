@@ -195,7 +195,7 @@ function AuthForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
           </div>
         )}
@@ -207,7 +207,7 @@ function AuthForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+            className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
           />
         </div>
         <div>
@@ -235,7 +235,7 @@ function AuthForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={tab === "signup" ? "At least 6 characters" : "Your password"}
-              className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 pr-11 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 pr-11 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
             <button
               type="button"
@@ -296,10 +296,10 @@ export default function AuthPage() {
       {/* Left panel — branding */}
       <div className="hidden lg:flex flex-col w-[420px] flex-shrink-0 bg-gradient-to-br from-blue-700 via-blue-800 to-blue-950 p-12 relative overflow-hidden">
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-white rounded-full opacity-[0.06] blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 right-0 w-48 h-48 bg-blue-300 rounded-full opacity-[0.12] blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 right-0 w-48 h-48 bg-sky-300 rounded-full opacity-[0.12] blur-3xl pointer-events-none" />
 
         <div className="flex items-center gap-2.5 relative z-10">
-          <img src="/logo.svg" alt="Common" className="w-7 h-7 brightness-0 invert" />
+          <img src="/logo.svg" alt="Common" className="w-7 h-7" />
           <span className="text-xl font-bold text-white tracking-tight">Common</span>
         </div>
 
