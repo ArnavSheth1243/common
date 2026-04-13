@@ -98,7 +98,21 @@ function CheckinForm() {
           streakCount: currentStreak + 1,
           ...(photoPreview ? { photo: photoPreview } : {}),
         })
+      } else {
+        // Solo check-in: save directly to DB with no pod
+        const supabase = createClient()
+        await supabase
+          .from("checkins")
+          .insert([{
+            user_id: user!.id,
+            pod_id: null,
+            content: text.trim(),
+            visibility,
+            streak_count: currentStreak + 1,
+            image_url: photoPreview || null,
+          }])
       }
+      recordCheckin(selectedPod || "solo")
       setSubmitted(true)
     } catch (error) {
       console.error("Failed to post check-in:", error)
@@ -239,7 +253,7 @@ function CheckinForm() {
               onChange={(e) => setText(e.target.value.slice(0, maxLength))}
               placeholder={selectedPod === "solo" ? "What did you work on today?" : `Share something with your ${cadenceLabel.toLowerCase()} pod.`}
               rows={5}
-              className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3.5 text-[15px] text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
+              className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3.5 text-[15px] text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none leading-relaxed"
             />
             <span
               className={`absolute bottom-3 right-4 text-xs font-medium tabular-nums ${

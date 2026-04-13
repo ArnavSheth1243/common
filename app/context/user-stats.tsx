@@ -119,8 +119,28 @@ export function UserStatsProvider({ children }: { children: React.ReactNode }) {
   }, [user, sessionLoading, supabase])
 
   const recordCheckin = (podId: string) => {
-    // This is handled by postCheckin in pod-state
-    // Stats will be recalculated when checkins are fetched
+    // Re-fetch stats after a new checkin is posted
+    if (!user) return
+    const refetch = async () => {
+      try {
+        const { data: checkins } = await supabase
+          .from("checkins")
+          .select("id, pod_id, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+
+        const checked = checkins || []
+        const streaks = calculateStreaks(checked)
+
+        setStats({
+          totalCheckins: checked.length,
+          ...streaks,
+        })
+      } catch (err) {
+        console.error("Failed to refetch stats:", err)
+      }
+    }
+    refetch()
   }
 
   return (

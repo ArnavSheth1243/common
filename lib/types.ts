@@ -123,6 +123,8 @@ export interface PodEvent {
   time: string | null
   end_time: string | null
   location: string | null
+  latitude: number | null
+  longitude: number | null
   description: string | null
   created_by: string | null
   is_public: boolean

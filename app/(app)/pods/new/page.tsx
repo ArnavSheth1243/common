@@ -68,39 +68,42 @@ export default function NewPodPage() {
     reader.readAsDataURL(file)
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!name.trim()) return
     setSubmitting(true)
 
-    const podId = `user_${Date.now()}`
     const color = MEMBER_COLORS[Math.floor(Math.random() * MEMBER_COLORS.length)]
     const displayName = profile?.displayName || "User"
     const initials = displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2)
 
-    createPod({
-      id: podId,
-      podId,
-      name: name.trim(),
-      description: description.trim() || "A new pod.",
-      category,
-      cadence,
-      type,
-      visibility,
-      location: location.trim() || "TBD",
-      members: 1,
-      maxMembers: maxMembers === "unlimited" ? null : parseInt(maxMembers) || 8,
-      streak: 0,
-      memberColors: [color],
-      createdAt: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
-      createdByYou: true,
-      imageUrl: imageUrl || undefined,
-      podMembers: [
-        { name: displayName, initials, color: `${color} text-white`, streak: 0, isYou: true },
-      ],
-      recentCheckins: [],
-    })
-
-    setTimeout(() => router.push("/pods"), 600)
+    try {
+      await createPod({
+        id: "",
+        podId: "",
+        name: name.trim(),
+        description: description.trim() || "A new pod.",
+        category,
+        cadence,
+        type,
+        visibility,
+        location: location.trim() || "",
+        members: 1,
+        maxMembers: maxMembers === "unlimited" ? null : parseInt(maxMembers) || 8,
+        streak: 0,
+        memberColors: [color],
+        createdAt: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+        createdByYou: true,
+        imageUrl: imageUrl || undefined,
+        podMembers: [
+          { name: displayName, initials, color: `${color} text-white`, streak: 0, isYou: true },
+        ],
+        recentCheckins: [],
+      })
+      router.push("/pods")
+    } catch (err) {
+      console.error("Failed to create pod:", err)
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -128,7 +131,7 @@ export default function NewPodPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Morning Run Club"
             maxLength={60}
-            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+            className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
           />
         </div>
 
@@ -140,7 +143,7 @@ export default function NewPodPage() {
             onChange={(e) => setDescription(e.target.value.slice(0, 300))}
             placeholder="What's this pod about? What do members commit to?"
             rows={3}
-            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none"
+            className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all resize-none"
           />
           <div className="text-right text-xs text-zinc-300 mt-1">{description.length}/300</div>
         </div>
@@ -247,7 +250,7 @@ export default function NewPodPage() {
               value={customCadence}
               onChange={(e) => setCustomCadence(e.target.value)}
               placeholder="e.g. Every Monday and Thursday"
-              className="w-full mt-3 bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full mt-3 bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
             />
           )}
         </div>
@@ -262,7 +265,7 @@ export default function NewPodPage() {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="e.g. Prospect Park, Brooklyn or Remote"
-            className="w-full bg-white border border-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
+            className="w-full bg-white border border-zinc-200 focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-2xl px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none transition-all"
           />
         </div>
 

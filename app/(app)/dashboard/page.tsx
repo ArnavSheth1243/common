@@ -184,9 +184,22 @@ function CheckinCard({
               )}
             </div>
           </div>
-          <button className="text-zinc-300 hover:text-zinc-500 transition-colors p-1 rounded-lg hover:bg-accent">
-            <DotsThree size={18} weight="bold" />
-          </button>
+          <div className="relative group">
+            <button className="text-zinc-300 hover:text-zinc-500 transition-colors p-1 rounded-lg hover:bg-accent peer">
+              <DotsThree size={18} weight="bold" />
+            </button>
+            <div className="absolute right-0 top-full mt-1 w-32 bg-card border border-border rounded-xl shadow-3 py-1 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-10">
+              <button
+                onClick={() => {
+                  // Copy link
+                  navigator.clipboard?.writeText(`${window.location.origin}/pods/${checkin.podId}`)
+                }}
+                className="w-full text-left px-3 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                Copy link
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Content */}
@@ -299,7 +312,7 @@ function CheckinCard({
 export default function DashboardPage() {
   const { user } = useSession()
   const { profile } = useUserProfile()
-  const { currentStreak, totalCheckins } = useUserStats()
+  const { currentStreak, totalCheckins, recordCheckin } = useUserStats()
   const { joinedPodIds, createdPods } = usePodState()
 
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])
@@ -461,10 +474,13 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, refreshKey])
 
+  const [composerError, setComposerError] = useState<string | null>(null)
+
   const handleQuickPost = async () => {
     if (!composerText.trim() || !composerPod || !user) return
+    setComposerError(null)
     try {
-      await supabase.from("checkins").insert([
+      const { error } = await supabase.from("checkins").insert([
         {
           pod_id: composerPod,
           user_id: user.id,
@@ -473,6 +489,8 @@ export default function DashboardPage() {
           streak_count: currentStreak + 1,
         },
       ])
+      if (error) throw error
+      recordCheckin(composerPod)
       setComposerPosted(true)
       setTimeout(() => {
         setComposerPosted(false)
@@ -480,8 +498,9 @@ export default function DashboardPage() {
         setComposerText("")
         setRefreshKey((k) => k + 1)
       }, 2500)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to post checkin:", err)
+      setComposerError("Failed to post. Please try again.")
     }
   }
 
@@ -635,6 +654,11 @@ export default function DashboardPage() {
                   {composerPosted && (
                     <div className="mt-3 text-xs text-green-600 font-semibold text-center bg-green-50 rounded-xl py-2">
                       Posted! Nice work.
+                    </div>
+                  )}
+                  {composerError && (
+                    <div className="mt-3 text-xs text-red-600 font-semibold text-center bg-red-50 rounded-xl py-2">
+                      {composerError}
                     </div>
                   )}
                 </div>

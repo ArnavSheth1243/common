@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   CalendarBlank,
   MapPin,
@@ -9,7 +10,10 @@ import {
   MagnifyingGlass,
   Users,
   Clock,
+  MapTrifold,
+  ListBullets,
 } from "@phosphor-icons/react"
+import dynamic from "next/dynamic"
 import { createClient } from "@/lib/supabase/client"
 import { useSession } from "@/app/context/session"
 import { usePodState } from "@/app/context/pod-state"
@@ -18,6 +22,15 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/ui/page-header"
 import { EmptyState } from "@/components/ui/empty-state"
 import { cn } from "@/lib/utils"
+
+const EventMap = dynamic(
+  () => import("@/components/ui/event-map").then((mod) => mod.EventMap),
+  { ssr: false, loading: () => (
+    <div className="w-full h-[300px] rounded-2xl bg-zinc-100 flex items-center justify-center">
+      <div className="w-5 h-5 border-2 border-zinc-300 border-t-blue-500 rounded-full animate-spin" />
+    </div>
+  )},
+)
 
 const CATEGORY_IMAGES: Record<string, string> = {
   running:      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&h=300&fit=crop&q=75",
@@ -58,6 +71,8 @@ interface EventRow {
   time: string | null
   end_time: string | null
   location: string | null
+  latitude: number | null
+  longitude: number | null
   description: string | null
   created_by: string | null
   is_public: boolean
@@ -124,7 +139,7 @@ function EventCard({ event }: { event: EventRow }) {
   return (
     <Link href={`/events/${event.id}`} className="group block">
       <Card className="overflow-hidden hover:shadow-2 hover:border-zinc-300 transition-all duration-150">
-        <div className="h-36 overflow-hidden relative">
+        <div className="h-32 overflow-hidden relative">
           <img
             src={imgUrl}
             alt=""
@@ -179,25 +194,29 @@ function EventCard({ event }: { event: EventRow }) {
 }
 
 export default function EventsPage() {
+  const router = useRouter()
   const { user } = useSession()
   const [events, setEvents] = useState<EventRow[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [dateFilter, setDateFilter] = useState("all")
+  const [viewMode, setViewMode] = useState<"list" | "map">("list")
 
   useEffect(() => {
     const fetchEvents = async () => {
       const sb = createClient()
       try {
         const today = new Date().toISOString().split("T")[0]
-        const { data, error } = await sb
+        // Try with lat/lng columns first, fall back without them
+        let result = await sb
           .from("pod_events")
           .select("*, pods(id, name, category)")
           .eq("is_public", true)
           .gte("date", today)
           .order("date", { ascending: true })
 
+        const { data, error } = result
         if (error) console.error("events fetch error:", error)
 
         // Get host names for solo events
@@ -293,8 +312,8 @@ export default function EventsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <PageHeader
-        title="Explore"
-        description="One-off events from pods and people in your community."
+        title="Explore Events"
+        description="One-time events hosted by real people in your area — pickup basketball tonight, a group hike this weekend, a yoga session in the park. Browse the map, find something nearby, and show up."
         action={
           <Button asChild className="bg-primary hover:bg-primary/90">
             <Link href="/events/new" className="gap-2">
@@ -332,7 +351,7 @@ export default function EventsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search events..."
-          className="w-full bg-card border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-full pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150"
+          className="w-full bg-card border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-full pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-all duration-150"
         />
       </div>
 
@@ -353,6 +372,63 @@ export default function EventsPage() {
           </button>
         ))}
       </div>
+
+      {/* View toggle */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-muted-foreground">{filtered.length} event{filtered.length !== 1 ? "s" : ""}</span>
+        <div className="inline-flex bg-zinc-100 rounded-lg p-0.5">
+          <button
+            onClick={() => setViewMode("list")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+              viewMode === "list"
+                ? "bg-white text-foreground shadow-sm"
+                : "text-zinc-500 hover:text-foreground",
+            )}
+          >
+            <ListBullets size={14} />
+            List
+          </button>
+          <button
+            onClick={() => setViewMode("map")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all",
+              viewMode === "map"
+                ? "bg-white text-foreground shadow-sm"
+                : "text-zinc-500 hover:text-foreground",
+            )}
+          >
+            <MapTrifold size={14} />
+            Map
+          </button>
+        </div>
+      </div>
+
+      {/* Map view */}
+      {viewMode === "map" && (
+        <div className="mb-6">
+          <EventMap
+            events={filtered
+              .filter((e) => e.latitude != null && e.longitude != null)
+              .map((e) => ({
+                id: e.id,
+                title: e.title,
+                date: e.date,
+                time: e.time,
+                location: e.location,
+                lat: e.latitude!,
+                lng: e.longitude!,
+                category: e.category,
+              }))}
+            onEventClick={(id) => router.push(`/events/${id}`)}
+          />
+          {filtered.filter((e) => e.latitude != null).length === 0 && (
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              No events with map locations yet. Events with a pin will appear on the map.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Category filter */}
       <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-hide">

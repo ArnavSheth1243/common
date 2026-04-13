@@ -95,8 +95,42 @@ export default function ProfilePage() {
           likes: 0,
           comments: 0,
           visibility: c.visibility,
-          podName: c.pods?.name || "Unknown Pod",
+          podName: c.pods?.name || "Solo",
         })))
+      }
+
+      // Fetch user's RSVP'd events
+      const { data: rsvpRows } = await supabase
+        .from("event_rsvps")
+        .select("event_id, status")
+        .eq("user_id", user.id)
+
+      if (rsvpRows && rsvpRows.length > 0) {
+        const eventIds = rsvpRows.map((r: any) => r.event_id)
+        const { data: events } = await supabase
+          .from("pod_events")
+          .select("*, pods(name)")
+          .in("id", eventIds)
+          .gte("date", new Date().toISOString().split("T")[0])
+          .order("date", { ascending: true })
+
+        if (events) {
+          setAllEvents(events.map((e: any) => ({
+            id: e.id,
+            title: e.title,
+            dateLabel: new Date(e.date + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+            time: e.time ? (() => {
+              const [h, m] = e.time.split(":")
+              const hour = parseInt(h, 10)
+              const ampm = hour >= 12 ? "PM" : "AM"
+              const hour12 = hour % 12 || 12
+              return `${hour12}:${m} ${ampm}`
+            })() : null,
+            location: e.location || "TBD",
+            description: e.description,
+            podName: e.pods?.name || "Solo event",
+          })))
+        }
       }
     }
     fetchData()
@@ -206,17 +240,27 @@ export default function ProfilePage() {
     return init
   })
 
-  // 35-day rolling calendar: Feb 16 (Mon) – Mar 22 (Sun), 5 complete weeks
-  // Today = March 21 (Saturday), March 22 = future
-  const calendarWeeks: string[][] = [
-    ["2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-21","2026-02-22"],
-    ["2026-02-23","2026-02-24","2026-02-25","2026-02-26","2026-02-27","2026-02-28","2026-03-01"],
-    ["2026-03-02","2026-03-03","2026-03-04","2026-03-05","2026-03-06","2026-03-07","2026-03-08"],
-    ["2026-03-09","2026-03-10","2026-03-11","2026-03-12","2026-03-13","2026-03-14","2026-03-15"],
-    ["2026-03-16","2026-03-17","2026-03-18","2026-03-19","2026-03-20","2026-03-21","2026-03-22"],
-  ]
-  const todayKey = "2026-03-21"
-  const futureKey = "2026-03-22"
+  // Dynamic 35-day rolling calendar: 5 complete weeks ending this week's Sunday
+  const today = new Date()
+  const todayKey = today.toISOString().split("T")[0]
+  const dayOfWeek = today.getDay() // 0=Sun, 1=Mon, ...
+  // Find the end of this week (Sunday)
+  const endOfWeek = new Date(today)
+  endOfWeek.setDate(today.getDate() + (7 - dayOfWeek) % 7)
+  // Start 34 days before end of week (5 complete weeks = 35 days)
+  const startDate = new Date(endOfWeek)
+  startDate.setDate(endOfWeek.getDate() - 34)
+
+  const calendarWeeks: string[][] = []
+  for (let w = 0; w < 5; w++) {
+    const week: string[] = []
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(startDate)
+      date.setDate(startDate.getDate() + w * 7 + d)
+      week.push(date.toISOString().split("T")[0])
+    }
+    calendarWeeks.push(week)
+  }
 
   if (!profile) {
     return (
@@ -372,14 +416,14 @@ export default function ProfilePage() {
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Your name"
                   autoFocus
-                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-blue-500 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-900 outline-none transition-all"
+                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-primary rounded-xl px-3 py-2 text-sm font-semibold text-zinc-900 outline-none transition-all"
                 />
                 <input
                   type="text"
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
                   placeholder="Short bio (optional)"
-                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-blue-500 rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none transition-all"
+                  className="w-full bg-zinc-50 border border-zinc-200 focus:border-primary rounded-xl px-3 py-2 text-sm text-zinc-700 outline-none transition-all"
                 />
                 <div className="flex gap-2 pt-1">
                   <button
@@ -591,7 +635,7 @@ export default function ProfilePage() {
           {calendarWeeks.flat().map((dateKey, i) => {
             const podIds = calendarData[dateKey] ?? []
             const isToday = dateKey === todayKey
-            const isFuture = dateKey === futureKey
+            const isFuture = dateKey > todayKey
             const dayNum = parseInt(dateKey.split("-")[2], 10)
             return (
               <div

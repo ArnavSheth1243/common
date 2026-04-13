@@ -325,8 +325,8 @@ export default function PodsPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       {/* Header */}
       <PageHeader
-        title="Explore"
-        description="Thousands of recurring activities. Find one, join a pod, show up."
+        title="Explore Pods"
+        description="Pods are small groups of real people who do the same activity on a recurring basis — weekly runs, daily journaling, monthly book clubs. Find one that fits, join up, and show up consistently with people who actually care."
         action={
           <Button asChild className="bg-primary hover:bg-primary/90">
             <Link href="/pods/new" className="gap-2">
@@ -393,7 +393,7 @@ export default function PodsPage() {
             key={opt.value}
             onClick={() => setTypeFilter(opt.value)}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150",
+              "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150",
               typeFilter === opt.value
                 ? "bg-foreground border-foreground text-background"
                 : "bg-card border-border text-muted-foreground hover:border-zinc-300",
@@ -423,7 +423,7 @@ export default function PodsPage() {
                     key={opt.value}
                     onClick={() => setSizeFilter(opt.value)}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150",
+                      "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150",
                       sizeFilter === opt.value
                         ? "bg-foreground border-foreground text-background"
                         : "bg-accent border-border text-muted-foreground hover:border-zinc-300",

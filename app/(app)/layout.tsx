@@ -30,8 +30,8 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   { href: "/dashboard",   label: "Home",       icon: House },
-  { href: "/pods",        label: "Explore",    icon: Compass },
-  { href: "/events",      label: "Events",     icon: CalendarStar },
+  { href: "/pods",        label: "Explore Pods",    icon: Compass },
+  { href: "/events",      label: "Explore Events",  icon: CalendarStar },
   { href: "/my-pods",     label: "My Pods",    icon: FolderUser },
   { href: "/people",      label: "People",     icon: UsersThree },
   { href: "/challenges",  label: "Challenges", icon: Lightning },
@@ -48,10 +48,10 @@ function SidebarStreakFooter() {
   if (!profile) return null
 
   return (
-    <div className="border-t border-zinc-100 pt-4 px-1">
+    <div className="border-t border-border pt-4 px-1">
       <Link
         href="/profile"
-        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 transition-colors"
+        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent transition-colors"
       >
         <UserAvatar
           name={profile.displayName || ""}
@@ -63,7 +63,7 @@ function SidebarStreakFooter() {
             {profile.displayName}
           </div>
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground font-medium">
-            <Flame size={10} weight="fill" className="text-blue-500" />
+            <Flame size={10} weight="fill" className="text-primary" />
             <span>{totalCheckins} check-ins</span>
           </div>
         </div>
@@ -91,14 +91,14 @@ function NavItemLink({
       className={cn(
         "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 relative",
         active
-          ? "bg-zinc-100 text-foreground"
-          : "text-zinc-500 hover:text-foreground hover:bg-zinc-50",
+          ? "bg-blue-50 text-blue-900"
+          : "text-zinc-500 hover:text-foreground hover:bg-accent",
       )}
     >
       <item.icon
         size={18}
         weight={active ? "fill" : "regular"}
-        className={active ? "text-blue-700" : ""}
+        className={active ? "text-primary" : ""}
       />
       {item.label}
       {isMessages && unreadCount && unreadCount > 0 ? (
@@ -171,7 +171,7 @@ function MobileHeader() {
         </Link>
         <button
           onClick={() => setOpen(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-400 hover:text-foreground hover:bg-zinc-100 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           aria-label="Open menu"
         >
           <List size={20} />
@@ -201,7 +201,7 @@ function MobileHeader() {
           <span className="text-sm font-bold text-foreground">Menu</span>
           <button
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-foreground hover:bg-zinc-100 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             aria-label="Close menu"
           >
             <X size={18} />

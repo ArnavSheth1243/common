@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Globe, Lock, CheckCircle } from "@phosphor-icons/react"
+import { ArrowLeft, Globe, Lock, CheckCircle, Crosshair, MapPin } from "@phosphor-icons/react"
 import { createClient } from "@/lib/supabase/client"
 import { useSession } from "@/app/context/session"
 import { Card } from "@/components/ui/card"
@@ -53,6 +53,9 @@ export default function NewEventPage() {
   const [imageUrl, setImageUrl] = useState("")
   const [hostPodId, setHostPodId] = useState<string | null>(null)
   const [isPublic, setIsPublic] = useState(true)
+  const [latitude, setLatitude] = useState("")
+  const [longitude, setLongitude] = useState("")
+  const [gettingLocation, setGettingLocation] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -90,28 +93,39 @@ export default function NewEventPage() {
 
     try {
       const sb = createClient()
-      const { data, error: insertError } = await sb
+      const row: Record<string, any> = {
+        pod_id: hostPodId,
+        title: title.trim(),
+        date,
+        time: time || null,
+        end_time: endTime || null,
+        location: location.trim() || null,
+        description: description.trim() || null,
+        created_by: user.id,
+        is_public: isPublic,
+        image_url: imageUrl.trim() || null,
+        category,
+      }
+      if (latitude && longitude) {
+        row.latitude = parseFloat(latitude)
+        row.longitude = parseFloat(longitude)
+      }
+
+      let result = await sb
         .from("pod_events")
-        .insert([
-          {
-            pod_id: hostPodId,
-            title: title.trim(),
-            date,
-            time: time || null,
-            end_time: endTime || null,
-            location: location.trim() || null,
-            description: description.trim() || null,
-            created_by: user.id,
-            is_public: isPublic,
-            image_url: imageUrl.trim() || null,
-            category,
-          },
-        ])
+        .insert([row])
         .select()
         .single()
 
-      if (insertError) throw insertError
-      router.push(`/events/${(data as any).id}`)
+      // If lat/lng columns don't exist yet, retry without them
+      if (result.error && result.error.code === "42703" && row.latitude != null) {
+        delete row.latitude
+        delete row.longitude
+        result = await sb.from("pod_events").insert([row]).select().single()
+      }
+
+      if (result.error) throw result.error
+      router.push(`/events/${(result.data as any).id}`)
     } catch (err: any) {
       console.error("Failed to create event:", err)
       setError(err.message || "Failed to create event")
@@ -149,7 +163,7 @@ export default function NewEventPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Saturday morning trail run"
               required
-              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
           </div>
 
@@ -164,7 +178,7 @@ export default function NewEventPage() {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
+                className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
               />
             </div>
             <div>
@@ -175,7 +189,7 @@ export default function NewEventPage() {
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
+                className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
               />
             </div>
           </div>
@@ -188,7 +202,7 @@ export default function NewEventPage() {
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-all"
             />
           </div>
 
@@ -202,8 +216,58 @@ export default function NewEventPage() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Golden Gate Park, San Francisco"
-              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
+          </div>
+
+          {/* Map pin */}
+          <div>
+            <label className="block text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">
+              Drop a pin on the map (optional)
+            </label>
+            <div className="flex gap-2 items-end">
+              <div className="flex-1 grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  placeholder="Latitude"
+                  className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+                />
+                <input
+                  type="text"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  placeholder="Longitude"
+                  className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                disabled={gettingLocation}
+                onClick={() => {
+                  setGettingLocation(true)
+                  navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                      setLatitude(pos.coords.latitude.toFixed(6))
+                      setLongitude(pos.coords.longitude.toFixed(6))
+                      setGettingLocation(false)
+                    },
+                    () => setGettingLocation(false),
+                  )
+                }}
+                className="gap-1.5 flex-shrink-0"
+              >
+                <Crosshair size={14} />
+                {gettingLocation ? "..." : "Use my location"}
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1">
+              <MapPin size={10} />
+              Adding a pin makes your event visible on the Explore Events map.
+            </p>
           </div>
 
           {/* Description */}
@@ -216,7 +280,7 @@ export default function NewEventPage() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Tell people what to expect..."
               rows={4}
-              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none"
+              className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all resize-none"
             />
           </div>
 
@@ -254,7 +318,7 @@ export default function NewEventPage() {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full bg-white border border-border focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
+              className="w-full bg-white border border-border focus:border-primary focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-zinc-400 outline-none transition-all"
             />
             <p className="text-[11px] text-muted-foreground mt-1.5">
               Leave blank to use a category default.
